@@ -1,0 +1,4052 @@
+[
+  {
+    "id": "q1",
+    "text": "Imagine you are in a team setting. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q1_opt1",
+        "text": "Writing react components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q1_opt2",
+        "text": "Managing the system architecture",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q1_opt3",
+        "text": "Implementing secure authentication",
+        "domain": "backend"
+      },
+      {
+        "id": "q1_opt4",
+        "text": "Orchestrating containers with kubernetes",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q2",
+    "text": "Imagine you are in a team setting. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q2_opt1",
+        "text": "Connecting the ui to the database",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q2_opt2",
+        "text": "Studying human anatomy",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q2_opt3",
+        "text": "Optimizing operational costs",
+        "domain": "business"
+      },
+      {
+        "id": "q2_opt4",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q3",
+    "text": "Imagine you are in a team setting. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q3_opt1",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q3_opt2",
+        "text": "Containerizing microservices",
+        "domain": "backend"
+      },
+      {
+        "id": "q3_opt3",
+        "text": "Evaluating student progress",
+        "domain": "education"
+      },
+      {
+        "id": "q3_opt4",
+        "text": "Managing cloud infrastructure",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q4",
+    "text": "Imagine you are in a team setting. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q4_opt1",
+        "text": "Evaluating student progress",
+        "domain": "education"
+      },
+      {
+        "id": "q4_opt2",
+        "text": "Integrating the api with the frontend",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q4_opt3",
+        "text": "Designing ai algorithms",
+        "domain": "ml"
+      },
+      {
+        "id": "q4_opt4",
+        "text": "Negotiating with clients",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q5",
+    "text": "Imagine you are in a team setting. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q5_opt1",
+        "text": "Rapidly prototyping the whole product",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q5_opt2",
+        "text": "Processing natural language",
+        "domain": "ml"
+      },
+      {
+        "id": "q5_opt3",
+        "text": "Analyzing hidden trends",
+        "domain": "data"
+      },
+      {
+        "id": "q5_opt4",
+        "text": "Creating a pitch deck",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q6",
+    "text": "Imagine you are in a team setting. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q6_opt1",
+        "text": "Training predictive models",
+        "domain": "ml"
+      },
+      {
+        "id": "q6_opt2",
+        "text": "Creating typography systems",
+        "domain": "design"
+      },
+      {
+        "id": "q6_opt3",
+        "text": "Orchestrating containers with kubernetes",
+        "domain": "devops"
+      },
+      {
+        "id": "q6_opt4",
+        "text": "Writing robust apis",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q7",
+    "text": "Imagine you are in a team setting. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q7_opt1",
+        "text": "Optimizing server response times",
+        "domain": "backend"
+      },
+      {
+        "id": "q7_opt2",
+        "text": "Creating typography systems",
+        "domain": "design"
+      },
+      {
+        "id": "q7_opt3",
+        "text": "Designing ai algorithms",
+        "domain": "ml"
+      },
+      {
+        "id": "q7_opt4",
+        "text": "Orchestrating containers with kubernetes",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q8",
+    "text": "Imagine you are in a team setting. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q8_opt1",
+        "text": "Leading meetings and strategy",
+        "domain": "business"
+      },
+      {
+        "id": "q8_opt2",
+        "text": "Adding animations",
+        "domain": "frontend"
+      },
+      {
+        "id": "q8_opt3",
+        "text": "Evaluating model biases",
+        "domain": "ml"
+      },
+      {
+        "id": "q8_opt4",
+        "text": "Teaching and mentoring students",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q9",
+    "text": "Imagine you are in a team setting. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q9_opt1",
+        "text": "Orchestrating containers with kubernetes",
+        "domain": "devops"
+      },
+      {
+        "id": "q9_opt2",
+        "text": "Designing brand logos",
+        "domain": "design"
+      },
+      {
+        "id": "q9_opt3",
+        "text": "Planning the financial budget",
+        "domain": "business"
+      },
+      {
+        "id": "q9_opt4",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q10",
+    "text": "Imagine you are in a team setting. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q10_opt1",
+        "text": "Managing project timelines",
+        "domain": "business"
+      },
+      {
+        "id": "q10_opt2",
+        "text": "Crafting visual storytelling",
+        "domain": "design"
+      },
+      {
+        "id": "q10_opt3",
+        "text": "Automating deployment pipelines",
+        "domain": "devops"
+      },
+      {
+        "id": "q10_opt4",
+        "text": "Teaching and mentoring students",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q11",
+    "text": "Imagine you are when working independently. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q11_opt1",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q11_opt2",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      },
+      {
+        "id": "q11_opt3",
+        "text": "Integrating the api with the frontend",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q11_opt4",
+        "text": "Using python pandas",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q12",
+    "text": "Imagine you are when working independently. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q12_opt1",
+        "text": "Analyzing hidden trends",
+        "domain": "data"
+      },
+      {
+        "id": "q12_opt2",
+        "text": "Promoting wellness",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q12_opt3",
+        "text": "Writing robust apis",
+        "domain": "backend"
+      },
+      {
+        "id": "q12_opt4",
+        "text": "Crafting visual storytelling",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q13",
+    "text": "Imagine you are when working independently. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q13_opt1",
+        "text": "Tuning neural networks",
+        "domain": "ml"
+      },
+      {
+        "id": "q13_opt2",
+        "text": "Optimizing server response times",
+        "domain": "backend"
+      },
+      {
+        "id": "q13_opt3",
+        "text": "Adding animations",
+        "domain": "frontend"
+      },
+      {
+        "id": "q13_opt4",
+        "text": "Focusing on esthetics",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q14",
+    "text": "Imagine you are when working independently. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q14_opt1",
+        "text": "Writing react components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q14_opt2",
+        "text": "Planning the financial budget",
+        "domain": "business"
+      },
+      {
+        "id": "q14_opt3",
+        "text": "Setting up rest endpoints",
+        "domain": "backend"
+      },
+      {
+        "id": "q14_opt4",
+        "text": "Connecting the ui to the database",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q15",
+    "text": "Imagine you are when working independently. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q15_opt1",
+        "text": "Using python pandas",
+        "domain": "data"
+      },
+      {
+        "id": "q15_opt2",
+        "text": "Promoting wellness",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q15_opt3",
+        "text": "Writing react components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q15_opt4",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q16",
+    "text": "Imagine you are when working independently. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q16_opt1",
+        "text": "Optimizing operational costs",
+        "domain": "business"
+      },
+      {
+        "id": "q16_opt2",
+        "text": "Securing the network",
+        "domain": "devops"
+      },
+      {
+        "id": "q16_opt3",
+        "text": "Teaching and mentoring students",
+        "domain": "education"
+      },
+      {
+        "id": "q16_opt4",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q17",
+    "text": "Imagine you are when working independently. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q17_opt1",
+        "text": "Promoting wellness",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q17_opt2",
+        "text": "Designing curriculum",
+        "domain": "education"
+      },
+      {
+        "id": "q17_opt3",
+        "text": "Building statistical models",
+        "domain": "data"
+      },
+      {
+        "id": "q17_opt4",
+        "text": "Running user research sessions",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q18",
+    "text": "Imagine you are when working independently. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q18_opt1",
+        "text": "Building computer vision tools",
+        "domain": "ml"
+      },
+      {
+        "id": "q18_opt2",
+        "text": "Managing application state",
+        "domain": "backend"
+      },
+      {
+        "id": "q18_opt3",
+        "text": "Finding actionable business insights",
+        "domain": "data"
+      },
+      {
+        "id": "q18_opt4",
+        "text": "Optimizing operational costs",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q19",
+    "text": "Imagine you are when working independently. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q19_opt1",
+        "text": "Building mobile-friendly views",
+        "domain": "frontend"
+      },
+      {
+        "id": "q19_opt2",
+        "text": "Optimizing model accuracy",
+        "domain": "ml"
+      },
+      {
+        "id": "q19_opt3",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      },
+      {
+        "id": "q19_opt4",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      }
+    ]
+  },
+  {
+    "id": "q20",
+    "text": "Imagine you are when working independently. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q20_opt1",
+        "text": "Designing curriculum",
+        "domain": "education"
+      },
+      {
+        "id": "q20_opt2",
+        "text": "Researching ai papers",
+        "domain": "ml"
+      },
+      {
+        "id": "q20_opt3",
+        "text": "Building mobile-friendly views",
+        "domain": "frontend"
+      },
+      {
+        "id": "q20_opt4",
+        "text": "Building statistical models",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q21",
+    "text": "Imagine you are during a crisis. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q21_opt1",
+        "text": "Building computer vision tools",
+        "domain": "ml"
+      },
+      {
+        "id": "q21_opt2",
+        "text": "Automating deployment pipelines",
+        "domain": "devops"
+      },
+      {
+        "id": "q21_opt3",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      },
+      {
+        "id": "q21_opt4",
+        "text": "Crafting visual storytelling",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q22",
+    "text": "Imagine you are during a crisis. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q22_opt1",
+        "text": "Building mobile-friendly views",
+        "domain": "frontend"
+      },
+      {
+        "id": "q22_opt2",
+        "text": "Building statistical models",
+        "domain": "data"
+      },
+      {
+        "id": "q22_opt3",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      },
+      {
+        "id": "q22_opt4",
+        "text": "Planning the financial budget",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q23",
+    "text": "Imagine you are during a crisis. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q23_opt1",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q23_opt2",
+        "text": "Writing c# logic",
+        "domain": "backend"
+      },
+      {
+        "id": "q23_opt3",
+        "text": "Adding animations",
+        "domain": "frontend"
+      },
+      {
+        "id": "q23_opt4",
+        "text": "Designing curriculum",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q24",
+    "text": "Imagine you are during a crisis. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q24_opt1",
+        "text": "Working across the stack",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q24_opt2",
+        "text": "Building computer vision tools",
+        "domain": "ml"
+      },
+      {
+        "id": "q24_opt3",
+        "text": "Optimizing browser performance",
+        "domain": "frontend"
+      },
+      {
+        "id": "q24_opt4",
+        "text": "Optimizing server response times",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q25",
+    "text": "Imagine you are during a crisis. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q25_opt1",
+        "text": "Ensuring accessibility",
+        "domain": "frontend"
+      },
+      {
+        "id": "q25_opt2",
+        "text": "Handling both server logic and client views",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q25_opt3",
+        "text": "Organizing classroom activities",
+        "domain": "education"
+      },
+      {
+        "id": "q25_opt4",
+        "text": "Building statistical models",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q26",
+    "text": "Imagine you are during a crisis. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q26_opt1",
+        "text": "Handling both server logic and client views",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q26_opt2",
+        "text": "Setting up css layouts",
+        "domain": "frontend"
+      },
+      {
+        "id": "q26_opt3",
+        "text": "Setting up aws/azure resources",
+        "domain": "devops"
+      },
+      {
+        "id": "q26_opt4",
+        "text": "Choosing color palettes",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q27",
+    "text": "Imagine you are during a crisis. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q27_opt1",
+        "text": "Studying human anatomy",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q27_opt2",
+        "text": "Illustrating graphics",
+        "domain": "design"
+      },
+      {
+        "id": "q27_opt3",
+        "text": "Ensuring data integrity",
+        "domain": "data"
+      },
+      {
+        "id": "q27_opt4",
+        "text": "Writing c# logic",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q28",
+    "text": "Imagine you are during a crisis. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q28_opt1",
+        "text": "Researching pedagogical methods",
+        "domain": "education"
+      },
+      {
+        "id": "q28_opt2",
+        "text": "Optimizing model accuracy",
+        "domain": "ml"
+      },
+      {
+        "id": "q28_opt3",
+        "text": "Prototyping in figma",
+        "domain": "design"
+      },
+      {
+        "id": "q28_opt4",
+        "text": "Ensuring accessibility",
+        "domain": "frontend"
+      }
+    ]
+  },
+  {
+    "id": "q29",
+    "text": "Imagine you are during a crisis. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q29_opt1",
+        "text": "Deploying a full web app",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q29_opt2",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      },
+      {
+        "id": "q29_opt3",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q29_opt4",
+        "text": "Creating typography systems",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q30",
+    "text": "Imagine you are during a crisis. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q30_opt1",
+        "text": "Training predictive models",
+        "domain": "ml"
+      },
+      {
+        "id": "q30_opt2",
+        "text": "Automating deployment pipelines",
+        "domain": "devops"
+      },
+      {
+        "id": "q30_opt3",
+        "text": "Providing clinical care",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q30_opt4",
+        "text": "Building statistical models",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q31",
+    "text": "Imagine you are when exploring new concepts. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q31_opt1",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q31_opt2",
+        "text": "Leading meetings and strategy",
+        "domain": "business"
+      },
+      {
+        "id": "q31_opt3",
+        "text": "Containerizing microservices",
+        "domain": "backend"
+      },
+      {
+        "id": "q31_opt4",
+        "text": "Optimizing browser performance",
+        "domain": "frontend"
+      }
+    ]
+  },
+  {
+    "id": "q32",
+    "text": "Imagine you are when exploring new concepts. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q32_opt1",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q32_opt2",
+        "text": "Adding animations",
+        "domain": "frontend"
+      },
+      {
+        "id": "q32_opt3",
+        "text": "Automating deployment pipelines",
+        "domain": "devops"
+      },
+      {
+        "id": "q32_opt4",
+        "text": "Illustrating graphics",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q33",
+    "text": "Imagine you are when exploring new concepts. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q33_opt1",
+        "text": "Crafting visual storytelling",
+        "domain": "design"
+      },
+      {
+        "id": "q33_opt2",
+        "text": "Driving revenue growth",
+        "domain": "business"
+      },
+      {
+        "id": "q33_opt3",
+        "text": "Studying human anatomy",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q33_opt4",
+        "text": "Handling both server logic and client views",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q34",
+    "text": "Imagine you are when exploring new concepts. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q34_opt1",
+        "text": "Organizing classroom activities",
+        "domain": "education"
+      },
+      {
+        "id": "q34_opt2",
+        "text": "Creating data visualizations",
+        "domain": "data"
+      },
+      {
+        "id": "q34_opt3",
+        "text": "Designing brand logos",
+        "domain": "design"
+      },
+      {
+        "id": "q34_opt4",
+        "text": "Rapidly prototyping the whole product",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q35",
+    "text": "Imagine you are when exploring new concepts. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q35_opt1",
+        "text": "Processing natural language",
+        "domain": "ml"
+      },
+      {
+        "id": "q35_opt2",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q35_opt3",
+        "text": "Researching pedagogical methods",
+        "domain": "education"
+      },
+      {
+        "id": "q35_opt4",
+        "text": "Predicting future trends",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q36",
+    "text": "Imagine you are when exploring new concepts. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q36_opt1",
+        "text": "Monitoring server health",
+        "domain": "devops"
+      },
+      {
+        "id": "q36_opt2",
+        "text": "Creating a pitch deck",
+        "domain": "business"
+      },
+      {
+        "id": "q36_opt3",
+        "text": "Optimizing model accuracy",
+        "domain": "ml"
+      },
+      {
+        "id": "q36_opt4",
+        "text": "Evaluating student progress",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q37",
+    "text": "Imagine you are when exploring new concepts. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q37_opt1",
+        "text": "Driving revenue growth",
+        "domain": "business"
+      },
+      {
+        "id": "q37_opt2",
+        "text": "Managing cloud infrastructure",
+        "domain": "devops"
+      },
+      {
+        "id": "q37_opt3",
+        "text": "Building mobile-friendly views",
+        "domain": "frontend"
+      },
+      {
+        "id": "q37_opt4",
+        "text": "Using python pandas",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q38",
+    "text": "Imagine you are when exploring new concepts. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q38_opt1",
+        "text": "Creating typography systems",
+        "domain": "design"
+      },
+      {
+        "id": "q38_opt2",
+        "text": "Implementing deep learning",
+        "domain": "ml"
+      },
+      {
+        "id": "q38_opt3",
+        "text": "Using python pandas",
+        "domain": "data"
+      },
+      {
+        "id": "q38_opt4",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      }
+    ]
+  },
+  {
+    "id": "q39",
+    "text": "Imagine you are when exploring new concepts. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q39_opt1",
+        "text": "Configuring ci/cd",
+        "domain": "devops"
+      },
+      {
+        "id": "q39_opt2",
+        "text": "Rapidly prototyping the whole product",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q39_opt3",
+        "text": "Predicting future trends",
+        "domain": "data"
+      },
+      {
+        "id": "q39_opt4",
+        "text": "Choosing color palettes",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q40",
+    "text": "Imagine you are when exploring new concepts. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q40_opt1",
+        "text": "Inspiring others to learn",
+        "domain": "education"
+      },
+      {
+        "id": "q40_opt2",
+        "text": "Analyzing hidden trends",
+        "domain": "data"
+      },
+      {
+        "id": "q40_opt3",
+        "text": "Integrating the api with the frontend",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q40_opt4",
+        "text": "Running user research sessions",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q41",
+    "text": "Imagine you are in a leadership role. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q41_opt1",
+        "text": "Creating a pitch deck",
+        "domain": "business"
+      },
+      {
+        "id": "q41_opt2",
+        "text": "Writing react components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q41_opt3",
+        "text": "Working across the stack",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q41_opt4",
+        "text": "Managing cloud infrastructure",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q42",
+    "text": "Imagine you are in a leadership role. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q42_opt1",
+        "text": "Securing the network",
+        "domain": "devops"
+      },
+      {
+        "id": "q42_opt2",
+        "text": "Ensuring accessibility",
+        "domain": "frontend"
+      },
+      {
+        "id": "q42_opt3",
+        "text": "Evaluating student progress",
+        "domain": "education"
+      },
+      {
+        "id": "q42_opt4",
+        "text": "Driving revenue growth",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q43",
+    "text": "Imagine you are in a leadership role. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q43_opt1",
+        "text": "Creating a pitch deck",
+        "domain": "business"
+      },
+      {
+        "id": "q43_opt2",
+        "text": "Researching pedagogical methods",
+        "domain": "education"
+      },
+      {
+        "id": "q43_opt3",
+        "text": "Deploying a full web app",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q43_opt4",
+        "text": "Choosing color palettes",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q44",
+    "text": "Imagine you are in a leadership role. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q44_opt1",
+        "text": "Evaluating model biases",
+        "domain": "ml"
+      },
+      {
+        "id": "q44_opt2",
+        "text": "Handling data persistence",
+        "domain": "backend"
+      },
+      {
+        "id": "q44_opt3",
+        "text": "Handling both server logic and client views",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q44_opt4",
+        "text": "Monitoring server health",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q45",
+    "text": "Imagine you are in a leadership role. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q45_opt1",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q45_opt2",
+        "text": "Negotiating with clients",
+        "domain": "business"
+      },
+      {
+        "id": "q45_opt3",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      },
+      {
+        "id": "q45_opt4",
+        "text": "Managing the system architecture",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q46",
+    "text": "Imagine you are in a leadership role. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q46_opt1",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      },
+      {
+        "id": "q46_opt2",
+        "text": "Researching pedagogical methods",
+        "domain": "education"
+      },
+      {
+        "id": "q46_opt3",
+        "text": "Optimizing operational costs",
+        "domain": "business"
+      },
+      {
+        "id": "q46_opt4",
+        "text": "Researching medical treatments",
+        "domain": "healthcare"
+      }
+    ]
+  },
+  {
+    "id": "q47",
+    "text": "Imagine you are in a leadership role. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q47_opt1",
+        "text": "Focusing on user experience",
+        "domain": "frontend"
+      },
+      {
+        "id": "q47_opt2",
+        "text": "Explaining complex concepts",
+        "domain": "education"
+      },
+      {
+        "id": "q47_opt3",
+        "text": "Orchestrating containers with kubernetes",
+        "domain": "devops"
+      },
+      {
+        "id": "q47_opt4",
+        "text": "Analyzing market competition",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q48",
+    "text": "Imagine you are in a leadership role. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q48_opt1",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q48_opt2",
+        "text": "Explaining complex concepts",
+        "domain": "education"
+      },
+      {
+        "id": "q48_opt3",
+        "text": "Setting up css layouts",
+        "domain": "frontend"
+      },
+      {
+        "id": "q48_opt4",
+        "text": "Writing robust apis",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q49",
+    "text": "Imagine you are in a leadership role. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q49_opt1",
+        "text": "Focusing on user experience",
+        "domain": "frontend"
+      },
+      {
+        "id": "q49_opt2",
+        "text": "Assisting in procedures",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q49_opt3",
+        "text": "Leading meetings and strategy",
+        "domain": "business"
+      },
+      {
+        "id": "q49_opt4",
+        "text": "Automating deployment pipelines",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q50",
+    "text": "Imagine you are in a leadership role. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q50_opt1",
+        "text": "Focusing on esthetics",
+        "domain": "design"
+      },
+      {
+        "id": "q50_opt2",
+        "text": "Inspiring others to learn",
+        "domain": "education"
+      },
+      {
+        "id": "q50_opt3",
+        "text": "Implementing deep learning",
+        "domain": "ml"
+      },
+      {
+        "id": "q50_opt4",
+        "text": "Setting up css layouts",
+        "domain": "frontend"
+      }
+    ]
+  },
+  {
+    "id": "q51",
+    "text": "Imagine you are when helping a friend. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q51_opt1",
+        "text": "Handling data persistence",
+        "domain": "backend"
+      },
+      {
+        "id": "q51_opt2",
+        "text": "Creating typography systems",
+        "domain": "design"
+      },
+      {
+        "id": "q51_opt3",
+        "text": "Setting up css layouts",
+        "domain": "frontend"
+      },
+      {
+        "id": "q51_opt4",
+        "text": "Using python pandas",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q52",
+    "text": "Imagine you are when helping a friend. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q52_opt1",
+        "text": "Building statistical models",
+        "domain": "data"
+      },
+      {
+        "id": "q52_opt2",
+        "text": "Negotiating with clients",
+        "domain": "business"
+      },
+      {
+        "id": "q52_opt3",
+        "text": "Focusing on user experience",
+        "domain": "frontend"
+      },
+      {
+        "id": "q52_opt4",
+        "text": "Focusing on esthetics",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q53",
+    "text": "Imagine you are when helping a friend. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q53_opt1",
+        "text": "Connecting the ui to the database",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q53_opt2",
+        "text": "Analyzing hidden trends",
+        "domain": "data"
+      },
+      {
+        "id": "q53_opt3",
+        "text": "Managing application state",
+        "domain": "backend"
+      },
+      {
+        "id": "q53_opt4",
+        "text": "Writing bash scripts",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q54",
+    "text": "Imagine you are when helping a friend. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q54_opt1",
+        "text": "Deploying a full web app",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q54_opt2",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      },
+      {
+        "id": "q54_opt3",
+        "text": "Securing the network",
+        "domain": "devops"
+      },
+      {
+        "id": "q54_opt4",
+        "text": "Ensuring accessibility",
+        "domain": "frontend"
+      }
+    ]
+  },
+  {
+    "id": "q55",
+    "text": "Imagine you are when helping a friend. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q55_opt1",
+        "text": "Analyzing hidden trends",
+        "domain": "data"
+      },
+      {
+        "id": "q55_opt2",
+        "text": "Setting up css layouts",
+        "domain": "frontend"
+      },
+      {
+        "id": "q55_opt3",
+        "text": "Managing the system architecture",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q55_opt4",
+        "text": "Designing ai algorithms",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q56",
+    "text": "Imagine you are when helping a friend. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q56_opt1",
+        "text": "Tuning neural networks",
+        "domain": "ml"
+      },
+      {
+        "id": "q56_opt2",
+        "text": "Ensuring accessibility",
+        "domain": "frontend"
+      },
+      {
+        "id": "q56_opt3",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q56_opt4",
+        "text": "Teaching and mentoring students",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q57",
+    "text": "Imagine you are when helping a friend. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q57_opt1",
+        "text": "Deploying a full web app",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q57_opt2",
+        "text": "Writing react components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q57_opt3",
+        "text": "Finding actionable business insights",
+        "domain": "data"
+      },
+      {
+        "id": "q57_opt4",
+        "text": "Organizing classroom activities",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q58",
+    "text": "Imagine you are when helping a friend. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q58_opt1",
+        "text": "Writing bash scripts",
+        "domain": "devops"
+      },
+      {
+        "id": "q58_opt2",
+        "text": "Inspiring others to learn",
+        "domain": "education"
+      },
+      {
+        "id": "q58_opt3",
+        "text": "Building statistical models",
+        "domain": "data"
+      },
+      {
+        "id": "q58_opt4",
+        "text": "Managing the system architecture",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q59",
+    "text": "Imagine you are when helping a friend. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q59_opt1",
+        "text": "Writing c# logic",
+        "domain": "backend"
+      },
+      {
+        "id": "q59_opt2",
+        "text": "Choosing color palettes",
+        "domain": "design"
+      },
+      {
+        "id": "q59_opt3",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q59_opt4",
+        "text": "Ensuring data integrity",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q60",
+    "text": "Imagine you are when helping a friend. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q60_opt1",
+        "text": "Securing the network",
+        "domain": "devops"
+      },
+      {
+        "id": "q60_opt2",
+        "text": "Containerizing microservices",
+        "domain": "backend"
+      },
+      {
+        "id": "q60_opt3",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q60_opt4",
+        "text": "Leading meetings and strategy",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q61",
+    "text": "Imagine you are at a hackathon. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q61_opt1",
+        "text": "Securing the network",
+        "domain": "devops"
+      },
+      {
+        "id": "q61_opt2",
+        "text": "Running user research sessions",
+        "domain": "design"
+      },
+      {
+        "id": "q61_opt3",
+        "text": "Explaining complex concepts",
+        "domain": "education"
+      },
+      {
+        "id": "q61_opt4",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q62",
+    "text": "Imagine you are at a hackathon. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q62_opt1",
+        "text": "Optimizing server response times",
+        "domain": "backend"
+      },
+      {
+        "id": "q62_opt2",
+        "text": "Creating data visualizations",
+        "domain": "data"
+      },
+      {
+        "id": "q62_opt3",
+        "text": "Setting up css layouts",
+        "domain": "frontend"
+      },
+      {
+        "id": "q62_opt4",
+        "text": "Automating deployment pipelines",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q63",
+    "text": "Imagine you are at a hackathon. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q63_opt1",
+        "text": "Setting up aws/azure resources",
+        "domain": "devops"
+      },
+      {
+        "id": "q63_opt2",
+        "text": "Providing clinical care",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q63_opt3",
+        "text": "Analyzing hidden trends",
+        "domain": "data"
+      },
+      {
+        "id": "q63_opt4",
+        "text": "Explaining complex concepts",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q64",
+    "text": "Imagine you are at a hackathon. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q64_opt1",
+        "text": "Handling both server logic and client views",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q64_opt2",
+        "text": "Building statistical models",
+        "domain": "data"
+      },
+      {
+        "id": "q64_opt3",
+        "text": "Building mobile-friendly views",
+        "domain": "frontend"
+      },
+      {
+        "id": "q64_opt4",
+        "text": "Optimizing operational costs",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q65",
+    "text": "Imagine you are at a hackathon. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q65_opt1",
+        "text": "Illustrating graphics",
+        "domain": "design"
+      },
+      {
+        "id": "q65_opt2",
+        "text": "Setting up rest endpoints",
+        "domain": "backend"
+      },
+      {
+        "id": "q65_opt3",
+        "text": "Integrating the api with the frontend",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q65_opt4",
+        "text": "Polishing the ui",
+        "domain": "frontend"
+      }
+    ]
+  },
+  {
+    "id": "q66",
+    "text": "Imagine you are at a hackathon. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q66_opt1",
+        "text": "Focusing on esthetics",
+        "domain": "design"
+      },
+      {
+        "id": "q66_opt2",
+        "text": "Tuning neural networks",
+        "domain": "ml"
+      },
+      {
+        "id": "q66_opt3",
+        "text": "Polishing the ui",
+        "domain": "frontend"
+      },
+      {
+        "id": "q66_opt4",
+        "text": "Analyzing hidden trends",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q67",
+    "text": "Imagine you are at a hackathon. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q67_opt1",
+        "text": "Driving revenue growth",
+        "domain": "business"
+      },
+      {
+        "id": "q67_opt2",
+        "text": "Evaluating model biases",
+        "domain": "ml"
+      },
+      {
+        "id": "q67_opt3",
+        "text": "Polishing the ui",
+        "domain": "frontend"
+      },
+      {
+        "id": "q67_opt4",
+        "text": "Prototyping in figma",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q68",
+    "text": "Imagine you are at a hackathon. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q68_opt1",
+        "text": "Studying human anatomy",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q68_opt2",
+        "text": "Optimizing operational costs",
+        "domain": "business"
+      },
+      {
+        "id": "q68_opt3",
+        "text": "Polishing the ui",
+        "domain": "frontend"
+      },
+      {
+        "id": "q68_opt4",
+        "text": "Choosing color palettes",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q69",
+    "text": "Imagine you are at a hackathon. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q69_opt1",
+        "text": "Researching pedagogical methods",
+        "domain": "education"
+      },
+      {
+        "id": "q69_opt2",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q69_opt3",
+        "text": "Driving revenue growth",
+        "domain": "business"
+      },
+      {
+        "id": "q69_opt4",
+        "text": "Organizing medical records",
+        "domain": "healthcare"
+      }
+    ]
+  },
+  {
+    "id": "q70",
+    "text": "Imagine you are at a hackathon. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q70_opt1",
+        "text": "Automating deployment pipelines",
+        "domain": "devops"
+      },
+      {
+        "id": "q70_opt2",
+        "text": "Setting up rest endpoints",
+        "domain": "backend"
+      },
+      {
+        "id": "q70_opt3",
+        "text": "Researching pedagogical methods",
+        "domain": "education"
+      },
+      {
+        "id": "q70_opt4",
+        "text": "Focusing on esthetics",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q71",
+    "text": "Imagine you are during a weekend project. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q71_opt1",
+        "text": "Prototyping in figma",
+        "domain": "design"
+      },
+      {
+        "id": "q71_opt2",
+        "text": "Optimizing server response times",
+        "domain": "backend"
+      },
+      {
+        "id": "q71_opt3",
+        "text": "Designing curriculum",
+        "domain": "education"
+      },
+      {
+        "id": "q71_opt4",
+        "text": "Rapidly prototyping the whole product",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q72",
+    "text": "Imagine you are during a weekend project. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q72_opt1",
+        "text": "Working across the stack",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q72_opt2",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      },
+      {
+        "id": "q72_opt3",
+        "text": "Promoting wellness",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q72_opt4",
+        "text": "Focusing on esthetics",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q73",
+    "text": "Imagine you are during a weekend project. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q73_opt1",
+        "text": "Containerizing microservices",
+        "domain": "backend"
+      },
+      {
+        "id": "q73_opt2",
+        "text": "Creating data visualizations",
+        "domain": "data"
+      },
+      {
+        "id": "q73_opt3",
+        "text": "Monitoring server health",
+        "domain": "devops"
+      },
+      {
+        "id": "q73_opt4",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q74",
+    "text": "Imagine you are during a weekend project. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q74_opt1",
+        "text": "Focusing on user experience",
+        "domain": "frontend"
+      },
+      {
+        "id": "q74_opt2",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q74_opt3",
+        "text": "Handling data persistence",
+        "domain": "backend"
+      },
+      {
+        "id": "q74_opt4",
+        "text": "Handling both server logic and client views",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q75",
+    "text": "Imagine you are during a weekend project. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q75_opt1",
+        "text": "Managing project timelines",
+        "domain": "business"
+      },
+      {
+        "id": "q75_opt2",
+        "text": "Choosing color palettes",
+        "domain": "design"
+      },
+      {
+        "id": "q75_opt3",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q75_opt4",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q76",
+    "text": "Imagine you are during a weekend project. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q76_opt1",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q76_opt2",
+        "text": "Managing application state",
+        "domain": "backend"
+      },
+      {
+        "id": "q76_opt3",
+        "text": "Evaluating model biases",
+        "domain": "ml"
+      },
+      {
+        "id": "q76_opt4",
+        "text": "Managing project timelines",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q77",
+    "text": "Imagine you are during a weekend project. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q77_opt1",
+        "text": "Evaluating student progress",
+        "domain": "education"
+      },
+      {
+        "id": "q77_opt2",
+        "text": "Analyzing market competition",
+        "domain": "business"
+      },
+      {
+        "id": "q77_opt3",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q77_opt4",
+        "text": "Evaluating model biases",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q78",
+    "text": "Imagine you are during a weekend project. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q78_opt1",
+        "text": "Optimizing browser performance",
+        "domain": "frontend"
+      },
+      {
+        "id": "q78_opt2",
+        "text": "Designing database schemas",
+        "domain": "backend"
+      },
+      {
+        "id": "q78_opt3",
+        "text": "Building statistical models",
+        "domain": "data"
+      },
+      {
+        "id": "q78_opt4",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q79",
+    "text": "Imagine you are during a weekend project. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q79_opt1",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      },
+      {
+        "id": "q79_opt2",
+        "text": "Designing brand logos",
+        "domain": "design"
+      },
+      {
+        "id": "q79_opt3",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q79_opt4",
+        "text": "Setting up aws/azure resources",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q80",
+    "text": "Imagine you are during a weekend project. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q80_opt1",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q80_opt2",
+        "text": "Deploying a full web app",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q80_opt3",
+        "text": "Automating deployment pipelines",
+        "domain": "devops"
+      },
+      {
+        "id": "q80_opt4",
+        "text": "Optimizing model accuracy",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q81",
+    "text": "Imagine you are in a corporate environment. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q81_opt1",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q81_opt2",
+        "text": "Training predictive models",
+        "domain": "ml"
+      },
+      {
+        "id": "q81_opt3",
+        "text": "Building mobile-friendly views",
+        "domain": "frontend"
+      },
+      {
+        "id": "q81_opt4",
+        "text": "Managing the system architecture",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q82",
+    "text": "Imagine you are in a corporate environment. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q82_opt1",
+        "text": "Analyzing hidden trends",
+        "domain": "data"
+      },
+      {
+        "id": "q82_opt2",
+        "text": "Processing natural language",
+        "domain": "ml"
+      },
+      {
+        "id": "q82_opt3",
+        "text": "Promoting wellness",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q82_opt4",
+        "text": "Monitoring server health",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q83",
+    "text": "Imagine you are in a corporate environment. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q83_opt1",
+        "text": "Driving revenue growth",
+        "domain": "business"
+      },
+      {
+        "id": "q83_opt2",
+        "text": "Processing natural language",
+        "domain": "ml"
+      },
+      {
+        "id": "q83_opt3",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q83_opt4",
+        "text": "Setting up rest endpoints",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q84",
+    "text": "Imagine you are in a corporate environment. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q84_opt1",
+        "text": "Evaluating model biases",
+        "domain": "ml"
+      },
+      {
+        "id": "q84_opt2",
+        "text": "Choosing color palettes",
+        "domain": "design"
+      },
+      {
+        "id": "q84_opt3",
+        "text": "Setting up css layouts",
+        "domain": "frontend"
+      },
+      {
+        "id": "q84_opt4",
+        "text": "Implementing secure authentication",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q85",
+    "text": "Imagine you are in a corporate environment. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q85_opt1",
+        "text": "Securing the network",
+        "domain": "devops"
+      },
+      {
+        "id": "q85_opt2",
+        "text": "Creating typography systems",
+        "domain": "design"
+      },
+      {
+        "id": "q85_opt3",
+        "text": "Researching medical treatments",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q85_opt4",
+        "text": "Setting up rest endpoints",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q86",
+    "text": "Imagine you are in a corporate environment. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q86_opt1",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      },
+      {
+        "id": "q86_opt2",
+        "text": "Deploying a full web app",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q86_opt3",
+        "text": "Evaluating business risk",
+        "domain": "business"
+      },
+      {
+        "id": "q86_opt4",
+        "text": "Tuning neural networks",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q87",
+    "text": "Imagine you are in a corporate environment. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q87_opt1",
+        "text": "Monitoring server health",
+        "domain": "devops"
+      },
+      {
+        "id": "q87_opt2",
+        "text": "Implementing secure authentication",
+        "domain": "backend"
+      },
+      {
+        "id": "q87_opt3",
+        "text": "Evaluating model biases",
+        "domain": "ml"
+      },
+      {
+        "id": "q87_opt4",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      }
+    ]
+  },
+  {
+    "id": "q88",
+    "text": "Imagine you are in a corporate environment. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q88_opt1",
+        "text": "Working across the stack",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q88_opt2",
+        "text": "Researching ai papers",
+        "domain": "ml"
+      },
+      {
+        "id": "q88_opt3",
+        "text": "Writing bash scripts",
+        "domain": "devops"
+      },
+      {
+        "id": "q88_opt4",
+        "text": "Creating a pitch deck",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q89",
+    "text": "Imagine you are in a corporate environment. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q89_opt1",
+        "text": "Designing ai algorithms",
+        "domain": "ml"
+      },
+      {
+        "id": "q89_opt2",
+        "text": "Managing application state",
+        "domain": "backend"
+      },
+      {
+        "id": "q89_opt3",
+        "text": "Cleaning and querying large datasets",
+        "domain": "data"
+      },
+      {
+        "id": "q89_opt4",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q90",
+    "text": "Imagine you are in a corporate environment. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q90_opt1",
+        "text": "Monitoring server health",
+        "domain": "devops"
+      },
+      {
+        "id": "q90_opt2",
+        "text": "Negotiating with clients",
+        "domain": "business"
+      },
+      {
+        "id": "q90_opt3",
+        "text": "Providing clinical care",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q90_opt4",
+        "text": "Designing ai algorithms",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q91",
+    "text": "Imagine you are when starting a new job. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q91_opt1",
+        "text": "Organizing medical records",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q91_opt2",
+        "text": "Using python pandas",
+        "domain": "data"
+      },
+      {
+        "id": "q91_opt3",
+        "text": "Optimizing model accuracy",
+        "domain": "ml"
+      },
+      {
+        "id": "q91_opt4",
+        "text": "Setting up aws/azure resources",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q92",
+    "text": "Imagine you are when starting a new job. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q92_opt1",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      },
+      {
+        "id": "q92_opt2",
+        "text": "Optimizing operational costs",
+        "domain": "business"
+      },
+      {
+        "id": "q92_opt3",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      },
+      {
+        "id": "q92_opt4",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      }
+    ]
+  },
+  {
+    "id": "q93",
+    "text": "Imagine you are when starting a new job. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q93_opt1",
+        "text": "Configuring ci/cd",
+        "domain": "devops"
+      },
+      {
+        "id": "q93_opt2",
+        "text": "Evaluating model biases",
+        "domain": "ml"
+      },
+      {
+        "id": "q93_opt3",
+        "text": "Evaluating business risk",
+        "domain": "business"
+      },
+      {
+        "id": "q93_opt4",
+        "text": "Implementing secure authentication",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q94",
+    "text": "Imagine you are when starting a new job. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q94_opt1",
+        "text": "Assisting in procedures",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q94_opt2",
+        "text": "Setting up css layouts",
+        "domain": "frontend"
+      },
+      {
+        "id": "q94_opt3",
+        "text": "Finding actionable business insights",
+        "domain": "data"
+      },
+      {
+        "id": "q94_opt4",
+        "text": "Working across the stack",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q95",
+    "text": "Imagine you are when starting a new job. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q95_opt1",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      },
+      {
+        "id": "q95_opt2",
+        "text": "Leading meetings and strategy",
+        "domain": "business"
+      },
+      {
+        "id": "q95_opt3",
+        "text": "Explaining complex concepts",
+        "domain": "education"
+      },
+      {
+        "id": "q95_opt4",
+        "text": "Handling data persistence",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q96",
+    "text": "Imagine you are when starting a new job. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q96_opt1",
+        "text": "Predicting future trends",
+        "domain": "data"
+      },
+      {
+        "id": "q96_opt2",
+        "text": "Processing natural language",
+        "domain": "ml"
+      },
+      {
+        "id": "q96_opt3",
+        "text": "Monitoring server health",
+        "domain": "devops"
+      },
+      {
+        "id": "q96_opt4",
+        "text": "Planning the financial budget",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q97",
+    "text": "Imagine you are when starting a new job. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q97_opt1",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q97_opt2",
+        "text": "Creating data visualizations",
+        "domain": "data"
+      },
+      {
+        "id": "q97_opt3",
+        "text": "Writing react components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q97_opt4",
+        "text": "Leading meetings and strategy",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q98",
+    "text": "Imagine you are when starting a new job. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q98_opt1",
+        "text": "Negotiating with clients",
+        "domain": "business"
+      },
+      {
+        "id": "q98_opt2",
+        "text": "Handling both server logic and client views",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q98_opt3",
+        "text": "Promoting wellness",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q98_opt4",
+        "text": "Grading assignments",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q99",
+    "text": "Imagine you are when starting a new job. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q99_opt1",
+        "text": "Implementing deep learning",
+        "domain": "ml"
+      },
+      {
+        "id": "q99_opt2",
+        "text": "Connecting the ui to the database",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q99_opt3",
+        "text": "Promoting wellness",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q99_opt4",
+        "text": "Organizing classroom activities",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q100",
+    "text": "Imagine you are when starting a new job. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q100_opt1",
+        "text": "Orchestrating containers with kubernetes",
+        "domain": "devops"
+      },
+      {
+        "id": "q100_opt2",
+        "text": "Optimizing operational costs",
+        "domain": "business"
+      },
+      {
+        "id": "q100_opt3",
+        "text": "Adding animations",
+        "domain": "frontend"
+      },
+      {
+        "id": "q100_opt4",
+        "text": "Crafting visual storytelling",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q101",
+    "text": "Imagine you are in a high-pressure situation. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q101_opt1",
+        "text": "Running user research sessions",
+        "domain": "design"
+      },
+      {
+        "id": "q101_opt2",
+        "text": "Handling data persistence",
+        "domain": "backend"
+      },
+      {
+        "id": "q101_opt3",
+        "text": "Explaining complex concepts",
+        "domain": "education"
+      },
+      {
+        "id": "q101_opt4",
+        "text": "Writing bash scripts",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q102",
+    "text": "Imagine you are in a high-pressure situation. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q102_opt1",
+        "text": "Configuring ci/cd",
+        "domain": "devops"
+      },
+      {
+        "id": "q102_opt2",
+        "text": "Building computer vision tools",
+        "domain": "ml"
+      },
+      {
+        "id": "q102_opt3",
+        "text": "Containerizing microservices",
+        "domain": "backend"
+      },
+      {
+        "id": "q102_opt4",
+        "text": "Creating typography systems",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q103",
+    "text": "Imagine you are in a high-pressure situation. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q103_opt1",
+        "text": "Writing bash scripts",
+        "domain": "devops"
+      },
+      {
+        "id": "q103_opt2",
+        "text": "Designing brand logos",
+        "domain": "design"
+      },
+      {
+        "id": "q103_opt3",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      },
+      {
+        "id": "q103_opt4",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q104",
+    "text": "Imagine you are in a high-pressure situation. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q104_opt1",
+        "text": "Building statistical models",
+        "domain": "data"
+      },
+      {
+        "id": "q104_opt2",
+        "text": "Designing ai algorithms",
+        "domain": "ml"
+      },
+      {
+        "id": "q104_opt3",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q104_opt4",
+        "text": "Leading meetings and strategy",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q105",
+    "text": "Imagine you are in a high-pressure situation. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q105_opt1",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q105_opt2",
+        "text": "Creating data visualizations",
+        "domain": "data"
+      },
+      {
+        "id": "q105_opt3",
+        "text": "Managing application state",
+        "domain": "backend"
+      },
+      {
+        "id": "q105_opt4",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q106",
+    "text": "Imagine you are in a high-pressure situation. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q106_opt1",
+        "text": "Orchestrating containers with kubernetes",
+        "domain": "devops"
+      },
+      {
+        "id": "q106_opt2",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      },
+      {
+        "id": "q106_opt3",
+        "text": "Ensuring accessibility",
+        "domain": "frontend"
+      },
+      {
+        "id": "q106_opt4",
+        "text": "Implementing deep learning",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q107",
+    "text": "Imagine you are in a high-pressure situation. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q107_opt1",
+        "text": "Integrating the api with the frontend",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q107_opt2",
+        "text": "Building mobile-friendly views",
+        "domain": "frontend"
+      },
+      {
+        "id": "q107_opt3",
+        "text": "Creating a pitch deck",
+        "domain": "business"
+      },
+      {
+        "id": "q107_opt4",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      }
+    ]
+  },
+  {
+    "id": "q108",
+    "text": "Imagine you are in a high-pressure situation. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q108_opt1",
+        "text": "Designing database schemas",
+        "domain": "backend"
+      },
+      {
+        "id": "q108_opt2",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      },
+      {
+        "id": "q108_opt3",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      },
+      {
+        "id": "q108_opt4",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q109",
+    "text": "Imagine you are in a high-pressure situation. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q109_opt1",
+        "text": "Writing robust apis",
+        "domain": "backend"
+      },
+      {
+        "id": "q109_opt2",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      },
+      {
+        "id": "q109_opt3",
+        "text": "Creating interactive components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q109_opt4",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q110",
+    "text": "Imagine you are in a high-pressure situation. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q110_opt1",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q110_opt2",
+        "text": "Orchestrating containers with kubernetes",
+        "domain": "devops"
+      },
+      {
+        "id": "q110_opt3",
+        "text": "Designing brand logos",
+        "domain": "design"
+      },
+      {
+        "id": "q110_opt4",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q111",
+    "text": "Imagine you are during casual networking. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q111_opt1",
+        "text": "Optimizing model accuracy",
+        "domain": "ml"
+      },
+      {
+        "id": "q111_opt2",
+        "text": "Evaluating business risk",
+        "domain": "business"
+      },
+      {
+        "id": "q111_opt3",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q111_opt4",
+        "text": "Working across the stack",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q112",
+    "text": "Imagine you are during casual networking. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q112_opt1",
+        "text": "Illustrating graphics",
+        "domain": "design"
+      },
+      {
+        "id": "q112_opt2",
+        "text": "Inspiring others to learn",
+        "domain": "education"
+      },
+      {
+        "id": "q112_opt3",
+        "text": "Orchestrating containers with kubernetes",
+        "domain": "devops"
+      },
+      {
+        "id": "q112_opt4",
+        "text": "Organizing medical records",
+        "domain": "healthcare"
+      }
+    ]
+  },
+  {
+    "id": "q113",
+    "text": "Imagine you are during casual networking. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q113_opt1",
+        "text": "Rapidly prototyping the whole product",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q113_opt2",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      },
+      {
+        "id": "q113_opt3",
+        "text": "Organizing classroom activities",
+        "domain": "education"
+      },
+      {
+        "id": "q113_opt4",
+        "text": "Writing react components",
+        "domain": "frontend"
+      }
+    ]
+  },
+  {
+    "id": "q114",
+    "text": "Imagine you are during casual networking. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q114_opt1",
+        "text": "Managing cloud infrastructure",
+        "domain": "devops"
+      },
+      {
+        "id": "q114_opt2",
+        "text": "Organizing medical records",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q114_opt3",
+        "text": "Managing the system architecture",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q114_opt4",
+        "text": "Writing robust apis",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q115",
+    "text": "Imagine you are during casual networking. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q115_opt1",
+        "text": "Promoting wellness",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q115_opt2",
+        "text": "Deploying a full web app",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q115_opt3",
+        "text": "Grading assignments",
+        "domain": "education"
+      },
+      {
+        "id": "q115_opt4",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q116",
+    "text": "Imagine you are during casual networking. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q116_opt1",
+        "text": "Designing brand logos",
+        "domain": "design"
+      },
+      {
+        "id": "q116_opt2",
+        "text": "Processing natural language",
+        "domain": "ml"
+      },
+      {
+        "id": "q116_opt3",
+        "text": "Cleaning and querying large datasets",
+        "domain": "data"
+      },
+      {
+        "id": "q116_opt4",
+        "text": "Implementing secure authentication",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q117",
+    "text": "Imagine you are during casual networking. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q117_opt1",
+        "text": "Managing application state",
+        "domain": "backend"
+      },
+      {
+        "id": "q117_opt2",
+        "text": "Training predictive models",
+        "domain": "ml"
+      },
+      {
+        "id": "q117_opt3",
+        "text": "Setting up aws/azure resources",
+        "domain": "devops"
+      },
+      {
+        "id": "q117_opt4",
+        "text": "Rapidly prototyping the whole product",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q118",
+    "text": "Imagine you are during casual networking. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q118_opt1",
+        "text": "Evaluating student progress",
+        "domain": "education"
+      },
+      {
+        "id": "q118_opt2",
+        "text": "Working across the stack",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q118_opt3",
+        "text": "Researching medical treatments",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q118_opt4",
+        "text": "Choosing color palettes",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q119",
+    "text": "Imagine you are during casual networking. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q119_opt1",
+        "text": "Evaluating business risk",
+        "domain": "business"
+      },
+      {
+        "id": "q119_opt2",
+        "text": "Writing bash scripts",
+        "domain": "devops"
+      },
+      {
+        "id": "q119_opt3",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q119_opt4",
+        "text": "Designing ai algorithms",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q120",
+    "text": "Imagine you are during casual networking. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q120_opt1",
+        "text": "Managing application state",
+        "domain": "backend"
+      },
+      {
+        "id": "q120_opt2",
+        "text": "Researching ai papers",
+        "domain": "ml"
+      },
+      {
+        "id": "q120_opt3",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q120_opt4",
+        "text": "Polishing the ui",
+        "domain": "frontend"
+      }
+    ]
+  },
+  {
+    "id": "q121",
+    "text": "Imagine you are when evaluating a new tool. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q121_opt1",
+        "text": "Securing the network",
+        "domain": "devops"
+      },
+      {
+        "id": "q121_opt2",
+        "text": "Writing react components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q121_opt3",
+        "text": "Creating a pitch deck",
+        "domain": "business"
+      },
+      {
+        "id": "q121_opt4",
+        "text": "Handling data persistence",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q122",
+    "text": "Imagine you are when evaluating a new tool. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q122_opt1",
+        "text": "Implementing deep learning",
+        "domain": "ml"
+      },
+      {
+        "id": "q122_opt2",
+        "text": "Teaching and mentoring students",
+        "domain": "education"
+      },
+      {
+        "id": "q122_opt3",
+        "text": "Promoting wellness",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q122_opt4",
+        "text": "Leading meetings and strategy",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q123",
+    "text": "Imagine you are when evaluating a new tool. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q123_opt1",
+        "text": "Assisting in procedures",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q123_opt2",
+        "text": "Choosing color palettes",
+        "domain": "design"
+      },
+      {
+        "id": "q123_opt3",
+        "text": "Optimizing operational costs",
+        "domain": "business"
+      },
+      {
+        "id": "q123_opt4",
+        "text": "Handling both server logic and client views",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q124",
+    "text": "Imagine you are when evaluating a new tool. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q124_opt1",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q124_opt2",
+        "text": "Implementing deep learning",
+        "domain": "ml"
+      },
+      {
+        "id": "q124_opt3",
+        "text": "Optimizing server response times",
+        "domain": "backend"
+      },
+      {
+        "id": "q124_opt4",
+        "text": "Negotiating with clients",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q125",
+    "text": "Imagine you are when evaluating a new tool. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q125_opt1",
+        "text": "Studying human anatomy",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q125_opt2",
+        "text": "Illustrating graphics",
+        "domain": "design"
+      },
+      {
+        "id": "q125_opt3",
+        "text": "Ensuring zero downtime",
+        "domain": "devops"
+      },
+      {
+        "id": "q125_opt4",
+        "text": "Analyzing market competition",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q126",
+    "text": "Imagine you are when evaluating a new tool. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q126_opt1",
+        "text": "Creating data visualizations",
+        "domain": "data"
+      },
+      {
+        "id": "q126_opt2",
+        "text": "Organizing classroom activities",
+        "domain": "education"
+      },
+      {
+        "id": "q126_opt3",
+        "text": "Writing react components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q126_opt4",
+        "text": "Researching medical treatments",
+        "domain": "healthcare"
+      }
+    ]
+  },
+  {
+    "id": "q127",
+    "text": "Imagine you are when evaluating a new tool. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q127_opt1",
+        "text": "Managing project timelines",
+        "domain": "business"
+      },
+      {
+        "id": "q127_opt2",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q127_opt3",
+        "text": "Prototyping in figma",
+        "domain": "design"
+      },
+      {
+        "id": "q127_opt4",
+        "text": "Securing the network",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q128",
+    "text": "Imagine you are when evaluating a new tool. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q128_opt1",
+        "text": "Optimizing server response times",
+        "domain": "backend"
+      },
+      {
+        "id": "q128_opt2",
+        "text": "Evaluating student progress",
+        "domain": "education"
+      },
+      {
+        "id": "q128_opt3",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      },
+      {
+        "id": "q128_opt4",
+        "text": "Architecting the entire application flow",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q129",
+    "text": "Imagine you are when evaluating a new tool. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q129_opt1",
+        "text": "Finding actionable business insights",
+        "domain": "data"
+      },
+      {
+        "id": "q129_opt2",
+        "text": "Managing cloud infrastructure",
+        "domain": "devops"
+      },
+      {
+        "id": "q129_opt3",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q129_opt4",
+        "text": "Evaluating model biases",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q130",
+    "text": "Imagine you are when evaluating a new tool. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q130_opt1",
+        "text": "Tuning neural networks",
+        "domain": "ml"
+      },
+      {
+        "id": "q130_opt2",
+        "text": "Adding animations",
+        "domain": "frontend"
+      },
+      {
+        "id": "q130_opt3",
+        "text": "Setting up aws/azure resources",
+        "domain": "devops"
+      },
+      {
+        "id": "q130_opt4",
+        "text": "Optimizing server response times",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q131",
+    "text": "Imagine you are while reading the news. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q131_opt1",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q131_opt2",
+        "text": "Creating interactive components",
+        "domain": "frontend"
+      },
+      {
+        "id": "q131_opt3",
+        "text": "Implementing deep learning",
+        "domain": "ml"
+      },
+      {
+        "id": "q131_opt4",
+        "text": "Rapidly prototyping the whole product",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q132",
+    "text": "Imagine you are while reading the news. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q132_opt1",
+        "text": "Analyzing market competition",
+        "domain": "business"
+      },
+      {
+        "id": "q132_opt2",
+        "text": "Ensuring accessibility",
+        "domain": "frontend"
+      },
+      {
+        "id": "q132_opt3",
+        "text": "Setting up aws/azure resources",
+        "domain": "devops"
+      },
+      {
+        "id": "q132_opt4",
+        "text": "Writing complex sql scripts",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q133",
+    "text": "Imagine you are while reading the news. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q133_opt1",
+        "text": "Predicting future trends",
+        "domain": "data"
+      },
+      {
+        "id": "q133_opt2",
+        "text": "Monitoring server health",
+        "domain": "devops"
+      },
+      {
+        "id": "q133_opt3",
+        "text": "Researching medical treatments",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q133_opt4",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q134",
+    "text": "Imagine you are while reading the news. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q134_opt1",
+        "text": "Processing natural language",
+        "domain": "ml"
+      },
+      {
+        "id": "q134_opt2",
+        "text": "Writing bash scripts",
+        "domain": "devops"
+      },
+      {
+        "id": "q134_opt3",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q134_opt4",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q135",
+    "text": "Imagine you are while reading the news. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q135_opt1",
+        "text": "Deploying a full web app",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q135_opt2",
+        "text": "Helping people recover",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q135_opt3",
+        "text": "Designing brand logos",
+        "domain": "design"
+      },
+      {
+        "id": "q135_opt4",
+        "text": "Optimizing model accuracy",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q136",
+    "text": "Imagine you are while reading the news. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q136_opt1",
+        "text": "Training predictive models",
+        "domain": "ml"
+      },
+      {
+        "id": "q136_opt2",
+        "text": "Prototyping in figma",
+        "domain": "design"
+      },
+      {
+        "id": "q136_opt3",
+        "text": "Designing curriculum",
+        "domain": "education"
+      },
+      {
+        "id": "q136_opt4",
+        "text": "Analyzing market competition",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q137",
+    "text": "Imagine you are while reading the news. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q137_opt1",
+        "text": "Assisting in procedures",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q137_opt2",
+        "text": "Ensuring data integrity",
+        "domain": "data"
+      },
+      {
+        "id": "q137_opt3",
+        "text": "Connecting the ui to the database",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q137_opt4",
+        "text": "Managing cloud infrastructure",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q138",
+    "text": "Imagine you are while reading the news. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q138_opt1",
+        "text": "Helping people recover",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q138_opt2",
+        "text": "Training predictive models",
+        "domain": "ml"
+      },
+      {
+        "id": "q138_opt3",
+        "text": "Running user research sessions",
+        "domain": "design"
+      },
+      {
+        "id": "q138_opt4",
+        "text": "Writing bash scripts",
+        "domain": "devops"
+      }
+    ]
+  },
+  {
+    "id": "q139",
+    "text": "Imagine you are while reading the news. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q139_opt1",
+        "text": "Cleaning and querying large datasets",
+        "domain": "data"
+      },
+      {
+        "id": "q139_opt2",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q139_opt3",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      },
+      {
+        "id": "q139_opt4",
+        "text": "Evaluating student progress",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q140",
+    "text": "Imagine you are while reading the news. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q140_opt1",
+        "text": "Configuring ci/cd",
+        "domain": "devops"
+      },
+      {
+        "id": "q140_opt2",
+        "text": "Teaching and mentoring students",
+        "domain": "education"
+      },
+      {
+        "id": "q140_opt3",
+        "text": "Diagnosing patient symptoms",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q140_opt4",
+        "text": "Negotiating with clients",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q141",
+    "text": "Imagine you are in a creative workshop. What do you prioritize?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q141_opt1",
+        "text": "Cleaning and querying large datasets",
+        "domain": "data"
+      },
+      {
+        "id": "q141_opt2",
+        "text": "Designing ai algorithms",
+        "domain": "ml"
+      },
+      {
+        "id": "q141_opt3",
+        "text": "Helping people recover",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q141_opt4",
+        "text": "Illustrating graphics",
+        "domain": "design"
+      }
+    ]
+  },
+  {
+    "id": "q142",
+    "text": "Imagine you are in a creative workshop. What sounds most appealing?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q142_opt1",
+        "text": "Securing the network",
+        "domain": "devops"
+      },
+      {
+        "id": "q142_opt2",
+        "text": "Rapidly prototyping the whole product",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q142_opt3",
+        "text": "Studying human anatomy",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q142_opt4",
+        "text": "Researching pedagogical methods",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q143",
+    "text": "Imagine you are in a creative workshop. Where do you focus your energy?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q143_opt1",
+        "text": "Handling both server logic and client views",
+        "domain": "fullstack"
+      },
+      {
+        "id": "q143_opt2",
+        "text": "Adding animations",
+        "domain": "frontend"
+      },
+      {
+        "id": "q143_opt3",
+        "text": "Implementing secure authentication",
+        "domain": "backend"
+      },
+      {
+        "id": "q143_opt4",
+        "text": "Training predictive models",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q144",
+    "text": "Imagine you are in a creative workshop. What is your first instinct?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q144_opt1",
+        "text": "Planning the financial budget",
+        "domain": "business"
+      },
+      {
+        "id": "q144_opt2",
+        "text": "Helping people recover",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q144_opt3",
+        "text": "Sketching wireframes",
+        "domain": "design"
+      },
+      {
+        "id": "q144_opt4",
+        "text": "Teaching and mentoring students",
+        "domain": "education"
+      }
+    ]
+  },
+  {
+    "id": "q145",
+    "text": "Imagine you are in a creative workshop. How do you contribute?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q145_opt1",
+        "text": "Optimizing server response times",
+        "domain": "backend"
+      },
+      {
+        "id": "q145_opt2",
+        "text": "Prototyping in figma",
+        "domain": "design"
+      },
+      {
+        "id": "q145_opt3",
+        "text": "Analyzing hidden trends",
+        "domain": "data"
+      },
+      {
+        "id": "q145_opt4",
+        "text": "Designing ai algorithms",
+        "domain": "ml"
+      }
+    ]
+  },
+  {
+    "id": "q146",
+    "text": "Imagine you are in a creative workshop. What tool do you reach for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q146_opt1",
+        "text": "Creating data visualizations",
+        "domain": "data"
+      },
+      {
+        "id": "q146_opt2",
+        "text": "Designing database schemas",
+        "domain": "backend"
+      },
+      {
+        "id": "q146_opt3",
+        "text": "Focusing on user experience",
+        "domain": "frontend"
+      },
+      {
+        "id": "q146_opt4",
+        "text": "Creating a pitch deck",
+        "domain": "business"
+      }
+    ]
+  },
+  {
+    "id": "q147",
+    "text": "Imagine you are in a creative workshop. What outcome do you hope for?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q147_opt1",
+        "text": "Building mobile-friendly views",
+        "domain": "frontend"
+      },
+      {
+        "id": "q147_opt2",
+        "text": "Monitoring vital signs",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q147_opt3",
+        "text": "Evaluating student progress",
+        "domain": "education"
+      },
+      {
+        "id": "q147_opt4",
+        "text": "Implementing secure authentication",
+        "domain": "backend"
+      }
+    ]
+  },
+  {
+    "id": "q148",
+    "text": "Imagine you are in a creative workshop. What problem do you tackle first?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q148_opt1",
+        "text": "Handling data persistence",
+        "domain": "backend"
+      },
+      {
+        "id": "q148_opt2",
+        "text": "Creating lesson plans",
+        "domain": "education"
+      },
+      {
+        "id": "q148_opt3",
+        "text": "Securing the network",
+        "domain": "devops"
+      },
+      {
+        "id": "q148_opt4",
+        "text": "Cleaning and querying large datasets",
+        "domain": "data"
+      }
+    ]
+  },
+  {
+    "id": "q149",
+    "text": "Imagine you are in a creative workshop. What role do you take on?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q149_opt1",
+        "text": "Helping people recover",
+        "domain": "healthcare"
+      },
+      {
+        "id": "q149_opt2",
+        "text": "Setting up aws/azure resources",
+        "domain": "devops"
+      },
+      {
+        "id": "q149_opt3",
+        "text": "Illustrating graphics",
+        "domain": "design"
+      },
+      {
+        "id": "q149_opt4",
+        "text": "Building end-to-end features",
+        "domain": "fullstack"
+      }
+    ]
+  },
+  {
+    "id": "q150",
+    "text": "Imagine you are in a creative workshop. How do you organize the work?",
+    "category": "General",
+    "options": [
+      {
+        "id": "q150_opt1",
+        "text": "Tuning neural networks",
+        "domain": "ml"
+      },
+      {
+        "id": "q150_opt2",
+        "text": "Negotiating with clients",
+        "domain": "business"
+      },
+      {
+        "id": "q150_opt3",
+        "text": "Ensuring data integrity",
+        "domain": "data"
+      },
+      {
+        "id": "q150_opt4",
+        "text": "Polishing the ui",
+        "domain": "frontend"
+      }
+    ]
+  }
+]
