@@ -1,0 +1,12 @@
+# ignore uploads and binaries
+backend/SkillScape/SkillScape.API/wwwroot/uploads/
+*.jpg
+*.png
+*.log
+*.user
+*.vs
+bin/
+obj/
+node_modules/
+.DS_Store
+.env

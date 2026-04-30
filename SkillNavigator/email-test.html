@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Configuration Test - SkillScape</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+        .info-box h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .info-box ol {
+            margin-left: 20px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.show {
+            display: block;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .config-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+        .config-section h2 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .config-path {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .checklist {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .checklist h3 {
+            color: #f57c00;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .checklist ul {
+            margin-left: 20px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        button.loading .loader {
+            display: block;
+        }
+        button.loading .button-text {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Email Configuration Test</h1>
+        <p class="subtitle">Test your SMTP settings to ensure emails are working correctly</p>
+
+        <div class="info-box">
+            <h3>Before Testing:</h3>
+            <ol>
+                <li>Update <code>appsettings.json</code> with your email credentials</li>
+                <li>For Gmail: Use an App Password (not your regular password)</li>
+                <li>Restart the backend server after updating settings</li>
+                <li>Make sure the backend is running on http://localhost:5000</li>
+            </ol>
+        </div>
+
+        <form id="testForm">
+            <div class="form-group">
+                <label for="email">Your Email Address:</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="your-email@gmail.com" 
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span class="button-text">Send Test Email</span>
+                <div class="loader"></div>
+            </button>
+        </form>
+
+        <div id="result" class="result"></div>
+
+        <div class="config-section">
+            <h2>Current Configuration</h2>
+            <div class="config-path">
+                📁 backend/SkillScape/SkillScape.API/appsettings.json
+            </div>
+
+            <div class="checklist">
+                <h3>⚠️ Common Issues:</h3>
+                <ul>
+                    <li><strong>Still using placeholder values?</strong> Replace "your-email@gmail.com" and "your-app-password"</li>
+                    <li><strong>Using regular Gmail password?</strong> Won't work! You need an App Password</li>
+                    <li><strong>No 2FA enabled?</strong> App Passwords require 2-Factor Authentication</li>
+                    <li><strong>Forgot to restart backend?</strong> Changes require a restart to take effect</li>
+                    <li><strong>Port 587 blocked?</strong> Check firewall/antivirus settings</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('testForm');
+        const result = document.getElementById('result');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            
+            // Clear previous result
+            result.classList.remove('show', 'success', 'error');
+            result.textContent = '';
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+
+            try {
+                const response = await fetch('http://localhost:5000/api/testemail/send-test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ toEmail: email })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    result.className = 'result success show';
+                    result.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        ${data.data || data.message}<br><br>
+                        <strong>Next Steps:</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Check your inbox for the test email</li>
+                            <li>Check your spam/junk folder if you don't see it</li>
+                            <li>If successful, your forgot password feature will work!</li>
+                        </ul>
+                    `;
+                } else {
+                    result.className = 'result error show';
+                    result.innerHTML = `
+                        <strong>❌ Error:</strong><br>
+                        ${data.message || data.error || 'Failed to send email'}<br><br>
+                        <strong>Troubleshooting:</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Verify your email and App Password in appsettings.json</li>
+                            <li>Make sure you're using an App Password, not your Gmail password</li>
+                            <li>Check that 2FA is enabled on your Google account</li>
+                            <li>Restart the backend server after updating settings</li>
+                            <li>Check backend console for detailed error messages</li>
+                        </ul>
+                    `;
+                }
+            } catch (error) {
+                result.className = 'result error show';
+                result.innerHTML = `
+                    <strong>❌ Connection Error:</strong><br>
+                    ${error.message}<br><br>
+                    <strong>Possible Causes:</strong>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Backend server is not running</li>
+                        <li>Backend is not running on http://localhost:5000</li>
+                        <li>CORS is blocking the request</li>
+                        <li>Check if dotnet process is running</li>
+                    </ul>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+            }
+        });
+    </script>
+</body>
+</html>
