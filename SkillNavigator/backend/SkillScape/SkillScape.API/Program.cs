@@ -94,7 +94,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             {
                 var accessToken = context.Request.Query["access_token"];
                 var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/chat"))
+                if (!string.IsNullOrEmpty(accessToken) && 
+                    (path.StartsWithSegments("/hubs/chat") || path.StartsWithSegments("/hubs/peer-rooms")))
                 {
                     context.Token = accessToken;
                 }
@@ -129,6 +130,7 @@ app.MapControllers();
 
 // Map SignalR Hubs
 app.MapHub<ChatHub>("/hubs/chat");
+app.MapHub<PeerRoomHub>("/hubs/peer-rooms");
 
 // Database initialization
 using (var scope = app.Services.CreateScope())

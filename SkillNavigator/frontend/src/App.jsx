@@ -21,6 +21,7 @@ import MentorsPage from "@/pages/Mentors";
 import MentorProfile from "@/pages/MentorProfile";
 import MyMentors from "@/pages/MyMentors";
 import MessagesPage from "@/pages/Messages";
+import PeerRoomsPage from "@/pages/PeerRooms";
 import ProfilePage from "@/pages/Profile";
 import AdminPage from "@/pages/Admin";
 import SessionsCalendar from "@/pages/SessionsCalendar";
@@ -97,6 +98,7 @@ const App = () => (
               <Route path="/mentor/:mentorId" element={<MentorProfile />} />
               <Route path="/my-mentors" element={<MyMentors />} />
               <Route path="/messages" element={<MessagesPage />} />
+              <Route path="/peer-rooms" element={<PeerRoomsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route
                 path="/admin"

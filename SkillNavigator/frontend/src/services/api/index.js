@@ -13,4 +13,4 @@ export { roadmapApi } from './roadmap';
 export { chatApi } from './chat';
 export { adminApi } from './admin';
 export { sessionsApi } from './sessions';
-
+export { peerRoomsApi } from './peerRooms';

@@ -37,6 +37,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<StudentWallet> StudentWallets { get; set; } = null!;
     public DbSet<PaymentTransaction> PaymentTransactions { get; set; } = null!;
     public DbSet<MentorSessionPriceHistory> MentorSessionPriceHistory { get; set; } = null!;
+    public DbSet<PeerLearningRoom> PeerLearningRooms { get; set; } = null!;
+    public DbSet<PeerRoomParticipant> PeerRoomParticipants { get; set; } = null!;
+    public DbSet<PeerRoomMessage> PeerRoomMessages { get; set; } = null!;
+    public DbSet<PeerRoomTask> PeerRoomTasks { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -440,6 +444,77 @@ public class ApplicationDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(cm => cm.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PeerLearningRoom>(entity =>
+        {
+            entity.ToTable("PeerStudyRooms");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(180);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(1000);
+            entity.Property(e => e.CollaborationType).IsRequired().HasMaxLength(80);
+            entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.SharedNotes).HasMaxLength(4000);
+            entity.Property(e => e.WhiteboardState).HasMaxLength(4000);
+
+            entity.HasOne(r => r.Creator)
+                .WithMany()
+                .HasForeignKey(r => r.CreatorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PeerRoomParticipant>(entity =>
+        {
+            entity.ToTable("PeerStudyRoomParticipants");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
+
+            entity.HasOne(p => p.Room)
+                .WithMany(r => r.Participants)
+                .HasForeignKey(p => p.RoomId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => new { e.RoomId, e.UserId }).IsUnique();
+        });
+
+        modelBuilder.Entity<PeerRoomMessage>(entity =>
+        {
+            entity.ToTable("PeerStudyRoomMessages");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Content).IsRequired().HasMaxLength(2000);
+
+            entity.HasOne(m => m.Room)
+                .WithMany(r => r.Messages)
+                .HasForeignKey(m => m.RoomId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PeerRoomTask>(entity =>
+        {
+            entity.ToTable("PeerStudyRoomTasks");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(220);
+
+            entity.HasOne(t => t.Room)
+                .WithMany(r => r.Tasks)
+                .HasForeignKey(t => t.RoomId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(t => t.AssignedToUser)
+                .WithMany()
+                .HasForeignKey(t => t.AssignedToUserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

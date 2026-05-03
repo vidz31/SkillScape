@@ -23,8 +23,10 @@ import {
   CalendarClock,
   BarChart3,
   BellRing,
+  ClipboardList,
   ListChecks,
   Map,
+  MonitorUp,
   Star,
 } from 'lucide-react';
 
@@ -84,8 +86,8 @@ const AdminPage = () => {
   const [analytics, setAnalytics] = useState(null);
   const [users, setUsers] = useState([]);
   const [allMentors, setAllMentors] = useState([]);
-  const [pendingMentors, setPendingMentors] = useState([]);
   const [sessions, setSessions] = useState([]);
+  const [peerRooms, setPeerRooms] = useState([]);
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [roadmapModules, setRoadmapModules] = useState([]);
   const [progressSnapshots, setProgressSnapshots] = useState([]);
@@ -94,12 +96,15 @@ const AdminPage = () => {
   const [skillsByDomain, setSkillsByDomain] = useState({});
 
   const [announcement, setAnnouncement] = useState('');
-  const [rejectReasons, setRejectReasons] = useState({});
   const [roadmapFilterDomain, setRoadmapFilterDomain] = useState('');
   const [roadmapSearchText, setRoadmapSearchText] = useState('');
   const [sessionStatusFilter, setSessionStatusFilter] = useState('');
   const [sessionStudentFilter, setSessionStudentFilter] = useState('');
   const [sessionMentorFilter, setSessionMentorFilter] = useState('');
+  const [peerRoomSearch, setPeerRoomSearch] = useState('');
+  const [selectedPeerRoomId, setSelectedPeerRoomId] = useState('');
+  const [selectedPeerRoom, setSelectedPeerRoom] = useState(null);
+  const [peerRoomDetailsLoading, setPeerRoomDetailsLoading] = useState(false);
 
   const [mentorForm, setMentorForm] = useState(emptyMentorForm);
   const [quizForm, setQuizForm] = useState(emptyQuizForm);
@@ -110,7 +115,7 @@ const AdminPage = () => {
     const parts = location.pathname.split('/').filter(Boolean);
     if (parts.length < 2) return 'dashboard';
     const section = parts[1];
-    const validSections = ['dashboard', 'users', 'mentors', 'questions', 'roadmap', 'progress', 'sessions', 'analytics', 'announcement'];
+    const validSections = ['dashboard', 'users', 'mentors', 'questions', 'roadmap', 'progress', 'sessions', 'peer-rooms', 'analytics', 'announcement'];
     return validSections.includes(section) ? section : 'dashboard';
   }, [location.pathname]);
 
@@ -121,8 +126,8 @@ const AdminPage = () => {
         statsData,
         usersData,
         mentorsData,
-        pendingData,
         sessionsData,
+        peerRoomsData,
         analyticsData,
         questionsData,
         roadmapData,
@@ -131,8 +136,8 @@ const AdminPage = () => {
         adminApi.getDashboard(),
         adminApi.getUsers(),
         adminApi.getMentors(),
-        adminApi.getPendingMentors(),
         adminApi.getSessions(),
+        adminApi.getPeerRooms(),
         adminApi.getAnalytics(),
         adminApi.getQuizQuestions(),
         adminApi.getRoadmapModules(),
@@ -142,8 +147,8 @@ const AdminPage = () => {
       setStats(statsData);
       setUsers(usersData || []);
       setAllMentors(mentorsData || []);
-      setPendingMentors(pendingData || []);
       setSessions(sessionsData || []);
+      setPeerRooms(peerRoomsData || []);
       setAnalytics(analyticsData);
       setQuizQuestions(questionsData || []);
       setRoadmapModules(roadmapData || []);
@@ -199,6 +204,30 @@ const AdminPage = () => {
   }, [mentorForm.skills]);
 
   const roadmapSkillOptions = skillsByDomain[roadmapForm.careerDomainId] || [];
+
+  const filteredPeerRooms = useMemo(() => {
+    const search = peerRoomSearch.trim().toLowerCase();
+    if (!search) return peerRooms;
+    return peerRooms.filter((room) =>
+      [room.title, room.description, room.collaborationType, room.creatorName, room.status]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(search))
+    );
+  }, [peerRooms, peerRoomSearch]);
+
+  const loadPeerRoomDetails = async (roomId) => {
+    if (!roomId) return;
+    try {
+      setPeerRoomDetailsLoading(true);
+      setSelectedPeerRoomId(roomId);
+      const data = await adminApi.getPeerRoomDetails(roomId);
+      setSelectedPeerRoom(data);
+    } catch (error) {
+      toast.error(error.message || 'Failed to load peer room details');
+    } finally {
+      setPeerRoomDetailsLoading(false);
+    }
+  };
 
   // Get unique domains from roadmap modules
   const uniqueDomainsFromRoadmaps = useMemo(() => {
@@ -269,26 +298,6 @@ const AdminPage = () => {
       await loadAdminData();
     } catch (error) {
       toast.error(error.message || 'Failed to update user');
-    }
-  };
-
-  const approveMentor = async (mentorId) => {
-    try {
-      await adminApi.approveMentor(mentorId);
-      toast.success('Mentor approved');
-      await loadAdminData();
-    } catch (error) {
-      toast.error(error.message || 'Failed to approve mentor');
-    }
-  };
-
-  const rejectMentor = async (mentorId) => {
-    try {
-      await adminApi.rejectMentor(mentorId, rejectReasons[mentorId] || 'Rejected by admin');
-      toast.success('Mentor rejected');
-      await loadAdminData();
-    } catch (error) {
-      toast.error(error.message || 'Failed to reject mentor');
     }
   };
 
@@ -492,9 +501,6 @@ const AdminPage = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Users" value={stats?.totalUsers} icon={Users} />
-        <StatCard label="Pending Mentor Approvals" value={stats?.pendingMentorApprovals} icon={UserCheck} />
-        <StatCard label="Total Sessions" value={stats?.totalSessions} icon={CalendarClock} />
-        <StatCard label="Avg Mentor Rating" value={stats?.averageMentorRating} icon={BarChart3} />
       </div>
 
       <Tabs value={activeSection} className="space-y-4">
@@ -521,14 +527,7 @@ const AdminPage = () => {
                 <CardContent className="p-5">
                   <p className="text-sm text-purple-700 dark:text-purple-300">Total Mentors</p>
                   <p className="text-2xl font-bold mt-2">{stats?.totalMentors || 0}</p>
-                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">{stats?.pendingMentorApprovals || 0} pending approval</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800">
-                <CardContent className="p-5">
-                  <p className="text-sm text-orange-700 dark:text-orange-300">Platform Rating</p>
-                  <p className="text-2xl font-bold mt-2">{stats?.averageMentorRating?.toFixed(1) || '0.0'} ⭐</p>
-                  <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">Average mentor rating</p>
+                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">Registered mentors</p>
                 </CardContent>
               </Card>
             </div>
@@ -802,33 +801,6 @@ const AdminPage = () => {
               </CardContent>
             </Card>
           </div>
-
-          <Card className="mt-4">
-            <CardHeader><CardTitle>Pending Mentor Approvals</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              {pendingMentors.length === 0 && <p className="text-sm text-muted-foreground">No pending mentors.</p>}
-              {pendingMentors.map((mentor) => (
-                <div key={mentor.id} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="font-semibold">{mentor.userName}</p>
-                      <p className="text-sm text-muted-foreground">{mentor.expertiseArea || mentor.expertise}</p>
-                    </div>
-                    <Badge variant="outline">Pending</Badge>
-                  </div>
-                  <Input
-                    placeholder="Rejection reason"
-                    value={rejectReasons[mentor.id] || ''}
-                    onChange={(e) => setRejectReasons((prev) => ({ ...prev, [mentor.id]: e.target.value }))}
-                  />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => approveMentor(mentor.id)}>Approve</Button>
-                    <Button size="sm" variant="destructive" onClick={() => rejectMentor(mentor.id)}>Reject</Button>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="questions">
@@ -1172,6 +1144,132 @@ const AdminPage = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="peer-rooms">
+          <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-2">
+                    <MonitorUp className="h-5 w-5" />
+                    Peer Learning Rooms
+                  </span>
+                  <Badge variant="secondary">{peerRooms.length}</Badge>
+                </CardTitle>
+                <Input
+                  placeholder="Search rooms, creator, type..."
+                  value={peerRoomSearch}
+                  onChange={(e) => setPeerRoomSearch(e.target.value)}
+                />
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {filteredPeerRooms.map((room) => (
+                  <button
+                    key={room.id}
+                    type="button"
+                    onClick={() => loadPeerRoomDetails(room.id)}
+                    className={`w-full rounded-lg border p-4 text-left transition hover:bg-secondary/50 ${
+                      selectedPeerRoomId === room.id ? 'border-primary bg-secondary/70' : ''
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{room.title}</p>
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{room.description}</p>
+                      </div>
+                      <Badge>{room.collaborationType}</Badge>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                      <span>Creator: {room.creatorName}</span>
+                      <span>Members: {room.approvedMembers}/{room.maxMembers}</span>
+                      <span>Status: {room.status}</span>
+                      <span>
+                        {room.scheduledAt ? new Date(room.scheduledAt).toLocaleString() : 'Flexible'}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+                {filteredPeerRooms.length === 0 && (
+                  <p className="py-8 text-center text-sm text-muted-foreground">No peer learning rooms found.</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5" />
+                  Room Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {peerRoomDetailsLoading ? (
+                  <div className="flex min-h-80 items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                ) : !selectedPeerRoom ? (
+                  <div className="flex min-h-80 items-center justify-center text-sm text-muted-foreground">
+                    Select a room to view its members.
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <StatCard label="Members" value={selectedPeerRoom.approvedMembers} icon={Users} />
+                      <StatCard label="Capacity" value={selectedPeerRoom.maxMembers} icon={UserCheck} />
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold">{selectedPeerRoom.title}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">{selectedPeerRoom.description}</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Badge>{selectedPeerRoom.collaborationType}</Badge>
+                        <Badge variant="secondary">Creator: {selectedPeerRoom.creatorName}</Badge>
+                        <Badge variant="outline">Duration: {selectedPeerRoom.durationMinutes} min</Badge>
+                        <Badge variant="outline">
+                          {selectedPeerRoom.scheduledAt ? new Date(selectedPeerRoom.scheduledAt).toLocaleString() : 'Flexible schedule'}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      <Card>
+                        <CardHeader><CardTitle className="text-base">Members & Join Requests</CardTitle></CardHeader>
+                        <CardContent>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Role</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Requested</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {(selectedPeerRoom.participants || []).map((participant) => (
+                                <TableRow key={participant.id}>
+                                  <TableCell className="font-medium">{participant.name}</TableCell>
+                                  <TableCell>{participant.role}</TableCell>
+                                  <TableCell>
+                                    <Badge variant={participant.status === 'Approved' ? 'default' : participant.status === 'Pending' ? 'outline' : 'destructive'}>
+                                      {participant.status}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-xs">{new Date(participant.requestedAt).toLocaleString()}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </CardContent>
+                      </Card>
+
+                    </div>
+
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="analytics">

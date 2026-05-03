@@ -147,6 +147,16 @@ export const adminApi = {
     const response = await apiClient.get('/admin/progress/snapshot');
     return unwrap(response) || [];
   },
+
+  getPeerRooms: async () => {
+    const response = await apiClient.get('/admin/peer-rooms');
+    return unwrap(response) || [];
+  },
+
+  getPeerRoomDetails: async (roomId) => {
+    const response = await apiClient.get(`/admin/peer-rooms/${roomId}`);
+    return unwrap(response);
+  },
 };
 
 export default adminApi;

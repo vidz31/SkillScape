@@ -25,6 +25,7 @@ import {
   MessageSquare,
   Shield,
   UserCheck,
+  Video,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -44,6 +45,7 @@ const navItems = [
   { path: '/resume', icon: FileText, label: 'Resume', hiddenRoles: ['Admin', 'Mentor'] },
   { path: '/mentors', icon: Users, label: 'Mentors', hiddenRoles: ['Admin', 'Mentor'] },
   { path: '/my-mentors', icon: UserCheck, label: 'My Mentors', hiddenRoles: ['Admin', 'Mentor'] },
+  { path: '/peer-rooms', icon: Video, label: 'Peer Rooms', hiddenRoles: ['Admin'] },
   { path: '/messages', icon: MessageSquare, label: 'Messages', hiddenRoles: ['Admin'] },
   { path: '/profile', icon: User, label: 'Profile', hiddenRoles: ['Admin'] },
   { path: '/admin', icon: Shield, label: 'Dashboard', roles: ['Admin'] },
@@ -53,6 +55,7 @@ const navItems = [
   { path: '/admin/roadmap', icon: Map, label: 'Roadmap', roles: ['Admin'] },
   { path: '/admin/progress', icon: Trophy, label: 'Progress', roles: ['Admin'] },
   { path: '/admin/sessions', icon: CalendarClock, label: 'Sessions', roles: ['Admin'] },
+  { path: '/admin/peer-rooms', icon: Video, label: 'Peer Rooms', roles: ['Admin'] },
   { path: '/admin/analytics', icon: BarChart3, label: 'Analytics', roles: ['Admin'] },
   { path: '/admin/announcement', icon: BellRing, label: 'Announcement', roles: ['Admin'] },
 ];
