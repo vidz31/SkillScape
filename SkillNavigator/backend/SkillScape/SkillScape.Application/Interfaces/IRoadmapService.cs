@@ -8,8 +8,9 @@ public interface IRoadmapService
     /// <summary>
     /// Gets the roadmap specifically tailored to the user's ML-predicted Career Domain.
     /// Includes completion status for each step based on UserSkill progress.
+    /// Returns null if quiz not completed or domain not found.
     /// </summary>
-    Task<RoadmapDto> GetMyRoadmapAsync(string userId);
+    Task<RoadmapDto?> GetMyRoadmapAsync(string userId);
 
     /// <summary>
     /// Gets available roadmap domains for the user to switch between.

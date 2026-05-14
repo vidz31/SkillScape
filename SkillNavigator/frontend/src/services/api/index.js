@@ -3,6 +3,7 @@
 // =============================================
 
 export { apiClient, setAuthToken, getAuthToken, clearAuthData } from './axios';
+export { apiClient as api } from './axios';
 export { authApi } from './auth';
 export { quizApi } from './quiz';
 export { domainsApi } from './domains';

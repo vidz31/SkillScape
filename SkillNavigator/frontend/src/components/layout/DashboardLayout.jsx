@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
+import ChatBot from '../ChatBot';
 import * as signalR from '@microsoft/signalr';
 import { getAuthToken } from '@/services/api';
 import { toast } from 'sonner';
@@ -94,6 +95,9 @@ export const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* ChatBot Widget */}
+      <ChatBot />
     </div>
   );
 };

@@ -64,7 +64,14 @@ const DashboardPage = () => {
         const [statsRes, badgesRes, roadmapRes, notificationsRes, sessionsRes] = await Promise.all([
           progressApi.getMyProgress(),
           progressApi.getBadges(),
-          import('@/services/api').then(m => m.roadmapApi.getMyInterestRoadmap().catch(() => ({ data: { data: null } }))),
+          import('@/services/api').then(m => 
+            m.roadmapApi.getMyInterestRoadmap()
+              .catch(err => {
+                // Gracefully handle roadmap fetch failure
+                console.warn('Roadmap fetch failed (expected if quiz not taken):', err);
+                return { data: { data: null } };
+              })
+          ),
           mentorsApi.getNotifications().catch(() => ({ data: [] })),
           sessionsApi.getUpcomingSessions().catch(() => ({ data: [] }))
         ]);

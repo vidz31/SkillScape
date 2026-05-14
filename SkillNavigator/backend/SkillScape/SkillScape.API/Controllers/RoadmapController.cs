@@ -32,15 +32,19 @@ public class RoadmapController : ControllerBase
                 return Unauthorized(ApiResponse<RoadmapDto>.ErrorResponse("User not authenticated"));
 
             var result = await _roadmapService.GetMyRoadmapAsync(userId);
+            
+            // If no roadmap found (quiz not taken or domain doesn't exist), return 200 with null data
+            if (result == null)
+            {
+                return Ok(ApiResponse<RoadmapDto>.SuccessResponse(null, 
+                    "No personalized roadmap yet. Complete the career quiz to get your personalized learning path."));
+            }
+            
             return Ok(ApiResponse<RoadmapDto>.SuccessResponse(result, "Roadmap retrieved successfully"));
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ApiResponse<RoadmapDto>.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ApiResponse<RoadmapDto>.ErrorResponse(ex.Message));
+            return StatusCode(500, ApiResponse<RoadmapDto>.ErrorResponse($"Error retrieving roadmap: {ex.Message}"));
         }
     }
 

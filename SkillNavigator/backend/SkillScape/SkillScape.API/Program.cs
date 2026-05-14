@@ -14,6 +14,31 @@ using Microsoft.Extensions.ML;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load environment variables from .env file
+void LoadEnvFile(string path)
+{
+    if (File.Exists(path))
+    {
+        var lines = File.ReadAllLines(path);
+        foreach (var line in lines)
+        {
+            if (!string.IsNullOrWhiteSpace(line) && !line.StartsWith("#"))
+            {
+                var parts = line.Split('=', 2);
+                if (parts.Length == 2)
+                {
+                    Environment.SetEnvironmentVariable(parts[0].Trim(), parts[1].Trim());
+                }
+            }
+        }
+    }
+}
+
+// Try current directory
+LoadEnvFile(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+// Try parent directory (common for solution-level .env)
+LoadEnvFile(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())?.FullName ?? "", ".env"));
+
 // Add services to the container
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -46,6 +71,34 @@ builder.Services.AddScoped<IMentorService, MentorService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IResumeService, ResumeService>();
 builder.Services.AddHttpClient<ITrendService, TrendService>();
+
+// Add ChatBot Services - Using Groq as Primary, OpenAI as Fallback
+builder.Services.AddScoped<IChatBotService, ChatBotService>();
+builder.Services.AddScoped<IKnowledgeBaseService>(provider =>
+{
+    var logger = provider.GetRequiredService<ILogger<KnowledgeBaseService>>();
+    var knowledgeBasePath = Path.GetFullPath(
+        Path.Combine(
+            AppContext.BaseDirectory,
+            "..", "..", "SkillScape.Infrastructure", "KnowledgeBase"));
+    logger.LogInformation($"Knowledge Base Path: {knowledgeBasePath}");
+    if (!Directory.Exists(knowledgeBasePath))
+    {
+        logger.LogWarning($"Knowledge Base directory does not exist: {knowledgeBasePath}");
+    }
+    return new KnowledgeBaseService(logger, knowledgeBasePath);
+});
+
+// Register Groq as primary AI service (faster inference)
+builder.Services.AddHttpClient<GroqService>();
+builder.Services.AddScoped<IOpenAIService>(provider =>
+    provider.GetRequiredService<GroqService>());
+
+// Register OpenAI service for fallback
+builder.Services.AddHttpClient<OpenAIService>();
+
+// Register Gemini service
+builder.Services.AddHttpClient<GeminiService>();
 
 // Configure SignalR
 builder.Services.AddSignalR();

@@ -19,15 +19,37 @@ public class RoadmapService : IRoadmapService
 
     public async Task<RoadmapDto> GetMyRoadmapAsync(string userId)
     {
-        var latestResult = await _context.QuizResults
-            .Where(r => r.UserId == userId)
-            .OrderByDescending(r => r.CompletedAt)
-            .FirstOrDefaultAsync();
+        try
+        {
+            var latestResult = await _context.QuizResults
+                .Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.CompletedAt)
+                .FirstOrDefaultAsync();
 
-        if (latestResult == null)
-            throw new InvalidOperationException("No career interest predicted yet. Please take the quiz first.");
+            if (latestResult == null || string.IsNullOrEmpty(latestResult.RecommendedDomainId))
+            {
+                // No quiz taken yet - return null instead of throwing
+                return null;
+            }
 
-        return await BuildRoadmapAsync(userId, latestResult.RecommendedDomainId);
+            // Check if the recommended domain exists and is active
+            var domain = await _context.CareerDomains
+                .FirstOrDefaultAsync(d => d.Id == latestResult.RecommendedDomainId && d.IsActive);
+            
+            if (domain == null)
+            {
+                // Domain doesn't exist or is inactive - return null
+                return null;
+            }
+
+            return await BuildRoadmapAsync(userId, latestResult.RecommendedDomainId);
+        }
+        catch (Exception ex)
+        {
+            // Log and return null on any error
+            System.Console.WriteLine($"Error in GetMyRoadmapAsync: {ex.Message}");
+            return null;
+        }
     }
 
     public async Task<List<RoadmapOptionDto>> GetRoadmapOptionsAsync(string userId)
