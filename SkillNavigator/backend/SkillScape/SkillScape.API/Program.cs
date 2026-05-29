@@ -70,6 +70,7 @@ builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<IMentorService, MentorService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IResumeService, ResumeService>();
+builder.Services.AddScoped<ICareerGuidanceService, CareerGuidanceService>();
 builder.Services.AddHttpClient<ITrendService, TrendService>();
 
 // Add ChatBot Services - Using Groq as Primary, OpenAI as Fallback

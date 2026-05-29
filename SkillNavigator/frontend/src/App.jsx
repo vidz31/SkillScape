@@ -28,6 +28,13 @@ import SessionsCalendar from "@/pages/SessionsCalendar";
 import UnauthorizedPage from "@/pages/Unauthorized";
 import NotFound from "@/pages/NotFound";
 
+// Career Guidance Module Pages
+import CareerExplorer from "@/pages/CareerExplorer";
+import QuizEngine from "@/pages/QuizEngine";
+import CareerInsights from "@/pages/CareerInsights";
+import SalaryForecast from "@/pages/SalaryForecast";
+import CareerAnalytics from "@/pages/CareerAnalytics";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -91,6 +98,14 @@ const App = () => (
               <Route path="/mentor-dashboard/schedule" element={<MentorDashboard />} />
               <Route path="/sessions" element={<SessionsCalendar />} />
               <Route path="/quiz" element={<QuizPage />} />
+              
+              {/* Career Guidance Module Routes */}
+              <Route path="/career-explorer" element={<CareerExplorer />} />
+              <Route path="/career-quiz" element={<QuizEngine />} />
+              <Route path="/career-insights" element={<CareerInsights />} />
+              <Route path="/salary-forecast" element={<SalaryForecast />} />
+              <Route path="/career-analytics" element={<CareerAnalytics />} />
+
               <Route path="/roadmap" element={<RoadmapPage />} />
               <Route path="/progress" element={<ProgressPage />} />
               <Route path="/resume" element={<ResumePage />} />

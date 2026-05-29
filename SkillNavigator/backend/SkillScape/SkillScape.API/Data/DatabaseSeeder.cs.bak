@@ -1,0 +1,1566 @@
+using SkillScape.Domain.Entities;
+using SkillScape.Infrastructure.Data;
+using System.Text.Json;
+
+namespace SkillScape.API.Data;
+
+public static class DatabaseSeeder
+{
+    public static async Task SeedAsync(ApplicationDbContext context)
+    {
+        // Seed Hierarchical Career Guidance Module Data first if not present
+        await SeedCareerPathsAsync(context);
+        await SeedHierarchicalQuizQuestionsAsync(context);
+
+        // Skip if data already exists
+        if (context.CareerDomains.Any())
+        {
+            // But still seed mentorship progress if mentors exist but no progress exists
+            if (context.Mentors.Any() && !context.MentorshipProgressEntries.Any())
+            {
+                var existingUsers = context.Users.ToList();
+                var existingMentors = context.Mentors.ToList();
+                var progressEntries = SeedMentorshipProgress(context, existingUsers, existingMentors);
+                context.MentorshipProgressEntries.AddRange(progressEntries);
+                await context.SaveChangesAsync();
+            }
+            return;
+        }
+
+        // Seed Career Domains
+        var domains = SeedDomains(context);
+        context.CareerDomains.AddRange(domains);
+        await context.SaveChangesAsync();
+
+        // Seed Skills
+        var skills = SeedSkills(context, domains);
+        context.Skills.AddRange(skills);
+        await context.SaveChangesAsync();
+
+        // Seed Quiz Questions and Options
+        var (questions, options) = SeedQuiz(context, domains);
+        context.QuizQuestions.AddRange(questions);
+        context.QuizOptions.AddRange(options);
+        await context.SaveChangesAsync();
+
+        // Seed Badges
+        var badges = SeedBadges();
+        context.Badges.AddRange(badges);
+        await context.SaveChangesAsync();
+
+        // Seed Roadmap Steps
+        var roadmapSteps = SeedRoadmapSteps(context, domains, skills);
+        context.RoadmapSteps.AddRange(roadmapSteps);
+        await context.SaveChangesAsync();
+
+        // Seed Sample Users
+        var users = SeedUsers();
+        context.Users.AddRange(users);
+        await context.SaveChangesAsync();
+
+        // Seed Sample Mentors
+        var mentors = SeedMentors(context, users.Where(u => u.Role == "Mentor").ToList());
+        context.Mentors.AddRange(mentors);
+        await context.SaveChangesAsync();
+
+        // Seed Mentorship Progress (student-mentor relationships)
+        var mentorshipProgresses = SeedMentorshipProgress(context, users, mentors);
+        context.MentorshipProgressEntries.AddRange(mentorshipProgresses);
+        await context.SaveChangesAsync();
+    }
+
+    private static List<CareerDomain> SeedDomains(ApplicationDbContext context)
+    {
+        return new List<CareerDomain>
+        {
+            new CareerDomain
+            {
+                Id = "frontend",
+                Name = "Frontend Development",
+                Description = "Build beautiful and interactive user interfaces with modern web technologies",
+                Color = "bg-pink-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=frontend",
+                DisplayOrder = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CareerDomain
+            {
+                Id = "backend",
+                Name = "Backend Development",
+                Description = "Build robust APIs and server-side applications that power modern applications",
+                Color = "bg-blue-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=backend",
+                DisplayOrder = 2,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CareerDomain
+            {
+                Id = "fullstack",
+                Name = "Full Stack Development",
+                Description = "Master both frontend and backend to become a complete developer",
+                Color = "bg-purple-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=fullstack",
+                DisplayOrder = 3,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CareerDomain
+            {
+                Id = "data",
+                Name = "Data Science",
+                Description = "Analyze data and extract insights using Python, SQL, and statistical methods",
+                Color = "bg-green-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=data",
+                DisplayOrder = 4,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CareerDomain
+            {
+                Id = "devops",
+                Name = "DevOps & Cloud",
+                Description = "Master deployment, scaling, and infrastructure automation",
+                Color = "bg-orange-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=devops",
+                DisplayOrder = 5,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CareerDomain
+            {
+                Id = "ml",
+                Name = "Machine Learning",
+                Description = "Build intelligent systems using machine learning algorithms",
+                Color = "bg-indigo-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=ml",
+                DisplayOrder = 6,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CareerDomain
+            {
+                Id = "business",
+                Name = "Business & Management",
+                Description = "Lead companies, manage budgets, and drive strategic growth",
+                Color = "bg-yellow-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=business",
+                DisplayOrder = 7,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CareerDomain
+            {
+                Id = "design",
+                Name = "Creative & Design",
+                Description = "Create stunning visual graphics, brands, and UI/UX",
+                Color = "bg-red-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=design",
+                DisplayOrder = 8,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CareerDomain
+            {
+                Id = "healthcare",
+                Name = "Healthcare & Medicine",
+                Description = "Treat patients, innovate medical research, and save lives",
+                Color = "bg-teal-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=healthcare",
+                DisplayOrder = 9,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new CareerDomain
+            {
+                Id = "education",
+                Name = "Education & Teaching",
+                Description = "Inspire students, foster learning, and cultivate growth",
+                Color = "bg-lime-500",
+                IconUrl = "https://api.dicebear.com/7.x/icons/svg?seed=education",
+                DisplayOrder = 10,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+    }
+
+    // Classes to deserialize the new curriculum JSON
+    private class JsonCurriculumDomain
+    {
+        public string domainId { get; set; } = string.Empty;
+        public List<JsonCurriculumSkill> skills { get; set; } = new();
+    }
+    private class JsonCurriculumSkill
+    {
+        public string id { get; set; } = string.Empty;
+        public string name { get; set; } = string.Empty;
+        public string description { get; set; } = string.Empty;
+        public string difficultyLevel { get; set; } = string.Empty;
+        public int xpReward { get; set; }
+        public int displayOrder { get; set; }
+        public List<JsonCurriculumStep> steps { get; set; } = new();
+    }
+    private class JsonCurriculumStep
+    {
+        public string id { get; set; } = string.Empty;
+        public string title { get; set; } = string.Empty;
+        public string description { get; set; } = string.Empty;
+        public int estimatedHours { get; set; }
+        public int stepNumber { get; set; }
+        public List<JsonCurriculumTopic> topics { get; set; } = new();
+    }
+    private class JsonCurriculumTopic
+    {
+        public string title { get; set; } = string.Empty;
+        public int displayOrder { get; set; }
+    }
+
+    private static List<JsonCurriculumDomain> LoadCurriculum()
+    {
+        var jsonFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "roadmap_curriculum.json");
+        if (!File.Exists(jsonFilePath))
+        {
+            throw new FileNotFoundException($"Curriculum file not found at {jsonFilePath}");
+        }
+
+        var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var fileContent = File.ReadAllText(jsonFilePath);
+        return JsonSerializer.Deserialize<List<JsonCurriculumDomain>>(fileContent, jsonOptions) ?? new List<JsonCurriculumDomain>();
+    }
+
+    private static List<Skill> SeedSkills(ApplicationDbContext context, List<CareerDomain> domains)
+    {
+        var skillsDb = new List<Skill>();
+        var curriculum = LoadCurriculum();
+
+        foreach (var cDomain in curriculum)
+        {
+            var domain = domains.FirstOrDefault(d => d.Id == cDomain.domainId);
+            if (domain == null) continue;
+
+            foreach (var cSkill in cDomain.skills)
+            {
+                skillsDb.Add(new Skill
+                {
+                    Id = cSkill.id,
+                    CareerDomainId = domain.Id,
+                    Name = cSkill.name,
+                    Description = cSkill.description,
+                    DifficultyLevel = cSkill.difficultyLevel,
+                    XPReward = cSkill.xpReward,
+                    DisplayOrder = cSkill.displayOrder,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+        }
+        return skillsDb;
+    }
+
+    private static List<RoadmapStep> SeedRoadmapSteps(ApplicationDbContext context, List<CareerDomain> domains, List<Skill> skills)
+    {
+        var stepsDb = new List<RoadmapStep>();
+        var curriculum = LoadCurriculum();
+
+        foreach (var cDomain in curriculum)
+        {
+            var domain = domains.FirstOrDefault(d => d.Id == cDomain.domainId);
+            if (domain == null) continue;
+
+            foreach (var cSkill in cDomain.skills)
+            {
+                var skill = skills.FirstOrDefault(s => s.Id == cSkill.id);
+                if (skill == null) continue;
+
+                foreach (var cStep in cSkill.steps)
+                {
+                    var roadmapStep = new RoadmapStep
+                    {
+                        Id = cStep.id,
+                        CareerDomainId = domain.Id,
+                        SkillId = skill.Id,
+                        Title = cStep.title,
+                        Description = cStep.description,
+                        StepNumber = cStep.stepNumber,
+                        EstimatedHours = cStep.estimatedHours,
+                        IsActive = true,
+                        Topics = new List<RoadmapTopic>()
+                    };
+
+                    foreach (var cTopic in cStep.topics)
+                    {
+                        roadmapStep.Topics.Add(new RoadmapTopic
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            ModuleId = roadmapStep.Id,
+                            Title = cTopic.title,
+                            DisplayOrder = cTopic.displayOrder,
+                            ResourceUrl = "https://developer.mozilla.org"
+                        });
+                    }
+                    
+                    stepsDb.Add(roadmapStep);
+                }
+            }
+        }
+
+        return stepsDb;
+    }
+
+    private class JsonQuizQuestion
+    {
+        public string id { get; set; } = string.Empty;
+        public string text { get; set; } = string.Empty;
+        public string category { get; set; } = string.Empty;
+        public List<JsonQuizOption> options { get; set; } = new();
+    }
+    
+    private class JsonQuizOption
+    {
+        public string id { get; set; } = string.Empty;
+        public string text { get; set; } = string.Empty;
+        public string domain { get; set; } = string.Empty;
+    }
+
+    private static (List<QuizQuestion>, List<QuizOption>) SeedQuiz(ApplicationDbContext context, List<CareerDomain> domains)
+    {
+        var questionsDb = new List<QuizQuestion>();
+        var optionsDb = new List<QuizOption>();
+
+        // Load questions from JSON file instead of hardcoding
+        var jsonFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "quiz_150_questions.json");
+        if (!File.Exists(jsonFilePath))
+        {
+            throw new FileNotFoundException($"Seed file not found at {jsonFilePath}");
+        }
+
+        var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var fileContent = File.ReadAllText(jsonFilePath);
+        var parsedQuestions = JsonSerializer.Deserialize<List<JsonQuizQuestion>>(fileContent, jsonOptions);
+
+        if (parsedQuestions == null) return (questionsDb, optionsDb);
+
+        int qOrder = 1;
+        foreach (var q in parsedQuestions)
+        {
+            var dbQ = new QuizQuestion 
+            { 
+                Id = q.id, 
+                Text = q.text, 
+                Category = q.category, 
+                DisplayOrder = qOrder++, 
+                IsActive = true, 
+                // Just arbitrary mapping for the schema requirement
+                CareerDomainId = domains[0].Id 
+            };
+            questionsDb.Add(dbQ);
+
+            int optOrder = 1;
+            foreach (var opt in q.options)
+            {
+                optionsDb.Add(new QuizOption 
+                { 
+                    Id = opt.id, 
+                    QuizQuestionId = dbQ.Id, 
+                    Text = opt.text,
+                    // Map the chosen domain with weight 1 (doesn't matter since we use ML now, but keeps old logic safe)
+                    DomainWeightJson = JsonSerializer.Serialize(new Dictionary<string, int> { { opt.domain, 1 } }), 
+                    DisplayOrder = optOrder++ 
+                });
+            }
+        }
+
+        return (questionsDb, optionsDb);
+    }
+
+    private static List<Badge> SeedBadges()
+    {
+        return new List<Badge>
+        {
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "First Steps", Description = "Complete your first skill", IconUrl = "👣", Rarity = "Common", XPRequired = 0, SkillsCompletedRequired = 1, IsActive = true },
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "Quick Learner", Description = "Complete 5 skills", IconUrl = "⚡", Rarity = "Rare", XPRequired = 0, SkillsCompletedRequired = 5, IsActive = true },
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "Skill Master", Description = "Complete 10 skills", IconUrl = "🏆", Rarity = "Epic", XPRequired = 0, SkillsCompletedRequired = 10, IsActive = true },
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "Legendary", Description = "Reach 500 XP", IconUrl = "👑", Rarity = "Legendary", XPRequired = 500, IsActive = true },
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "Domain Expert", Description = "Complete a full domain", IconUrl = "🔥", Rarity = "Epic", XPRequired = 100, IsActive = true }
+        };
+    }
+
+    private static List<ApplicationUser> SeedUsers()
+    {
+        var mentorNames = new[]
+        {
+            ("Sarah Chen", "Frontend Development", "UI/UX specialist with 10 years experience"),
+            ("Rajesh Kumar", "Backend Development", "Cloud architect and API design expert"),
+            ("Emily Watson", "Data Science", "ML engineer with focus on deep learning"),
+            ("Michael Johnson", "Full Stack Development", "MERN stack expert"),
+            ("Priya Sharma", "DevOps & Cloud", "AWS certified cloud architect"),
+            ("David Lee", "Mobile Development", "React Native and iOS developer"),
+            ("Jessica Brown", "Web3 & Blockchain", "Smart contracts and DeFi specialist"),
+            ("Alex Martinez", "System Design", "Distributed systems expert"),
+            ("Lisa Wang", "Security & Cryptography", "Cybersecurity specialist"),
+            ("James Wilson", "Game Development", "Unity and Unreal Engine expert")
+        };
+
+        var users = new List<ApplicationUser>
+        {
+            new ApplicationUser
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "student@example.com",
+                FullName = "John Learner",
+                Role = "Student",
+                Bio = "Aspiring developer learning web technologies",
+                Level = 1,
+                TotalXP = 0,
+                CurrentStreak = 0,
+                IsActive = true,
+                ProfileCompleted = false,
+                IsBlocked = false,
+                BlockedReason = null,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new ApplicationUser
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "admin@example.com",
+                FullName = "Admin User",
+                Role = "Admin",
+                Level = 20,
+                TotalXP = 5000,
+                IsActive = true,
+                ProfileCompleted = true,
+                IsBlocked = false,
+                BlockedReason = null,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        // Create mentor users with diverse specializations
+        foreach (var (name, specialty, bio) in mentorNames)
+        {
+            users.Add(new ApplicationUser
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = $"{name.ToLower().Replace(" ", ".")}@mentors.com",
+                FullName = name,
+                Role = "Mentor",
+                Bio = bio,
+                Level = 10,
+                TotalXP = 2000,
+                CurrentStreak = 30,
+                IsActive = true,
+                ProfileCompleted = true,
+                IsBlocked = false,
+                BlockedReason = null,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+        }
+
+        return users;
+    }
+
+    private static List<ApplicationMentor> SeedMentors(ApplicationDbContext context, List<ApplicationUser> mentorUsers)
+    {
+        var mentorSpecializations = new Dictionary<string, (string expertise, string skills, string company, decimal rate, double rating)>
+        {
+            { "Sarah Chen", ("Frontend Development", "React,JavaScript,CSS,TypeScript", "TechCorp", 60, 4.9) },
+            { "Rajesh Kumar", ("Backend Development", "Node.js,Python,Docker,Kubernetes", "CloudInnovate", 70, 4.7) },
+            { "Emily Watson", ("Data Science", "Python,TensorFlow,pandas,scikit-learn", "DataAI Labs", 80, 4.8) },
+            { "Michael Johnson", ("Full Stack Development", "React,Node.js,MongoDB,Express", "WebDev Solutions", 55, 4.6) },
+            { "Priya Sharma", ("DevOps & Cloud", "AWS,Azure,Terraform,CI/CD", "CloudOps Inc", 75, 4.9) },
+            { "David Lee", ("Mobile Development", "React Native,Swift,Kotlin,Flutter", "MobileWorks", 65, 4.7) },
+            { "Jessica Brown", ("Web3 & Blockchain", "Solidity,Ethereum,Web3.js,Smart Contracts", "BlockchainHub", 90, 4.8) },
+            { "Alex Martinez", ("System Design", "Microservices,Distributed Systems,C++", "SystemsDesign Co", 85, 4.9) },
+            { "Lisa Wang", ("Security & Cryptography", "Cybersecurity,Ethical Hacking,Cryptography", "SecureCode Inc", 95, 4.8) },
+            { "James Wilson", ("Game Development", "Unity,Unreal,C#,GameDesign", "GameStudio Pro", 70, 4.7) }
+        };
+
+        return mentorUsers
+            .Where(u => u.Role == "Mentor")
+            .Select(user =>
+            {
+                var (expertise, skills, company, rate, rating) = mentorSpecializations.ContainsKey(user.FullName)
+                    ? mentorSpecializations[user.FullName]
+                    : ("Full Stack Development", "C#,ASP.NET Core,React,SQL", "SkillScape Labs", 50, 4.5);
+
+                return new ApplicationMentor
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserId = user.Id,
+                    Expertise = expertise,
+                    ExpertiseArea = expertise,
+                    CurrentCompany = company,
+                    Bio = user.Bio,
+                    SkillsCsv = skills,
+                    LinkedInUrl = $"https://linkedin.com/in/{user.FullName.ToLower().Replace(" ", "-")}",
+                    AvailabilitySchedule = "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday",
+                    YearsOfExperience = new Random().Next(3, 15),
+                    HourlyRate = rate,
+                    SessionPrice = rate,
+                    IsAvailable = true,
+                    TotalSessionCount = new Random().Next(10, 100),
+                    AvgRating = rating,
+                    IsApproved = true,
+                    ApprovedByAdminId = null,
+                    ApprovedAt = DateTime.UtcNow,
+                    RejectionReason = null,
+                    CreatedAt = DateTime.UtcNow
+                };
+            }).ToList();
+    }
+
+    private static List<MentorshipProgress> SeedMentorshipProgress(ApplicationDbContext context, List<ApplicationUser> users, List<ApplicationMentor> mentors)
+    {
+        var mentorshipProgresses = new List<MentorshipProgress>();
+        var studentUsers = users.Where(u => u.Role == "Student").ToList();
+        
+        if (studentUsers.Count == 0)
+            return mentorshipProgresses;
+
+        var random = new Random();
+        var roadmapStages = new[] { "Basics", "Fundamentals", "Intermediate", "Advanced", "Expert", "Mastery" };
+        var tasks = new[] 
+        { 
+            "Complete beginner course, Learn syntax, Build first project",
+            "Build 2 projects, Contribute to open source, Review code",
+            "Advanced design patterns, System design, Mentoring skills",
+            "Build scalable application, Deploy to production, Optimize performance",
+            "Write technical blog, Create course content, Lead team",
+            "Expert level, Industry recognition, Multiple achievements"
+        };
+
+        // Get existing entries to avoid duplicates
+        var existingEntries = context.MentorshipProgressEntries
+            .Select(e => new { e.StudentId, e.RoadmapStage })
+            .ToHashSet();
+
+        // Create mentorship progress for each mentor
+        foreach (var mentor in mentors)
+        {
+            // Each mentor mentors 2-5 students
+            int studentCount = Math.Min(random.Next(2, 6), studentUsers.Count);
+            var assignedStudents = studentUsers.OrderBy(x => random.Next()).Take(studentCount).ToList();
+
+            foreach (var student in assignedStudents)
+            {
+                // Pick stages that don't already exist for this student
+                var availableStages = roadmapStages
+                    .Where(stage => !existingEntries.Contains(new { StudentId = student.Id, RoadmapStage = stage }))
+                    .ToList();
+
+                if (availableStages.Count == 0)
+                    continue; // Skip if all stages already assigned to this student
+
+                var stage = availableStages[random.Next(availableStages.Count)];
+                
+                mentorshipProgresses.Add(new MentorshipProgress
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    StudentId = student.Id,
+                    MentorId = mentor.Id,
+                    RoadmapStage = stage,
+                    MentorFeedback = $"Great progress on {stage}! Keep practicing and building projects.",
+                    CompletedTasks = tasks[random.Next(tasks.Length)],
+                    NextMilestone = roadmapStages[(Array.IndexOf(roadmapStages, stage) + 1) % roadmapStages.Length],
+                    UpdatedAt = DateTime.UtcNow.AddDays(-random.Next(0, 30))
+                });
+
+                // Track the new entry
+                existingEntries.Add(new { StudentId = student.Id, RoadmapStage = stage });
+            }
+        }
+
+        return mentorshipProgresses;
+    }
+
+    private static async Task SeedCareerPathsAsync(ApplicationDbContext context)
+    {
+        // Clear existing to refresh seeder data
+        if (context.UserCareerProfiles.Any())
+        {
+            context.UserCareerProfiles.RemoveRange(context.UserCareerProfiles);
+            await context.SaveChangesAsync();
+        }
+        if (context.CareerPaths.Any())
+        {
+            context.CareerPaths.RemoveRange(context.CareerPaths);
+            await context.SaveChangesAsync();
+        }
+
+        var allPaths = new List<CareerPath>();
+
+        // Level 1: Core Streams (6 nodes)
+        var streams = new[]
+        {
+            new { Id = "sci-lvl1", Title = "Science Stream", Desc = "Focuses on scientific method, critical thinking, logic, and physical/biological systems.", Tags = "science,tech,healthcare", StreamType = "After10th, After12th, AfterGraduation", Icon = "flask", Color = "blue" },
+            new { Id = "com-lvl1", Title = "Commerce Stream", Desc = "Focuses on business, finance, accounting, taxation, and markets.", Tags = "commerce,business,finance", StreamType = "After10th, After12th, AfterGraduation", Icon = "banknote", Color = "green" },
+            new { Id = "art-lvl1", Title = "Arts & Humanities", Desc = "Focuses on human culture, creative writing, history, design, and media.", Tags = "arts,creative,humanities", StreamType = "After10th, After12th, AfterGraduation", Icon = "palette", Color = "purple" },
+            new { Id = "dip-lvl1", Title = "Polytechnic & Diploma Stream", Desc = "Hands-on technical education, engineering diplomas, and vocational training fields.", Tags = "diploma,tech,polytech,vocational", StreamType = "After10th, After12th, AfterGraduation", Icon = "briefcase", Color = "amber" },
+            new { Id = "swi-lvl1", Title = "Career Switch & Transition", Desc = "Focuses on retraining and transition fields for working professionals.", Tags = "switch,tech,business,creative", StreamType = "AfterGraduation, CareerSwitch", Icon = "git-pull-request", Color = "rose" },
+            new { Id = "enh-lvl1", Title = "Skill Enhancement", Desc = "Focuses on modern micro-credentials, certifications, and upskilling tracks.", Tags = "skill,tech,business,future", StreamType = "AfterGraduation, SkillEnhancement", Icon = "trending-up", Color = "cyan" }
+        };
+
+        foreach (var s in streams)
+        {
+            var p1 = new CareerPath
+            {
+                Id = s.Id,
+                Title = s.Title,
+                Description = s.Desc,
+                Level = 1,
+                ParentCareerId = null,
+                StreamType = s.StreamType,
+                Tags = s.Tags,
+                FutureScope = "High demand in " + s.Title + " driven by global trends and industry growth.",
+                DemandIndex = 80.0,
+                Icon = s.Icon,
+                Color = s.Color,
+                SkillsRequired = "[\"Basic Logic\", \"Communication\"]",
+                SalaryDataJson = "{\"Starting\": 300000, \"Mid-Career\": 700000, \"Senior\": 1500000}",
+                IndustryGrowth = 10.0,
+                RoadmapJson = "[{\"phase\":\"Foundations\",\"duration\":\"1-2 Years\",\"topics\":[\"Basic concepts of " + s.Title + "\"],\"projectSuggestion\":\"Create a simple report detailing introductory topics.\"}]",
+                Certifications = "None",
+                Colleges = "Various local institutes",
+                WhatYouWillStudy = "Introduction to core principles of " + s.Title,
+                RecommendedSubjects = "[\"Language\", \"Mathematics\"]",
+                TopCompanies = "[\"General Enterprises\"]",
+                RequiredDegrees = "[\"Secondary School Certificate\"]",
+                WorkEnvironment = "Office",
+                RemoteWorkPossibility = 20.0,
+                EntrepreneurshipPotential = 30.0,
+                CareerFlexibility = 40.0,
+                LearningResources = "[\"Standard textbooks\"]",
+                YoutubeResources = "[\"Introductory educational channels\"]",
+                RoadmapTimeline = "1-2 Years",
+                DifficultyLevel = "Medium",
+                PersonalityMatch = "ESTJ, ESFJ",
+                RelatedCareerIds = "",
+                AutomationRisk = 25.0
+            };
+            allPaths.Add(p1);
+
+            // Level 2: Subdomains (5 per stream)
+            for (int i = 1; i <= 5; i++)
+            {
+                string sTitle = GetSubdomainTitle(s.Id, i);
+                string sTag = GetSubdomainTag(s.Id, i);
+                string sdId = $"{s.Id}-sd{i}";
+
+                var p2 = new CareerPath
+                {
+                    Id = sdId,
+                    Title = sTitle,
+                    Description = "Gateway domain focusing on " + sTitle + " theoretical and practical aspects.",
+                    Level = 2,
+                    ParentCareerId = s.Id,
+                    StreamType = s.StreamType,
+                    Tags = s.Tags + "," + sTag,
+                    FutureScope = "Gateway for specialized studies in " + sTitle + ".",
+                    DemandIndex = 82.0,
+                    Icon = s.Icon,
+                    Color = s.Color,
+                    SkillsRequired = "[\"Problem Solving\", \"Data Interpretation\"]",
+                    SalaryDataJson = "{\"Starting\": 350000, \"Mid-Career\": 800000, \"Senior\": 1800000}",
+                    IndustryGrowth = 11.0,
+                    RoadmapJson = "[{\"phase\":\"Subdomain Core\",\"duration\":\"1 Year\",\"topics\":[\"Fundamentals of " + sTitle + "\"],\"projectSuggestion\":\"Build a case study analyzing " + sTitle + ".\"}]",
+                    Certifications = "Foundational certificates",
+                    Colleges = "State universities",
+                    WhatYouWillStudy = "Intermediate concepts of " + sTitle,
+                    RecommendedSubjects = "[\"Domain basics\"]",
+                    TopCompanies = "[\"Industry Leaders\"]",
+                    RequiredDegrees = "[\"Higher Secondary School Certificate\"]",
+                    WorkEnvironment = "Office",
+                    RemoteWorkPossibility = 30.0,
+                    EntrepreneurshipPotential = 35.0,
+                    CareerFlexibility = 45.0,
+                    LearningResources = "[\"Online tutorials\", \"Industry blogs\"]",
+                    YoutubeResources = "[\"Disciplinary channels\"]",
+                    RoadmapTimeline = "2 Years",
+                    DifficultyLevel = "Medium",
+                    PersonalityMatch = "INTJ, ISTJ",
+                    RelatedCareerIds = "",
+                    AutomationRisk = 20.0
+                };
+                allPaths.Add(p2);
+
+                // Level 3: Fields (3 per subdomain)
+                for (int j = 1; j <= 3; j++)
+                {
+                    string fTitle = GetFieldTitle(sdId, j);
+                    string fTag = GetFieldTag(sdId, j);
+                    string fId = $"{sdId}-f{j}";
+
+                    var p3 = new CareerPath
+                    {
+                        Id = fId,
+                        Title = fTitle,
+                        Description = "Applied study and practice of " + fTitle + " in modern industry.",
+                        Level = 3,
+                        ParentCareerId = sdId,
+                        StreamType = s.StreamType,
+                        Tags = p2.Tags + "," + fTag,
+                        FutureScope = "Expanding scope in " + fTitle + " driven by modern innovation.",
+                        DemandIndex = 85.0,
+                        Icon = "cpu",
+                        Color = s.Color,
+                        SkillsRequired = "[\"Core tools\", \"Logical flow\"]",
+                        SalaryDataJson = "{\"Starting\": 450000, \"Mid-Career\": 1000000, \"Senior\": 2200000}",
+                        IndustryGrowth = 12.5,
+                        RoadmapJson = "[{\"phase\":\"Core Field\",\"duration\":\"1 Year\",\"topics\":[\"Core topics in " + fTitle + "\"],\"projectSuggestion\":\"Deploy a prototype applying " + fTitle + " logic.\"}]",
+                        Certifications = "Professional level certificates",
+                        Colleges = "Top regional colleges",
+                        WhatYouWillStudy = "Core professional aspects of " + fTitle,
+                        RecommendedSubjects = "[\"Specialized domain\"]",
+                        TopCompanies = "[\"TechCorp\", \"FinSolutions\", \"DesignStudio\"]",
+                        RequiredDegrees = "[\"Bachelor's Degree\"]",
+                        WorkEnvironment = "Hybrid",
+                        RemoteWorkPossibility = 45.0,
+                        EntrepreneurshipPotential = 50.0,
+                        CareerFlexibility = 55.0,
+                        LearningResources = "[\"Professional manuals\", \"Online courses\"]",
+                        YoutubeResources = "[\"Technical tutorials\"]",
+                        RoadmapTimeline = "3-4 Years",
+                        DifficultyLevel = "Hard",
+                        PersonalityMatch = "INFJ, ENFP",
+                        RelatedCareerIds = "",
+                        AutomationRisk = 15.0
+                    };
+                    allPaths.Add(p3);
+
+                    // Level 4: Specializations (3 per field)
+                    for (int k = 1; k <= 3; k++)
+                    {
+                        string spTitle = GetSpecializationTitle(fId, k);
+                        string spTag = GetSpecializationTag(fId, k);
+                        string spId = $"{fId}-s{k}";
+
+                        var p4 = new CareerPath
+                        {
+                            Id = spId,
+                            Title = spTitle,
+                            Description = "Specialized career track focusing on advanced skills in " + spTitle + ".",
+                            Level = 4,
+                            ParentCareerId = fId,
+                            StreamType = s.StreamType,
+                            Tags = p3.Tags + "," + spTag,
+                            FutureScope = "Highly sought-after specialization with rising job opportunities.",
+                            DemandIndex = 90.0,
+                            Icon = "code",
+                            Color = s.Color,
+                            SkillsRequired = "[\"Advanced tools\", \"Systems build\"]",
+                            SalaryDataJson = "{\"Starting\": 550000, \"Mid-Career\": 1200000, \"Senior\": 2500000}",
+                            IndustryGrowth = 14.5,
+                            RoadmapJson = "[{\"phase\":\"Specialized concepts\",\"duration\":\"6 Months\",\"topics\":[\"Advanced systems in " + spTitle + "\"],\"projectSuggestion\":\"Build a complex production-ready application of " + spTitle + ".\"}]",
+                            Certifications = "Industry standard credentials",
+                            Colleges = "National level institutes",
+                            WhatYouWillStudy = "Advanced practices in " + spTitle,
+                            RecommendedSubjects = "[\"System theory\"]",
+                            TopCompanies = "[\"Google\", \"Microsoft\", \"Meta\", \"Amazon\"]",
+                            RequiredDegrees = "[\"Bachelor's / Master's Degree\"]",
+                            WorkEnvironment = "Hybrid",
+                            RemoteWorkPossibility = 60.0,
+                            EntrepreneurshipPotential = 60.0,
+                            CareerFlexibility = 65.0,
+                            LearningResources = "[\"Advanced textbooks\", \"Research papers\"]",
+                            YoutubeResources = "[\"Industry expert channels\"]",
+                            RoadmapTimeline = "4 Years",
+                            DifficultyLevel = "Hard",
+                            PersonalityMatch = "INTP, INTJ",
+                            RelatedCareerIds = "",
+                            AutomationRisk = 10.0
+                        };
+                        allPaths.Add(p4);
+
+                        // Level 5: Job Roles (4 per specialization)
+                        for (int m = 1; m <= 4; m++)
+                        {
+                            string rTitle = GetJobRoleTitle(spId, m);
+                            string rTag = GetJobRoleTag(spId, m);
+                            string rId = $"{spId}-r{m}";
+
+                            var p5 = new CareerPath
+                            {
+                                Id = rId,
+                                Title = rTitle,
+                                Description = "Elite production role. Responsible for delivery, architecture, and scaling of " + rTitle + " solutions.",
+                                Level = 5,
+                                ParentCareerId = spId,
+                                StreamType = s.StreamType,
+                                Tags = p4.Tags + "," + rTag,
+                                FutureScope = "Top tier job role with high market demand and excellent long term growth.",
+                                DemandIndex = 95.0,
+                                Icon = "sparkles",
+                                Color = s.Color,
+                                SkillsRequired = "[\"Expert tools\", \"Scaling infrastructure\", \"System architecture\"]",
+                                SalaryDataJson = "{\"Starting\": 700000, \"Mid-Career\": 1500000, \"Senior\": 3000000}",
+                                IndustryGrowth = 18.5,
+                                RoadmapJson = "[{\"phase\":\"Job Preparation\",\"duration\":\"3-6 Months\",\"topics\":[\"Practical deployment of " + rTitle + "\"],\"projectSuggestion\":\"Deploy a public-facing system demonstrating expert-level implementation of " + rTitle + ".\"}]",
+                                Certifications = "Professional expert certifications",
+                                Colleges = "IITs, IIMs, IISc, top global universities",
+                                WhatYouWillStudy = "Industrial workflows and production scaling for " + rTitle,
+                                RecommendedSubjects = "[\"Advanced Industry Workflows\"]",
+                                TopCompanies = "[\"Top Tech MNCs\", \"Fortune 500 Enterprises\"]",
+                                RequiredDegrees = "[\"B.Tech/M.Tech\", \"B.Sc/M.Sc\", \"MBA\"]",
+                                WorkEnvironment = "Remote",
+                                RemoteWorkPossibility = 80.0,
+                                EntrepreneurshipPotential = 70.0,
+                                CareerFlexibility = 75.0,
+                                LearningResources = "[\"Documentation sites\", \"Expert courses\", \"Case studies\"]",
+                                YoutubeResources = "[\"Tech conferences\", \"Project walkthrough channels\"]",
+                                RoadmapTimeline = "4-5 Years",
+                                DifficultyLevel = "Extremely Hard",
+                                PersonalityMatch = "INTJ, ENTJ, ENTP",
+                                RelatedCareerIds = "",
+                                AutomationRisk = 5.0
+                            };
+                            allPaths.Add(p5);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Set RelatedCareerIds based on sibling nodes in level 5 or level 4
+        var level5Paths = allPaths.Where(p => p.Level == 5).ToList();
+        for (int i = 0; i < level5Paths.Count; i++)
+        {
+            var p = level5Paths[i];
+            var siblings = level5Paths.Where(x => x.ParentCareerId == p.ParentCareerId && x.Id != p.Id).Select(x => x.Id).ToList();
+            p.RelatedCareerIds = string.Join(",", siblings);
+        }
+
+        // Save in batches to make Entity Framework seeding blazing fast
+        context.ChangeTracker.AutoDetectChangesEnabled = false;
+        int batchSize = 100;
+        for (int i = 0; i < allPaths.Count; i += batchSize)
+        {
+            var batch = allPaths.Skip(i).Take(batchSize);
+            context.CareerPaths.AddRange(batch);
+            await context.SaveChangesAsync();
+        }
+        context.ChangeTracker.AutoDetectChangesEnabled = true;
+    }
+
+    private static string GetSubdomainTitle(string streamId, int index)
+    {
+        string p = streamId.Split('-')[0];
+        if (p == "sci")
+        {
+            return index switch {
+                1 => "PCM (Physics, Chemistry, Maths)",
+                2 => "PCB (Physics, Chemistry, Biology)",
+                3 => "Biotechnology & Genetics",
+                4 => "Environmental & Climate Sciences",
+                _ => "Astronomy & Astrophysics"
+            };
+        }
+        if (p == "com")
+        {
+            return index switch {
+                1 => "Financial Markets & Banking",
+                2 => "Corporate Accounting & Tax",
+                3 => "Business Management & Operations",
+                4 => "E-Commerce & Digital Trade",
+                _ => "International Trade & Economics"
+            };
+        }
+        if (p == "art")
+        {
+            return index switch {
+                1 => "Visual Arts & Graphic Design",
+                2 => "Humanities & Social Sciences",
+                3 => "Journalism & Mass Media",
+                4 => "Law & Legal Studies",
+                _ => "Creative Writing & Literature"
+            };
+        }
+        if (p == "dip")
+        {
+            return index switch {
+                1 => "Polytechnic Engineering",
+                2 => "Medical Lab Technology",
+                3 => "Vocational Trades",
+                4 => "Office Administration & Helpdesk",
+                _ => "Logistics & Warehouse Operations"
+            };
+        }
+        if (p == "swi")
+        {
+            return index switch {
+                1 => "Switching to Software Engineering",
+                2 => "Switching to Project Management",
+                3 => "Switching to UI/UX Design",
+                4 => "Switching to Digital Content",
+                _ => "Switching to Education"
+            };
+        }
+        // enh
+        return index switch {
+            1 => "Advanced Coding & Scaling",
+            2 => "Product & Team Leadership",
+            3 => "AI & Machine Learning Systems",
+            4 => "Corporate Sales & Negotiation",
+            _ => "Emerging Future Careers"
+        };
+    }
+
+    private static string GetSubdomainTag(string streamId, int index)
+    {
+        string p = streamId.Split('-')[0];
+        return $"{p}-sd{index}";
+    }
+
+    private static string GetFieldTitle(string subdomainId, int index)
+    {
+        var parts = subdomainId.Split('-');
+        string stream = parts[0];
+        int sdIdx = int.Parse(parts[2].Replace("sd", ""));
+
+        if (stream == "sci")
+        {
+            if (sdIdx == 1)
+            {
+                return index switch {
+                    1 => "Computer Science & IT",
+                    2 => "Aerospace & Mechanical Eng",
+                    _ => "Civil & Structural Eng"
+                };
+            }
+            if (sdIdx == 2)
+            {
+                return index switch {
+                    1 => "Clinical Medicine",
+                    2 => "Pharmaceutical Sciences",
+                    _ => "Microbiology & Pathology"
+                };
+            }
+            if (sdIdx == 3)
+            {
+                return index switch {
+                    1 => "Genetics Research",
+                    2 => "Bioinformatics",
+                    _ => "Agricultural Biotech"
+                };
+            }
+            if (sdIdx == 4)
+            {
+                return index switch {
+                    1 => "Ecology & Climate Policy",
+                    2 => "Geological Surveys",
+                    _ => "Renewable Energy Systems"
+                };
+            }
+            return index switch {
+                1 => "Astrophysics Research",
+                2 => "Satellite Systems",
+                _ => "Space Exploration Tech"
+            };
+        }
+
+        if (stream == "com")
+        {
+            if (sdIdx == 1)
+            {
+                return index switch {
+                    1 => "Investment Banking",
+                    2 => "Stock Trading & Brokerage",
+                    _ => "Risk Management"
+                };
+            }
+            if (sdIdx == 2)
+            {
+                return index switch {
+                    1 => "Statutory Auditing",
+                    2 => "Corporate Taxation",
+                    _ => "Cost Accountancy"
+                };
+            }
+            if (sdIdx == 3)
+            {
+                return index switch {
+                    1 => "Operations & Logistics",
+                    2 => "Human Resources",
+                    _ => "Marketing & Brand Strategy"
+                };
+            }
+            if (sdIdx == 4)
+            {
+                return index switch {
+                    1 => "Digital Store Operations",
+                    2 => "E-Commerce Marketing",
+                    _ => "Payment Systems"
+                };
+            }
+            return index switch {
+                1 => "Global Supply Chains",
+                2 => "Trade Economics",
+                _ => "Customs compliance"
+            };
+        }
+
+        if (stream == "art")
+        {
+            if (sdIdx == 1)
+            {
+                return index switch {
+                    1 => "UI/UX & Product Design",
+                    2 => "3D Animation",
+                    _ => "Graphic Design"
+                };
+            }
+            if (sdIdx == 2)
+            {
+                return index switch {
+                    1 => "Sociology & Research",
+                    2 => "Political Science",
+                    _ => "Archeological Surveys"
+                };
+            }
+            if (sdIdx == 3)
+            {
+                return index switch {
+                    1 => "Broadcast Journalism",
+                    2 => "Copywriting & SEO",
+                    _ => "Public Relations"
+                };
+            }
+            if (sdIdx == 4)
+            {
+                return index switch {
+                    1 => "Corporate Law",
+                    2 => "Criminal Litigation",
+                    _ => "Intellectual Property"
+                };
+            }
+            return index switch {
+                1 => "Novel Writing",
+                2 => "Creative Copywriting",
+                _ => "Poetry & Publishing"
+            };
+        }
+
+        if (stream == "dip")
+        {
+            if (sdIdx == 1)
+            {
+                return index switch {
+                    1 => "Electrical Trades",
+                    2 => "Mechanical Lathes",
+                    _ => "CAD Drafting"
+                };
+            }
+            if (sdIdx == 2)
+            {
+                return index switch {
+                    1 => "Blood Diagnostics",
+                    2 => "Pathology Lab",
+                    _ => "Medical Scans"
+                };
+            }
+            if (sdIdx == 3)
+            {
+                return index switch {
+                    1 => "Heavy Welding",
+                    2 => "Commercial Plumbing",
+                    _ => "HVAC Systems"
+                };
+            }
+            if (sdIdx == 4)
+            {
+                return index switch {
+                    1 => "IT helpdesk Support",
+                    2 => "Office Clerical",
+                    _ => "Front Desk Ops"
+                };
+            }
+            return index switch {
+                1 => "Fleet Shipping",
+                2 => "Warehouse Logistics",
+                _ => "Inventory Operations"
+            };
+        }
+
+        if (stream == "swi")
+        {
+            if (sdIdx == 1)
+            {
+                return index switch {
+                    1 => "Frontend bootcamps",
+                    2 => "Backend systems",
+                    _ => "QA & Automated Testing"
+                };
+            }
+            if (sdIdx == 2)
+            {
+                return index switch {
+                    1 => "Scrum Mastery",
+                    2 => "Product Roadmapping",
+                    _ => "Client Communications"
+                };
+            }
+            if (sdIdx == 3)
+            {
+                return index switch {
+                    1 => "Figma Wireframes",
+                    2 => "User Research",
+                    _ => "Aesthetics & Colors"
+                };
+            }
+            if (sdIdx == 4)
+            {
+                return index switch {
+                    1 => "Technical writing",
+                    2 => "Social copy write",
+                    _ => "Editing layouts"
+                };
+            }
+            return index switch {
+                1 => "Online teaching",
+                2 => "Course planning",
+                _ => "Student operations"
+            };
+        }
+
+        if (sdIdx == 1)
+        {
+            return index switch {
+                1 => "System Architectures",
+                2 => "Microservices API",
+                _ => "Database Scaling"
+            };
+        }
+        if (sdIdx == 2)
+        {
+            return index switch {
+                1 => "Agile Frameworks",
+                2 => "MBA Strategy",
+                _ => "Executive Consulting"
+            };
+        }
+        if (sdIdx == 3)
+        {
+            return index switch {
+                1 => "LLM API Integrations",
+                2 => "Neural Models",
+                _ => "Python Data Science"
+            };
+        }
+        if (sdIdx == 4)
+        {
+            return index switch {
+                1 => "Client Presentations",
+                2 => "B2B Sales Operations",
+                _ => "Contract Negotiations"
+            };
+        }
+        return index switch {
+            1 => "Future tech forecasting",
+            2 => "Sustainability consulting",
+            _ => "Emerging Roles Strategy"
+        };
+    }
+
+    private static string GetFieldTag(string subdomainId, int index)
+    {
+        return subdomainId + "-f" + index;
+    }
+
+    private static string GetSpecializationTitle(string fieldId, int index)
+    {
+        var parts = fieldId.Split('-');
+        string stream = parts[0];
+        int sdIdx = int.Parse(parts[2].Replace("sd", ""));
+        int fIdx = int.Parse(parts[3].Replace("f", ""));
+
+        string baseTitle = GetFieldTitle($"{parts[0]}-lvl1-sd{sdIdx}", fIdx);
+        return index switch {
+            1 => $"{baseTitle} - Advanced Spec",
+            2 => $"{baseTitle} - Applied Practice",
+            _ => $"{baseTitle} - Research & Design"
+        };
+    }
+
+    private static string GetSpecializationTag(string fieldId, int index)
+    {
+        return fieldId + "-s" + index;
+    }
+
+    private static string GetJobRoleTitle(string specId, int index)
+    {
+        var parts = specId.Split('-');
+        string stream = parts[0];
+        int sdIdx = int.Parse(parts[2].Replace("sd", ""));
+        int fIdx = int.Parse(parts[3].Replace("f", ""));
+        int sIdx = int.Parse(parts[4].Replace("s", ""));
+
+        if (stream == "sci" && sdIdx == 1 && fIdx == 1 && sIdx == 1)
+        {
+            return index switch {
+                1 => "AI Engineer",
+                2 => "Full Stack Developer",
+                3 => "DevOps Engineer",
+                _ => "Mobile App Developer"
+            };
+        }
+        if (stream == "com" && sdIdx == 1 && fIdx == 1 && sIdx == 1)
+        {
+            return index switch {
+                1 => "Investment Banker",
+                2 => "Venture Capitalist",
+                3 => "M&A Specialist",
+                _ => "Private Equity Analyst"
+            };
+        }
+        if (stream == "art" && sdIdx == 1 && fIdx == 1 && sIdx == 1)
+        {
+            return index switch {
+                1 => "UI/UX Designer",
+                2 => "Product Designer",
+                3 => "Visual System Architect",
+                _ => "Interaction Designer"
+            };
+        }
+
+        string baseTitle = GetSpecializationTitle($"{parts[0]}-lvl1-sd{sdIdx}-f{fIdx}", sIdx);
+        string cleanBase = baseTitle.Replace(" - Advanced Spec", "").Replace(" - Applied Practice", "").Replace(" - Research & Design", "");
+        return index switch {
+            1 => $"Lead {cleanBase} Engineer",
+            2 => $"Senior {cleanBase} Consultant",
+            3 => $"{cleanBase} Architect",
+            _ => $"{cleanBase} Analyst"
+        };
+    }
+
+    private static string GetJobRoleTag(string specId, int index)
+    {
+        return specId + "-r" + index;
+    }
+
+    private static async Task SeedHierarchicalQuizQuestionsAsync(ApplicationDbContext context)
+    {
+        if (context.HierarchicalQuizQuestions.Any())
+        {
+            context.HierarchicalQuizQuestions.RemoveRange(context.HierarchicalQuizQuestions);
+            await context.SaveChangesAsync();
+        }
+
+        var paths = await context.CareerPaths.ToListAsync();
+        var questionsList = new List<HierarchicalQuizQuestion>();
+
+        // Seed 3 base Level 1 questions
+        var level1Questions = new List<HierarchicalQuizQuestion>
+        {
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-1",
+                QuestionText = "Which academic discipline or domain of work excites you the most when reading news or blogs?",
+                HierarchyLevel = 1,
+                StreamType = "After10th, After12th, AfterGraduation, CareerSwitch, SkillEnhancement",
+                AptitudeType = "Interest",
+                TargetCareerTags = "science,commerce,arts,diploma",
+                OptionsJson = "[" +
+                              "{\"text\": \"Scientific inventions, engineering marvels, or medical discoveries.\", \"weights\": {\"science\": 3, \"pcm\": 2, \"pcb\": 2}, \"nextLevelTags\": \"science\"}," +
+                              "{\"text\": \"Stock markets, finance trends, corporate mergers, or startups.\", \"weights\": {\"commerce\": 3, \"finance\": 2, \"management\": 2}, \"nextLevelTags\": \"commerce\"}," +
+                              "{\"text\": \"Graphic designs, legal analyses, media reporting, or writing.\", \"weights\": {\"arts\": 3, \"creative\": 2, \"law\": 2}, \"nextLevelTags\": \"arts\"}," +
+                              "{\"text\": \"Practical hands-on repairs, workshop machines, or technical polytechnics.\", \"weights\": {\"diploma\": 3, \"polytech\": 2, \"vocational\": 2}, \"nextLevelTags\": \"diploma\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-3",
+                QuestionText = "How do you naturally approach problem solving or task organization?",
+                HierarchyLevel = 1,
+                StreamType = "After10th, After12th, AfterGraduation, CareerSwitch, SkillEnhancement",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "science,commerce,arts,diploma",
+                OptionsJson = "[" +
+                              "{\"text\": \"By collecting data, analyzing equations, and modeling logical steps.\", \"weights\": {\"science\": 3, \"pcm\": 2}, \"nextLevelTags\": \"science\"}," +
+                              "{\"text\": \"By measuring cash flows, estimating risk, and negotiating resource allocation.\", \"weights\": {\"commerce\": 3, \"finance\": 2}, \"nextLevelTags\": \"commerce\"}," +
+                              "{\"text\": \"By evaluating emotional response, visual aesthetics, and cultural impact.\", \"weights\": {\"arts\": 3, \"creative\": 2}, \"nextLevelTags\": \"arts\"}," +
+                              "{\"text\": \"By physically disassembling the device, testing parts, and repairing manually.\", \"weights\": {\"diploma\": 3, \"polytech\": 2}, \"nextLevelTags\": \"diploma\"}" +
+                              "]"
+            }
+        };
+        questionsList.AddRange(level1Questions);
+
+        // For each career path at Level 2, 3, 4, 5, generate 9 questions
+        var targetPaths = paths.Where(p => p.Level >= 2).ToList();
+
+        foreach (var path in targetPaths)
+        {
+            var pathTags = path.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            string primaryTag = pathTags.LastOrDefault() ?? "general";
+
+            // Generate 3 Interest questions
+            for (int i = 1; i <= 3; i++)
+            {
+                questionsList.Add(new HierarchicalQuizQuestion
+                {
+                    Id = $"hq-g-{path.Id}-i{i}",
+                    QuestionText = $"Regarding {path.Title}, what aspect of interest excites you the most (Scenario {i})?",
+                    HierarchyLevel = path.Level,
+                    StreamType = path.StreamType,
+                    AptitudeType = "Interest",
+                    TargetCareerTags = primaryTag,
+                    OptionsJson = "[" +
+                                  $"{{\"text\": \"Deep diving into core {path.Title} workflows and mastering its details.\", \"weights\": {{\"{primaryTag}\": 5}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
+                                  $"{{\"text\": \"Coordinating high-level strategies surrounding {path.Title}.\", \"weights\": {{\"{primaryTag}\": 3}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
+                                  $"{{\"text\": \"Working on visual layout designs and aesthetics for {path.Title}.\", \"weights\": {{\"creative\": 2, \"design\": 2}}, \"nextLevelTags\": \"design\"}}," +
+                                  $"{{\"text\": \"Dealing with basic system setups, network routers, and support.\", \"weights\": {{\"diploma\": 2, \"tech\": 2}}, \"nextLevelTags\": \"diploma\"}}" +
+                                  "]"
+                });
+            }
+
+            // Generate 3 WorkStyle questions
+            for (int i = 1; i <= 3; i++)
+            {
+                questionsList.Add(new HierarchicalQuizQuestion
+                {
+                    Id = $"hq-g-{path.Id}-w{i}",
+                    QuestionText = $"In a day-to-day role in {path.Title}, how do you prefer to approach your team tasks (Scenario {i})?",
+                    HierarchyLevel = path.Level,
+                    StreamType = path.StreamType,
+                    AptitudeType = "WorkStyle",
+                    TargetCareerTags = primaryTag,
+                    OptionsJson = "[" +
+                                  $"{{\"text\": \"Independently focusing on technical deliverables and specifications for {path.Title}.\", \"weights\": {{\"{primaryTag}\": 5}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
+                                  $"{{\"text\": \"Collaborating in agile sprint planning sessions with business analysts.\", \"weights\": {{\"{primaryTag}\": 3, \"management\": 2}}, \"nextLevelTags\": \"management\"}}," +
+                                  $"{{\"text\": \"Creating vector mockups, icons, and aesthetic layouts.\", \"weights\": {{\"creative\": 2, \"design\": 2}}, \"nextLevelTags\": \"design\"}}," +
+                                  $"{{\"text\": \"Troubleshooting physical machines, switchboards, or server terminals.\", \"weights\": {{\"diploma\": 2, \"tech\": 2}}, \"nextLevelTags\": \"diploma\"}}" +
+                                  "]"
+                });
+            }
+
+            // Generate 3 Aptitude questions
+            for (int i = 1; i <= 3; i++)
+            {
+                questionsList.Add(new HierarchicalQuizQuestion
+                {
+                    Id = $"hq-g-{path.Id}-a{i}",
+                    QuestionText = $"If a critical block occurs during a {path.Title} project, what is your diagnostic method (Scenario {i})?",
+                    HierarchyLevel = path.Level,
+                    StreamType = path.StreamType,
+                    AptitudeType = "Aptitude",
+                    TargetCareerTags = primaryTag,
+                    OptionsJson = "[" +
+                                  $"{{\"text\": \"Deep diving into the underlying logic or ledger data of {path.Title}.\", \"weights\": {{\"{primaryTag}\": 5}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
+                                  $"{{\"text\": \"Formulating new business strategies and negotiating project scope changes.\", \"weights\": {{\"{primaryTag}\": 3, \"finance\": 2}}, \"nextLevelTags\": \"finance\"}}," +
+                                  $"{{\"text\": \"Vetting user persona reviews and redesigning wireframes.\", \"weights\": {{\"creative\": 2, \"design\": 2}}, \"nextLevelTags\": \"design\"}}," +
+                                  $"{{\"text\": \"Disassembling components, checking logs, and applying quick hotfixes.\", \"weights\": {{\"diploma\": 2, \"tech\": 2}}, \"nextLevelTags\": \"diploma\"}}" +
+                                  "]"
+        return index switch {
+            1 => "Future tech forecasting",
+            2 => "Sustainability consulting",
+            _ => "Emerging Roles Strategy"
+        };
+    }
+
+    private static string GetFieldTag(string subdomainId, int index)
+    {
+        return subdomainId + "-f" + index;
+    }
+
+    private static string GetSpecializationTitle(string fieldId, int index)
+    {
+        var parts = fieldId.Split('-');
+        string stream = parts[0];
+        int sdIdx = int.Parse(parts[2].Replace("sd", ""));
+        int fIdx = int.Parse(parts[3].Replace("f", ""));
+
+        string baseTitle = GetFieldTitle($"{parts[0]}-lvl1-sd{sdIdx}", fIdx);
+        return index switch {
+            1 => $"{baseTitle} - Advanced Spec",
+            2 => $"{baseTitle} - Applied Practice",
+            _ => $"{baseTitle} - Research & Design"
+        };
+    }
+
+    private static string GetSpecializationTag(string fieldId, int index)
+    {
+        return fieldId + "-s" + index;
+    }
+
+    private static string GetJobRoleTitle(string specId, int index)
+    {
+        var parts = specId.Split('-');
+        string stream = parts[0];
+        int sdIdx = int.Parse(parts[2].Replace("sd", ""));
+        int fIdx = int.Parse(parts[3].Replace("f", ""));
+        int sIdx = int.Parse(parts[4].Replace("s", ""));
+
+        if (stream == "sci" && sdIdx == 1 && fIdx == 1 && sIdx == 1)
+        {
+            return index switch {
+                1 => "AI Engineer",
+                2 => "Full Stack Developer",
+                3 => "DevOps Engineer",
+                _ => "Mobile App Developer"
+            };
+        }
+        if (stream == "com" && sdIdx == 1 && fIdx == 1 && sIdx == 1)
+        {
+            return index switch {
+                1 => "Investment Banker",
+                2 => "Venture Capitalist",
+                3 => "M&A Specialist",
+                _ => "Private Equity Analyst"
+            };
+        }
+        if (stream == "art" && sdIdx == 1 && fIdx == 1 && sIdx == 1)
+        {
+            return index switch {
+                1 => "UI/UX Designer",
+                2 => "Product Designer",
+                3 => "Visual System Architect",
+                _ => "Interaction Designer"
+            };
+        }
+
+        string baseTitle = GetSpecializationTitle($"{parts[0]}-lvl1-sd{sdIdx}-f{fIdx}", sIdx);
+        string cleanBase = baseTitle.Replace(" - Advanced Spec", "").Replace(" - Applied Practice", "").Replace(" - Research & Design", "");
+        return index switch {
+            1 => $"Lead {cleanBase} Engineer",
+            2 => $"Senior {cleanBase} Consultant",
+            3 => $"{cleanBase} Architect",
+            _ => $"{cleanBase} Analyst"
+        };
+    }
+
+    private static string GetJobRoleTag(string specId, int index)
+    {
+        return specId + "-r" + index;
+    }
+
+    private static async Task SeedHierarchicalQuizQuestionsAsync(ApplicationDbContext context)
+    {
+        if (context.HierarchicalQuizQuestions.Any())
+        {
+            context.HierarchicalQuizQuestions.RemoveRange(context.HierarchicalQuizQuestions);
+            await context.SaveChangesAsync();
+        }
+
+        var paths = await context.CareerPaths.ToListAsync();
+        var questionsList = new List<HierarchicalQuizQuestion>();
+
+        // Seed 3 base Level 1 questions
+        var level1Questions = new List<HierarchicalQuizQuestion>
+        {
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-1",
+                QuestionText = "Which academic discipline or domain of work excites you the most when reading news or blogs?",
+                HierarchyLevel = 1,
+                StreamType = "After10th, After12th, AfterGraduation, CareerSwitch, SkillEnhancement",
+                AptitudeType = "Interest",
+                TargetCareerTags = "science,commerce,arts,diploma",
+                OptionsJson = "[" +
+                              "{\"text\": \"Scientific inventions, engineering marvels, or medical discoveries.\", \"weights\": {\"science\": 3, \"pcm\": 2, \"pcb\": 2}, \"nextLevelTags\": \"science\"}," +
+                              "{\"text\": \"Stock markets, finance trends, corporate mergers, or startups.\", \"weights\": {\"commerce\": 3, \"finance\": 2, \"management\": 2}, \"nextLevelTags\": \"commerce\"}," +
+                              "{\"text\": \"Graphic designs, legal analyses, media reporting, or writing.\", \"weights\": {\"arts\": 3, \"creative\": 2, \"law\": 2}, \"nextLevelTags\": \"arts\"}," +
+                              "{\"text\": \"Practical hands-on repairs, workshop machines, or technical polytechnics.\", \"weights\": {\"diploma\": 3, \"polytech\": 2, \"vocational\": 2}, \"nextLevelTags\": \"diploma\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-3",
+                QuestionText = "How do you naturally approach problem solving or task organization?",
+                HierarchyLevel = 1,
+                StreamType = "After10th, After12th, AfterGraduation, CareerSwitch, SkillEnhancement",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "science,commerce,arts,diploma",
+                OptionsJson = "[" +
+                              "{\"text\": \"By collecting data, analyzing equations, and modeling logical steps.\", \"weights\": {\"science\": 3, \"pcm\": 2}, \"nextLevelTags\": \"science\"}," +
+                              "{\"text\": \"By measuring cash flows, estimating risk, and negotiating resource allocation.\", \"weights\": {\"commerce\": 3, \"finance\": 2}, \"nextLevelTags\": \"commerce\"}," +
+                              "{\"text\": \"By evaluating emotional response, visual aesthetics, and cultural impact.\", \"weights\": {\"arts\": 3, \"creative\": 2}, \"nextLevelTags\": \"arts\"}," +
+                              "{\"text\": \"By physically disassembling the device, testing parts, and repairing manually.\", \"weights\": {\"diploma\": 3, \"polytech\": 2}, \"nextLevelTags\": \"diploma\"}" +
+                              "]"
+            }
+        };
+        questionsList.AddRange(level1Questions);
+
+        // For each career path at Level 2, 3, 4, 5, generate 9 questions
+        var targetPaths = paths.Where(p => p.Level >= 2).ToList();
+
+        foreach (var path in targetPaths)
+        {
+            var pathTags = path.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            string primaryTag = pathTags.LastOrDefault() ?? "general";
+
+            // Generate 3 Interest questions
+            for (int i = 1; i <= 3; i++)
+            {
+                questionsList.Add(new HierarchicalQuizQuestion
+                {
+                    Id = $"hq-g-{path.Id}-i{i}",
+                    QuestionText = $"Regarding {path.Title}, what aspect of interest excites you the most (Scenario {i})?",
+                    HierarchyLevel = path.Level,
+                    StreamType = path.StreamType,
+                    AptitudeType = "Interest",
+                    TargetCareerTags = primaryTag,
+                    OptionsJson = "[" +
+                                  $"{{\"text\": \"Deep diving into core {path.Title} workflows and mastering its details.\", \"weights\": {{\"{primaryTag}\": 5}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
+                                  $"{{\"text\": \"Coordinating high-level strategies surrounding {path.Title}.\", \"weights\": {{\"{primaryTag}\": 3}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
+                                  $"{{\"text\": \"Working on visual layout designs and aesthetics for {path.Title}.\", \"weights\": {{\"creative\": 2, \"design\": 2}}, \"nextLevelTags\": \"design\"}}," +
+                                  $"{{\"text\": \"Dealing with basic system setups, network routers, and support.\", \"weights\": {{\"diploma\": 2, \"tech\": 2}}, \"nextLevelTags\": \"diploma\"}}" +
+                                  "]"
+                });
+            }
+
+            // Generate 3 WorkStyle questions
+            for (int i = 1; i <= 3; i++)
+            {
+                questionsList.Add(new HierarchicalQuizQuestion
+                {
+                    Id = $"hq-g-{path.Id}-w{i}",
+                    QuestionText = $"In a day-to-day role in {path.Title}, how do you prefer to approach your team tasks (Scenario {i})?",
+                    HierarchyLevel = path.Level,
+                    StreamType = path.StreamType,
+                    AptitudeType = "WorkStyle",
+                    TargetCareerTags = primaryTag,
+                    OptionsJson = "[" +
+                                  $"{{\"text\": \"Independently focusing on technical deliverables and specifications for {path.Title}.\", \"weights\": {{\"{primaryTag}\": 5}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
+                                  $"{{\"text\": \"Collaborating in agile sprint planning sessions with business analysts.\", \"weights\": {{\"{primaryTag}\": 3, \"management\": 2}}, \"nextLevelTags\": \"management\"}}," +
+                                  $"{{\"text\": \"Creating vector mockups, icons, and aesthetic layouts.\", \"weights\": {{\"creative\": 2, \"design\": 2}}, \"nextLevelTags\": \"design\"}}," +
+                                  $"{{\"text\": \"Troubleshooting physical machines, switchboards, or server terminals.\", \"weights\": {{\"diploma\": 2, \"tech\": 2}}, \"nextLevelTags\": \"diploma\"}}" +
+                                  "]"
+                });
+            }
+
+            // Generate 3 Aptitude questions
+            for (int i = 1; i <= 3; i++)
+            {
+                questionsList.Add(new HierarchicalQuizQuestion
+                {
+                    Id = $"hq-g-{path.Id}-a{i}",
+                    QuestionText = $"If a critical block occurs during a {path.Title} project, what is your diagnostic method (Scenario {i})?",
+                    HierarchyLevel = path.Level,
+                    StreamType = path.StreamType,
+                    AptitudeType = "Aptitude",
+                    TargetCareerTags = primaryTag,
+                    OptionsJson = "[" +
+                                  $"{{\"text\": \"Deep diving into the underlying logic or ledger data of {path.Title}.\", \"weights\": {{\"{primaryTag}\": 5}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
+                                  $"{{\"text\": \"Formulating new business strategies and negotiating project scope changes.\", \"weights\": {{\"{primaryTag}\": 3, \"finance\": 2}}, \"nextLevelTags\": \"finance\"}}," +
+                                  $"{{\"text\": \"Vetting user persona reviews and redesigning wireframes.\", \"weights\": {{\"creative\": 2, \"design\": 2}}, \"nextLevelTags\": \"design\"}}," +
+                                  $"{{\"text\": \"Disassembling components, checking logs, and applying quick hotfixes.\", \"weights\": {{\"diploma\": 2, \"tech\": 2}}, \"nextLevelTags\": \"diploma\"}}" +
+                                  "]"
+                });
+            }
+        }
+
+        // Save in batches
+        context.ChangeTracker.AutoDetectChangesEnabled = false;
+        int batchSize = 200;
+        for (int i = 0; i < questionsList.Count; i += batchSize)
+        {
+            var batch = questionsList.Skip(i).Take(batchSize);
+            context.HierarchicalQuizQuestions.AddRange(batch);
+            await context.SaveChangesAsync();
+        }
+        context.ChangeTracker.AutoDetectChangesEnabled = true;
+    }
+}

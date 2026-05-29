@@ -41,6 +41,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<PeerRoomParticipant> PeerRoomParticipants { get; set; } = null!;
     public DbSet<PeerRoomMessage> PeerRoomMessages { get; set; } = null!;
     public DbSet<PeerRoomTask> PeerRoomTasks { get; set; } = null!;
+    public DbSet<CareerPath> CareerPaths { get; set; } = null!;
+    public DbSet<HierarchicalQuizQuestion> HierarchicalQuizQuestions { get; set; } = null!;
+    public DbSet<UserCareerProfile> UserCareerProfiles { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -515,6 +518,51 @@ public class ApplicationDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(t => t.AssignedToUserId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // CareerPath
+        modelBuilder.Entity<CareerPath>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(256);
+            entity.Property(e => e.Description).IsRequired();
+            entity.Property(e => e.Tags).HasMaxLength(1000);
+            entity.Property(e => e.Certifications).HasMaxLength(1000);
+            entity.Property(e => e.Colleges).HasMaxLength(1000);
+            
+            // Self-referencing recursive relationship
+            entity.HasOne(e => e.ParentCareer)
+                .WithMany(p => p.SubCareers)
+                .HasForeignKey(e => e.ParentCareerId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // HierarchicalQuizQuestion
+        modelBuilder.Entity<HierarchicalQuizQuestion>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.QuestionText).IsRequired();
+            entity.Property(e => e.OptionsJson).IsRequired();
+        });
+
+        // UserCareerProfile
+        modelBuilder.Entity<UserCareerProfile>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.QuizAnswersJson).IsRequired();
+            entity.Property(e => e.RoadmapJson).IsRequired();
+            entity.Property(e => e.SkillGapJson).IsRequired();
+            entity.Property(e => e.BookmarkedPaths).IsRequired();
+            
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            entity.HasOne(e => e.RecommendedCareer)
+                .WithMany()
+                .HasForeignKey(e => e.RecommendedCareerId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

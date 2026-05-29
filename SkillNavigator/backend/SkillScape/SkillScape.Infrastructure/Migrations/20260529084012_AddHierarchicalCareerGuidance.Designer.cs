@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillScape.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SkillScape.Infrastructure.Data;
 namespace SkillScape.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260529084012_AddHierarchicalCareerGuidance")]
+    partial class AddHierarchicalCareerGuidance
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -291,12 +294,6 @@ namespace SkillScape.Infrastructure.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double>("AutomationRisk")
-                        .HasColumnType("float");
-
-                    b.Property<double>("CareerFlexibility")
-                        .HasColumnType("float");
-
                     b.Property<string>("Certifications")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -321,13 +318,6 @@ namespace SkillScape.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DifficultyLevel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("EntrepreneurshipPotential")
-                        .HasColumnType("float");
-
                     b.Property<string>("FutureScope")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -339,40 +329,13 @@ namespace SkillScape.Infrastructure.Migrations
                     b.Property<double>("IndustryGrowth")
                         .HasColumnType("float");
 
-                    b.Property<string>("LearningResources")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Level")
                         .HasColumnType("int");
 
                     b.Property<string>("ParentCareerId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("PersonalityMatch")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RecommendedSubjects")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RelatedCareerIds")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("RemoteWorkPossibility")
-                        .HasColumnType("float");
-
-                    b.Property<string>("RequiredDegrees")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("RoadmapJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoadmapTimeline")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -397,22 +360,6 @@ namespace SkillScape.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("TopCompanies")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WhatYouWillStudy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WorkEnvironment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("YoutubeResources")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -1323,10 +1270,6 @@ namespace SkillScape.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CareerGrowthGraphJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<double>("ConfidenceScore")
                         .HasColumnType("float");
 
@@ -1356,25 +1299,9 @@ namespace SkillScape.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StrengthsWeaknessesJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TopMatchesJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("WhyNotRecommended")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WhyRecommended")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

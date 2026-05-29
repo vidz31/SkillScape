@@ -156,6 +156,20 @@ POST   /api/mentor/request
 GET    /api/mentor/requests
 ```
 
+### Career Guidance & Quiz Intelligence
+```
+GET    /api/career-guidance/paths       (Retrieve career path tree by stream)
+GET    /api/career-guidance/paths/{id}  (Get single path details)
+GET    /api/career-guidance/quiz/questions (Get adaptive questions by stream)
+POST   /api/career-guidance/quiz/submit (Submit quiz answers for recommendation)
+GET    /api/career-guidance/profile     (Get user recommendation profile)
+POST   /api/career-guidance/bookmarks/{pathId} (Toggle bookmark for path)
+GET    /api/career-guidance/bookmarks   (Retrieve user bookmarked paths)
+POST   /api/career-guidance/forecast    (Predict salary compounding trends)
+GET    /api/career-guidance/analytics   (Fetch metric dashboards and charts)
+GET    /api/career-guidance/compare     (Compare two career paths side-by-side)
+```
+
 ---
 
 ## 🔧 Next Steps
