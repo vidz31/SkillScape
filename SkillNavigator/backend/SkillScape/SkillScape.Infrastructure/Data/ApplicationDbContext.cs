@@ -26,6 +26,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<RoadmapStep> RoadmapSteps { get; set; } = null!;
     public DbSet<RoadmapTopic> RoadmapTopics { get; set; } = null!;
     public DbSet<UserModuleProgress> UserModuleProgressions { get; set; } = null!;
+    public DbSet<UserCustomModuleProgress> UserCustomModuleProgressions { get; set; } = null!;
     public DbSet<ApplicationMentor> Mentors { get; set; } = null!;
     public DbSet<MentorRequest> MentorRequests { get; set; } = null!;
     public DbSet<MentorSession> MentorSessions { get; set; } = null!;
@@ -243,6 +244,19 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(ump => ump.ModuleId)
                 .OnDelete(DeleteBehavior.Cascade);
             
+            entity.HasIndex(e => new { e.UserId, e.ModuleId }).IsUnique();
+        });
+
+        // UserCustomModuleProgress
+        modelBuilder.Entity<UserCustomModuleProgress>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(ump => ump.User)
+                .WithMany(u => u.UserCustomModuleProgresses)
+                .HasForeignKey(ump => ump.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasIndex(e => new { e.UserId, e.ModuleId }).IsUnique();
         });
 

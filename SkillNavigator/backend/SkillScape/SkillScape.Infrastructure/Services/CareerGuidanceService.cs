@@ -87,8 +87,19 @@ public class CareerGuidanceService : ICareerGuidanceService
         return dtos;
     }
 
+    private async Task VerifyUserExistsAsync(string userId)
+    {
+        var exists = await _context.Users.AnyAsync(u => u.Id == userId);
+        if (!exists)
+        {
+            throw new UnauthorizedAccessException("User session is invalid. The database was reset or your account no longer exists. Please log in again.");
+        }
+    }
+
     public async Task<UserCareerProfileDto> SubmitQuizAnswersAsync(string userId, QuizSubmissionRequest request)
     {
+        await VerifyUserExistsAsync(userId);
+
         // 1. Gather all questions for this stream to retrieve weights
         var dbQuestions = await _context.HierarchicalQuizQuestions
             .Where(q => q.StreamType.Contains(request.SelectedStream))
@@ -326,6 +337,7 @@ public class CareerGuidanceService : ICareerGuidanceService
 
     public async Task<UserCareerProfileDto?> GetUserCareerProfileAsync(string userId)
     {
+        await VerifyUserExistsAsync(userId);
         var profile = await _context.UserCareerProfiles
             .FirstOrDefaultAsync(p => p.UserId == userId);
 
@@ -337,6 +349,7 @@ public class CareerGuidanceService : ICareerGuidanceService
 
     public async Task<bool> ToggleBookmarkPathAsync(string userId, string pathId)
     {
+        await VerifyUserExistsAsync(userId);
         var profile = await _context.UserCareerProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
         if (profile == null)
         {
@@ -387,6 +400,7 @@ public class CareerGuidanceService : ICareerGuidanceService
 
     public async Task<List<CareerPathDto>> GetBookmarkedPathsAsync(string userId)
     {
+        await VerifyUserExistsAsync(userId);
         var profile = await _context.UserCareerProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
         if (profile == null) return new List<CareerPathDto>();
 
@@ -855,5 +869,108 @@ public class CareerGuidanceService : ICareerGuidanceService
             CareerGrowthGraph = careerGrowthGraph,
             CreatedAt = profile.CreatedAt
         };
+    }
+
+    public async Task<bool> AcceptCareerPathAsync(string userId, string pathId)
+    {
+        await VerifyUserExistsAsync(userId);
+        var path = await _context.CareerPaths.FindAsync(pathId);
+        if (path == null) return false;
+
+        var profile = await _context.UserCareerProfiles
+            .FirstOrDefaultAsync(p => p.UserId == userId);
+
+        bool isNew = profile == null;
+        if (profile == null)
+        {
+            profile = new UserCareerProfile
+            {
+                UserId = userId,
+                BookmarkedPaths = "[]"
+            };
+        }
+
+        profile.SelectedHierarchy = path.StreamType.Split(',').FirstOrDefault() ?? "DirectAccept";
+        profile.RecommendedCareerId = path.Id;
+        profile.RoadmapJson = path.RoadmapJson;
+        profile.ConfidenceScore = 100.0;
+        profile.WhyRecommended = $"You manually selected and accepted {path.Title} as your target career path.";
+
+        double baseSalary = 500000;
+        try
+        {
+            var salData = JsonSerializer.Deserialize<Dictionary<string, double>>(path.SalaryDataJson);
+            if (salData != null && salData.Any())
+            {
+                baseSalary = salData.Values.First();
+            }
+        }
+        catch { }
+        profile.PredictedSalary = baseSalary;
+
+        var growthGraph = new List<SalaryTrendPointDto>();
+        int startYr = DateTime.Now.Year;
+        double currentSal = baseSalary;
+        double cagr = path.IndustryGrowth / 100.0;
+        if (cagr <= 0) cagr = 0.08;
+        for (int i = 0; i < 10; i++)
+        {
+            growthGraph.Add(new SalaryTrendPointDto
+            {
+                Year = startYr + i,
+                SalaryIndia = Math.Round(currentSal),
+                SalaryGlobal = Math.Round(currentSal * 2.3)
+            });
+            currentSal *= (1 + cagr);
+        }
+        profile.CareerGrowthGraphJson = JsonSerializer.Serialize(growthGraph);
+
+        var allPathsForMapping = await _context.CareerPaths.ToListAsync();
+        var topMatches = new List<CareerPath> { path };
+        var topMatchesDtos = topMatches.Select(p => MapCareerPathToDto(p, allPathsForMapping)).ToList();
+        profile.TopMatchesJson = JsonSerializer.Serialize(topMatchesDtos);
+
+        if (isNew)
+        {
+            _context.UserCareerProfiles.Add(profile);
+        }
+        else
+        {
+            _context.UserCareerProfiles.Update(profile);
+        }
+
+        // Ensure a matching CareerDomain exists to satisfy database FK constraints on UserProgressions
+        var domainExists = await _context.CareerDomains.AnyAsync(d => d.Id == path.Id);
+        if (!domainExists)
+        {
+            _context.CareerDomains.Add(new CareerDomain
+            {
+                Id = path.Id,
+                Name = path.Title,
+                Description = path.Description ?? $"Custom accepted career path for {path.Title}",
+                IsActive = false, // Set to false to avoid displaying in standard domain categories/listings
+                Color = path.Color ?? "#4F46E5",
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        var progress = await _context.UserProgressions
+            .FirstOrDefaultAsync(p => p.UserId == userId && p.CareerDomainId == path.Id);
+        if (progress == null)
+        {
+            _context.UserProgressions.Add(new UserProgress
+            {
+                UserId = userId,
+                CareerDomainId = path.Id,
+                ProgressPercentage = 0,
+                SkillsCompleted = 0,
+                TotalSkills = 0,
+                XPInDomain = 0,
+                UpdatedAt = DateTime.UtcNow
+            });
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

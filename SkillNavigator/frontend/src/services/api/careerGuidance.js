@@ -61,6 +61,14 @@ export const careerGuidanceApi = {
   },
 
   /**
+   * Accept a career path and copy its roadmap to the user's active profile
+   */
+  acceptCareer: async (id) => {
+    const response = await apiClient.post(`/career-guidance/accept/${id}`);
+    return unwrapData(response, 'acceptCareer');
+  },
+
+  /**
    * Get user bookmarked career paths
    */
   getBookmarkedPaths: async () => {

@@ -236,6 +236,58 @@ public static class DatabaseSeeder
         return JsonSerializer.Deserialize<List<JsonCurriculumDomain>>(fileContent, jsonOptions) ?? new List<JsonCurriculumDomain>();
     }
 
+    private class RoadmapPhase
+    {
+        public string Phase { get; set; } = string.Empty;
+        public string Duration { get; set; } = string.Empty;
+        public List<string> Topics { get; set; } = new();
+        public string ProjectSuggestion { get; set; } = string.Empty;
+    }
+
+    private static Dictionary<string, List<RoadmapPhase>>? _roadmapTemplates;
+
+    private static Dictionary<string, List<RoadmapPhase>> LoadRoadmapTemplates()
+    {
+        if (_roadmapTemplates != null) return _roadmapTemplates;
+
+        var jsonFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "career_roadmaps.json");
+        if (!File.Exists(jsonFilePath))
+        {
+            var altPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "career_roadmaps.json");
+            if (File.Exists(altPath)) jsonFilePath = altPath;
+            else throw new FileNotFoundException($"Roadmap templates file not found at {jsonFilePath}");
+        }
+
+        var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var fileContent = File.ReadAllText(jsonFilePath);
+        _roadmapTemplates = JsonSerializer.Deserialize<Dictionary<string, List<RoadmapPhase>>>(fileContent, jsonOptions);
+        return _roadmapTemplates ?? new Dictionary<string, List<RoadmapPhase>>();
+    }
+
+    private static string GetRoadmapCategory(string id)
+    {
+        id = id.ToLower();
+        if (id.Contains("ai") || id.Contains("ml") || id.Contains("ds") || id.Contains("data"))
+            return "ai_data";
+        if (id.Contains("eng") || id.Contains("cs") || id.Contains("tech") || id.Contains("cloud") || id.Contains("cyber") || id.Contains("sre") || id.Contains("block") || id.Contains("game") || id.Contains("arvr") || id.Contains("embed") || id.Contains("prod") || id.Contains("arch") || id.Contains("cto") || id.Contains("ms"))
+            return "tech_software";
+        if (id.Contains("pcb") || id.Contains("med") || id.Contains("hc") || id.Contains("pharm") || id.Contains("nurse") || id.Contains("physio") || id.Contains("vet") || id.Contains("clinical") || id.Contains("medical") || id.Contains("doctor") || id.Contains("dentist") || id.Contains("bams") || id.Contains("bhms") || id.Contains("bpt") || id.Contains("biomed") || id.Contains("neuro") || id.Contains("immuno") || id.Contains("radio") || id.Contains("path"))
+            return "medical";
+        if (id.Contains("com") || id.Contains("fin") || id.Contains("bus") || id.Contains("bank") || id.Contains("acct") || id.Contains("wealth") || id.Contains("quant") || id.Contains("mba") || id.Contains("mgmt") || id.Contains("d2c") || id.Contains("ca") || id.Contains("cma") || id.Contains("cfa") || id.Contains("frm") || id.Contains("cfp") || id.Contains("wealth") || id.Contains("auditor") || id.Contains("tax") || id.Contains("retail") || id.Contains("econ"))
+            return "commerce_finance";
+        if (id.Contains("des") || id.Contains("art") || id.Contains("gd") || id.Contains("anim") || id.Contains("photo") || id.Contains("creative") || id.Contains("fashion") || id.Contains("interior") || id.Contains("palette") || id.Contains("media") || id.Contains("journal") || id.Contains("creator") || id.Contains("film") || id.Contains("paint") || id.Contains("sculpt"))
+            return "design_creative";
+        if (id.Contains("law") || id.Contains("legal") || id.Contains("corporate") || id.Contains("criminal") || id.Contains("judge") || id.Contains("court") || id.Contains("judiciary"))
+            return "law";
+        if (id.Contains("gov") || id.Contains("civil") || id.Contains("state") || id.Contains("def") || id.Contains("army") || id.Contains("navy") || id.Contains("iaf") || id.Contains("nda"))
+            return "government";
+        if (id.Contains("ent") || id.Contains("startup") || id.Contains("founder") || id.Contains("entrepreneur"))
+            return "entrepreneurship";
+        if (id.Contains("dip") || id.Contains("iti") || id.Contains("voc") || id.Contains("vocational") || id.Contains("trade") || id.Contains("elec") || id.Contains("fitter") || id.Contains("welder") || id.Contains("plumb") || id.Contains("cul") || id.Contains("hosp") || id.Contains("mech") || id.Contains("auto") || id.Contains("civil") || id.Contains("entc") || id.Contains("mecha") || id.Contains("text") || id.Contains("chem") || id.Contains("petr") || id.Contains("aero") || id.Contains("marine") || id.Contains("biotech") || id.Contains("nano") || id.Contains("env") || id.Contains("arch") || id.Contains("urban"))
+            return "vocational";
+        return "tech_software";
+    }
+
     private static List<Skill> SeedSkills(ApplicationDbContext context, List<CareerDomain> domains)
     {
         var skillsDb = new List<Skill>();
@@ -335,50 +387,265 @@ public static class DatabaseSeeder
         var questionsDb = new List<QuizQuestion>();
         var optionsDb = new List<QuizOption>();
 
-        // Load questions from JSON file instead of hardcoding
+        // Try to load from JSON first, fallback to hardcoded detailed questions
         var jsonFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "quiz_150_questions.json");
-        if (!File.Exists(jsonFilePath))
+        if (File.Exists(jsonFilePath))
         {
-            throw new FileNotFoundException($"Seed file not found at {jsonFilePath}");
+            var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var fileContent = File.ReadAllText(jsonFilePath);
+            var parsedQuestions = JsonSerializer.Deserialize<List<JsonQuizQuestion>>(fileContent, jsonOptions);
+
+            if (parsedQuestions != null)
+            {
+                int qOrder = 1;
+                foreach (var q in parsedQuestions)
+                {
+                    var dbQ = new QuizQuestion 
+                    { 
+                        Id = q.id, 
+                        Text = q.text, 
+                        Category = q.category, 
+                        DisplayOrder = qOrder++, 
+                        IsActive = true, 
+                        CareerDomainId = domains[0].Id 
+                    };
+                    questionsDb.Add(dbQ);
+
+                    int optOrder = 1;
+                    foreach (var opt in q.options)
+                    {
+                        optionsDb.Add(new QuizOption 
+                        { 
+                            Id = opt.id, 
+                            QuizQuestionId = dbQ.Id, 
+                            Text = opt.text,
+                            DomainWeightJson = JsonSerializer.Serialize(new Dictionary<string, int> { { opt.domain, 1 } }), 
+                            DisplayOrder = optOrder++ 
+                        });
+                    }
+                }
+                return (questionsDb, optionsDb);
+            }
         }
 
-        var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var fileContent = File.ReadAllText(jsonFilePath);
-        var parsedQuestions = JsonSerializer.Deserialize<List<JsonQuizQuestion>>(fileContent, jsonOptions);
+        // Fallback: Create comprehensive detailed quiz questions
+        return CreateDetailedComprehensiveQuiz(questionsDb, optionsDb, domains);
+    }
 
-        if (parsedQuestions == null) return (questionsDb, optionsDb);
-
+    private static (List<QuizQuestion>, List<QuizOption>) CreateDetailedComprehensiveQuiz(
+        List<QuizQuestion> questionsDb, List<QuizOption> optionsDb, List<CareerDomain> domains)
+    {
         int qOrder = 1;
-        foreach (var q in parsedQuestions)
+        var detailedQuestions = GetDetailedQuizQuestions();
+
+        foreach (var q in detailedQuestions)
         {
             var dbQ = new QuizQuestion 
             { 
-                Id = q.id, 
-                Text = q.text, 
-                Category = q.category, 
-                DisplayOrder = qOrder++, 
+                Id = $"q_{qOrder}", 
+                Text = q.Text, 
+                Category = q.Category, 
+                DisplayOrder = qOrder, 
                 IsActive = true, 
-                // Just arbitrary mapping for the schema requirement
                 CareerDomainId = domains[0].Id 
             };
             questionsDb.Add(dbQ);
 
             int optOrder = 1;
-            foreach (var opt in q.options)
+            foreach (var opt in q.Options)
             {
                 optionsDb.Add(new QuizOption 
                 { 
-                    Id = opt.id, 
+                    Id = $"o_{qOrder}_{optOrder}", 
                     QuizQuestionId = dbQ.Id, 
-                    Text = opt.text,
-                    // Map the chosen domain with weight 1 (doesn't matter since we use ML now, but keeps old logic safe)
-                    DomainWeightJson = JsonSerializer.Serialize(new Dictionary<string, int> { { opt.domain, 1 } }), 
+                    Text = opt.Text,
+                    DomainWeightJson = JsonSerializer.Serialize(opt.DomainWeights), 
                     DisplayOrder = optOrder++ 
                 });
             }
+            qOrder++;
         }
 
         return (questionsDb, optionsDb);
+    }
+
+    private class DetailedQuizQuestion
+    {
+        public string Text { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public List<DetailedQuizOption> Options { get; set; } = new();
+    }
+
+    private class DetailedQuizOption
+    {
+        public string Text { get; set; } = string.Empty;
+        public Dictionary<string, int> DomainWeights { get; set; } = new();
+    }
+
+    private static List<DetailedQuizQuestion> GetDetailedQuizQuestions()
+    {
+        return new List<DetailedQuizQuestion>
+        {
+            // Question 1: Work Preference
+            new DetailedQuizQuestion
+            {
+                Text = "What aspect of technology excites you the most?",
+                Category = "Interests & Passions",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "Creating beautiful, interactive user experiences", DomainWeights = new() { { "frontend", 40 }, { "design", 30 }, { "fullstack", 20 } } },
+                    new DetailedQuizOption { Text = "Building powerful APIs and server-side logic", DomainWeights = new() { { "backend", 40 }, { "fullstack", 30 }, { "devops", 15 } } },
+                    new DetailedQuizOption { Text = "Working across the entire stack from UI to databases", DomainWeights = new() { { "fullstack", 50 }, { "backend", 25 }, { "frontend", 25 } } },
+                    new DetailedQuizOption { Text = "Analyzing data and finding patterns", DomainWeights = new() { { "data", 50 }, { "ml", 30 }, { "backend", 15 } } },
+                    new DetailedQuizOption { Text = "Infrastructure, deployment, and system reliability", DomainWeights = new() { { "devops", 45 }, { "backend", 30 }, { "fullstack", 15 } } },
+                    new DetailedQuizOption { Text = "Building intelligent systems with AI/ML algorithms", DomainWeights = new() { { "ml", 50 }, { "data", 35 }, { "backend", 15 } } }
+                }
+            },
+
+            // Question 2: Problem Solving Style
+            new DetailedQuizQuestion
+            {
+                Text = "How do you prefer to solve problems?",
+                Category = "Problem-Solving Approach",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "By optimizing the visual and user experience", DomainWeights = new() { { "frontend", 50 }, { "design", 40 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "By designing efficient algorithms and data structures", DomainWeights = new() { { "backend", 45 }, { "fullstack", 30 }, { "ml", 15 } } },
+                    new DetailedQuizOption { Text = "By understanding the complete system architecture", DomainWeights = new() { { "fullstack", 45 }, { "backend", 35 }, { "devops", 15 } } },
+                    new DetailedQuizOption { Text = "By analyzing data trends and generating insights", DomainWeights = new() { { "data", 55 }, { "ml", 30 }, { "backend", 10 } } },
+                    new DetailedQuizOption { Text = "By ensuring systems are scalable and reliable", DomainWeights = new() { { "devops", 50 }, { "backend", 35 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "By training models and optimizing predictions", DomainWeights = new() { { "ml", 55 }, { "data", 35 }, { "backend", 10 } } }
+                }
+            },
+
+            // Question 3: Learning Preference
+            new DetailedQuizQuestion
+            {
+                Text = "What's your preferred learning style?",
+                Category = "Learning & Growth",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "Visual design systems, CSS frameworks, UI libraries", DomainWeights = new() { { "frontend", 50 }, { "design", 35 }, { "fullstack", 15 } } },
+                    new DetailedQuizOption { Text = "Databases, APIs, server architectures, best practices", DomainWeights = new() { { "backend", 50 }, { "fullstack", 30 }, { "data", 15 } } },
+                    new DetailedQuizOption { Text = "Both frontend and backend technologies equally", DomainWeights = new() { { "fullstack", 60 }, { "backend", 25 }, { "frontend", 15 } } },
+                    new DetailedQuizOption { Text = "Data analysis tools, SQL, statistics, visualization", DomainWeights = new() { { "data", 55 }, { "ml", 30 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "Docker, Kubernetes, CI/CD pipelines, cloud platforms", DomainWeights = new() { { "devops", 55 }, { "backend", 30 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "Machine learning libraries, neural networks, statistics", DomainWeights = new() { { "ml", 55 }, { "data", 35 }, { "backend", 10 } } }
+                }
+            },
+
+            // Question 4: Work Environment Preference
+            new DetailedQuizQuestion
+            {
+                Text = "What's your ideal work environment?",
+                Category = "Work Style",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "Fast-paced, designing cutting-edge interfaces", DomainWeights = new() { { "frontend", 45 }, { "design", 40 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "Focused on code quality and system design", DomainWeights = new() { { "backend", 50 }, { "fullstack", 30 }, { "devops", 15 } } },
+                    new DetailedQuizOption { Text = "Collaborative, working on multiple layers", DomainWeights = new() { { "fullstack", 55 }, { "backend", 25 }, { "frontend", 15 } } },
+                    new DetailedQuizOption { Text = "Research-oriented, exploring data patterns", DomainWeights = new() { { "data", 50 }, { "ml", 40 }, { "backend", 10 } } },
+                    new DetailedQuizOption { Text = "Problem-solving focused on reliability and scale", DomainWeights = new() { { "devops", 50 }, { "backend", 35 }, { "fullstack", 15 } } },
+                    new DetailedQuizOption { Text = "Experimental, building intelligent algorithms", DomainWeights = new() { { "ml", 50 }, { "data", 40 }, { "backend", 10 } } }
+                }
+            },
+
+            // Question 5: Technical Interest Depth
+            new DetailedQuizQuestion
+            {
+                Text = "Which technical domain interests you the most?",
+                Category = "Technical Expertise",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "React, Vue, Angular, responsive design, animations", DomainWeights = new() { { "frontend", 55 }, { "design", 30 }, { "fullstack", 15 } } },
+                    new DetailedQuizOption { Text = "Node.js, Python, Java, databases, authentication", DomainWeights = new() { { "backend", 55 }, { "fullstack", 30 }, { "devops", 10 } } },
+                    new DetailedQuizOption { Text = "Everything from HTML to databases and APIs", DomainWeights = new() { { "fullstack", 60 }, { "backend", 25 }, { "frontend", 15 } } },
+                    new DetailedQuizOption { Text = "Python, SQL, Pandas, data visualization tools", DomainWeights = new() { { "data", 60 }, { "ml", 30 }, { "backend", 10 } } },
+                    new DetailedQuizOption { Text = "Docker, AWS, Kubernetes, monitoring, automation", DomainWeights = new() { { "devops", 60 }, { "backend", 30 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "TensorFlow, PyTorch, scikit-learn, NLP, CV", DomainWeights = new() { { "ml", 60 }, { "data", 30 }, { "backend", 10 } } }
+                }
+            },
+
+            // Question 6: Career Goals
+            new DetailedQuizQuestion
+            {
+                Text = "What's your primary career aspiration?",
+                Category = "Career Goals",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "Lead design systems and create exceptional UX", DomainWeights = new() { { "frontend", 50 }, { "design", 40 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "Become a backend architect or tech lead", DomainWeights = new() { { "backend", 50 }, { "fullstack", 30 }, { "devops", 15 } } },
+                    new DetailedQuizOption { Text = "Become a versatile full-stack engineer", DomainWeights = new() { { "fullstack", 60 }, { "backend", 25 }, { "frontend", 15 } } },
+                    new DetailedQuizOption { Text = "Lead data science or analytics initiatives", DomainWeights = new() { { "data", 55 }, { "ml", 35 }, { "backend", 10 } } },
+                    new DetailedQuizOption { Text = "Architect cloud solutions and DevOps pipelines", DomainWeights = new() { { "devops", 55 }, { "backend", 35 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "Lead ML research and AI product development", DomainWeights = new() { { "ml", 55 }, { "data", 35 }, { "backend", 10 } } }
+                }
+            },
+
+            // Question 7: Challenge Type
+            new DetailedQuizQuestion
+            {
+                Text = "What type of challenges do you enjoy most?",
+                Category = "Problem Types",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "Performance optimization and smooth interactions", DomainWeights = new() { { "frontend", 50 }, { "fullstack", 30 }, { "backend", 15 } } },
+                    new DetailedQuizOption { Text = "Designing scalable systems and handling millions of requests", DomainWeights = new() { { "backend", 50 }, { "devops", 35 }, { "fullstack", 15 } } },
+                    new DetailedQuizOption { Text = "Balancing frontend and backend optimization", DomainWeights = new() { { "fullstack", 55 }, { "backend", 30 }, { "frontend", 15 } } },
+                    new DetailedQuizOption { Text = "Extracting insights from complex datasets", DomainWeights = new() { { "data", 55 }, { "ml", 35 }, { "backend", 10 } } },
+                    new DetailedQuizOption { Text = "Managing infrastructure and ensuring system reliability", DomainWeights = new() { { "devops", 55 }, { "backend", 30 }, { "fullstack", 15 } } },
+                    new DetailedQuizOption { Text = "Building models that solve real-world problems", DomainWeights = new() { { "ml", 55 }, { "data", 35 }, { "backend", 10 } } }
+                }
+            },
+
+            // Question 8: Technology Stack Interest
+            new DetailedQuizQuestion
+            {
+                Text = "Which technology stack interests you most?",
+                Category = "Tech Stack Preferences",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "JavaScript/TypeScript ecosystem (React, Vue, Next.js)", DomainWeights = new() { { "frontend", 55 }, { "fullstack", 35 }, { "backend", 10 } } },
+                    new DetailedQuizOption { Text = "Backend languages (.NET, Java, Node.js, Python Django)", DomainWeights = new() { { "backend", 55 }, { "fullstack", 30 }, { "devops", 10 } } },
+                    new DetailedQuizOption { Text = "Full-stack frameworks (Next.js, Nuxt, Django+React)", DomainWeights = new() { { "fullstack", 60 }, { "backend", 25 }, { "frontend", 15 } } },
+                    new DetailedQuizOption { Text = "Data science stack (Pandas, Scikit-learn, Jupyter)", DomainWeights = new() { { "data", 60 }, { "ml", 35 }, { "backend", 5 } } },
+                    new DetailedQuizOption { Text = "DevOps tools (Docker, Kubernetes, Terraform, CI/CD)", DomainWeights = new() { { "devops", 60 }, { "backend", 35 }, { "fullstack", 5 } } },
+                    new DetailedQuizOption { Text = "ML frameworks (TensorFlow, PyTorch, Keras)", DomainWeights = new() { { "ml", 65 }, { "data", 30 }, { "backend", 5 } } }
+                }
+            },
+
+            // Question 9: Interaction with Users
+            new DetailedQuizQuestion
+            {
+                Text = "How do you prefer to interact with your work's impact?",
+                Category = "Impact & Visibility",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "See users interact with beautiful interfaces I built", DomainWeights = new() { { "frontend", 55 }, { "design", 35 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "Know my code powers critical backend systems", DomainWeights = new() { { "backend", 55 }, { "fullstack", 30 }, { "devops", 15 } } },
+                    new DetailedQuizOption { Text = "See end-to-end features working seamlessly", DomainWeights = new() { { "fullstack", 60 }, { "backend", 25 }, { "frontend", 15 } } },
+                    new DetailedQuizOption { Text = "Present data insights that drive decisions", DomainWeights = new() { { "data", 60 }, { "ml", 35 }, { "backend", 5 } } },
+                    new DetailedQuizOption { Text = "Ensure systems run reliably without incidents", DomainWeights = new() { { "devops", 60 }, { "backend", 35 }, { "fullstack", 5 } } },
+                    new DetailedQuizOption { Text = "See AI/ML solutions solve complex problems", DomainWeights = new() { { "ml", 60 }, { "data", 35 }, { "backend", 5 } } }
+                }
+            },
+
+            // Question 10: Team Collaboration
+            new DetailedQuizQuestion
+            {
+                Text = "What's your preferred team structure?",
+                Category = "Collaboration",
+                Options = new List<DetailedQuizOption>
+                {
+                    new DetailedQuizOption { Text = "Work with designers and focus on user experience", DomainWeights = new() { { "frontend", 50 }, { "design", 40 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "Work with other backend engineers on system design", DomainWeights = new() { { "backend", 55 }, { "fullstack", 30 }, { "devops", 15 } } },
+                    new DetailedQuizOption { Text = "Collaborate closely with both frontend and backend teams", DomainWeights = new() { { "fullstack", 60 }, { "backend", 25 }, { "frontend", 15 } } },
+                    new DetailedQuizOption { Text = "Work with domain experts and business analysts", DomainWeights = new() { { "data", 55 }, { "ml", 35 }, { "backend", 10 } } },
+                    new DetailedQuizOption { Text = "Work with developers and infrastructure teams", DomainWeights = new() { { "devops", 55 }, { "backend", 35 }, { "fullstack", 10 } } },
+                    new DetailedQuizOption { Text = "Work with researchers and data engineers", DomainWeights = new() { { "ml", 55 }, { "data", 35 }, { "backend", 10 } } }
+                }
+            }
+        };
     }
 
     private static List<Badge> SeedBadges()
@@ -998,6 +1265,38 @@ public static class DatabaseSeeder
             _ => "{\"Starting\": 900000, \"Mid-Career\": 2000000, \"Senior\": 4000000}"
         };
 
+        string category = GetRoadmapCategory(id);
+        var templates = LoadRoadmapTemplates();
+        string roadmapJsonString = "[]";
+
+        if (templates.TryGetValue(category, out var phases))
+        {
+            var customizedPhases = phases.Select(p => new RoadmapPhase
+            {
+                Phase = p.Phase.Replace("{Title}", title),
+                Duration = p.Duration,
+                Topics = p.Topics.Select(t => t.Replace("{Title}", title)).ToList(),
+                ProjectSuggestion = p.ProjectSuggestion.Replace("{Title}", title)
+            }).ToList();
+
+            roadmapJsonString = JsonSerializer.Serialize(customizedPhases, new JsonSerializerOptions { WriteIndented = false });
+        }
+        else
+        {
+            roadmapJsonString = $"[{{\"Phase\":\"Phase 1: Foundations of {title}\",\"Duration\":\"3 Months\",\"Topics\":[\"Introduction to {title}\",\"Core Concepts and Terminology\"],\"ProjectSuggestion\":\"Build a review deck on {title} fundamentals.\"}}]";
+        }
+
+        string skillsRequiredJson = "[\"Communication\", \"Problem Solving\", \"Critical Thinking\"]";
+        if (category == "tech_software") skillsRequiredJson = "[\"Programming\", \"Git/GitHub\", \"Databases\", \"API Design\"]";
+        else if (category == "ai_data") skillsRequiredJson = "[\"Python\", \"Pandas/NumPy\", \"Mathematics\", \"Machine Learning\"]";
+        else if (category == "medical") skillsRequiredJson = "[\"Anatomy\", \"Pathology\", \"Pharmacology\", \"Diagnostics\"]";
+        else if (category == "commerce_finance") skillsRequiredJson = "[\"Accounting\", \"Taxation\", \"Financial Valuation\", \"Strategic Mgmt\"]";
+        else if (category == "design_creative") skillsRequiredJson = "[\"Design Thinking\", \"Typography\", \"Figma Prototyping\", \"User Research\"]";
+        else if (category == "law") skillsRequiredJson = "[\"Constitutional Law\", \"Legal Drafting\", \"Criminal/Civil Code\", \"Courtroom Advocacy\"]";
+        else if (category == "government") skillsRequiredJson = "[\"Indian Polity\", \"CSAT Aptitude\", \"Answer Writing\", \"Current Affairs\"]";
+        else if (category == "entrepreneurship") skillsRequiredJson = "[\"Lean Startup\", \"Product Execution\", \"Growth Marketing\", \"Fundraising\"]";
+        else if (category == "vocational") skillsRequiredJson = "[\"Trade Tools\", \"Workshop Controls\", \"Blueprint Schematics\", \"Safety Auditing\"]";
+
         list.Add(new CareerPath
         {
             Id = id,
@@ -1007,11 +1306,11 @@ public static class DatabaseSeeder
             ParentCareerId = string.IsNullOrEmpty(parentId) ? null : parentId,
             StreamType = streamType,
             Tags = id.Replace("-", ","),
-            SkillsRequired = "[\"Communication\", \"Problem Solving\", \"Critical Thinking\"]",
+            SkillsRequired = skillsRequiredJson,
             FutureScope = $"Excellent scope driven by advancements and market demand for {title}.",
             SalaryDataJson = salaryJson,
             IndustryGrowth = cagr,
-            RoadmapJson = "[{\"phase\":\"Foundations\",\"duration\":\"3 Months\",\"topics\":[\"Introduction\",\"Core Concepts\"],\"projectSuggestion\":\"Simple review/presentation\"}]",
+            RoadmapJson = roadmapJsonString,
             Certifications = "Professional Standard Certifications",
             Colleges = "Top National & Global Universities",
             DemandIndex = demand,
@@ -1034,6 +1333,913 @@ public static class DatabaseSeeder
             AutomationRisk = risk
         });
     }
+    private class QuestionTemplate
+    {
+        public string TextTemplate { get; set; } = string.Empty;
+        public string AptitudeType { get; set; } = string.Empty;
+        public List<OptionTemplate> Options { get; set; } = new();
+    }
+
+    private class OptionTemplate
+    {
+        public string TextTemplate { get; set; } = string.Empty;
+        public Dictionary<string, int> WeightModifiers { get; set; } = new();
+        public string NextLevelTags { get; set; } = string.Empty;
+    }
+
+    private static List<QuestionTemplate> GetTemplatesForCategory(string category)
+    {
+        var list = new List<QuestionTemplate>();
+
+        switch (category.ToLower())
+        {
+            case "ai_data":
+                // 3 Interest Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What area of data science or machine learning excites you the most when studying {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Designing deep neural networks, transformers, and generative AI models.", WeightModifiers = new() { { "primary", 5 }, { "ai", 5 } }, NextLevelTags = "ai" },
+                        new() { TextTemplate = "Building large-scale data pipelines, ETL workflows, and data lakehouses.", WeightModifiers = new() { { "primary", 3 }, { "data", 5 } }, NextLevelTags = "data" },
+                        new() { TextTemplate = "Performing statistical analysis, hypothesis testing, and forecasting trends.", WeightModifiers = new() { { "primary", 3 }, { "ds", 5 } }, NextLevelTags = "ds" },
+                        new() { TextTemplate = "Deploying model inference services with extremely low latency at the edge.", WeightModifiers = new() { { "primary", 2 }, { "ml", 5 } }, NextLevelTags = "ml" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "Which type of dataset would you enjoy analyzing the most in a {Title} project?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Massive text corpora for training large language models (LLMs).", WeightModifiers = new() { { "primary", 5 }, { "ai", 5 } }, NextLevelTags = "ai" },
+                        new() { TextTemplate = "Structured financial transaction records for fraud detection models.", WeightModifiers = new() { { "primary", 4 }, { "ds", 4 } }, NextLevelTags = "ds" },
+                        new() { TextTemplate = "Raw sensor data streams from autonomous robots or IoT devices.", WeightModifiers = new() { { "primary", 4 }, { "ml", 5 } }, NextLevelTags = "ml" },
+                        new() { TextTemplate = "Biomedical genomics datasets to discover new therapeutic proteins.", WeightModifiers = new() { { "primary", 3 }, { "biotech", 4 } }, NextLevelTags = "biotech" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What kind of analytical breakthrough sounds most fulfilling to you in {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Improving model accuracy on generative tasks by fine-tuning neural weights.", WeightModifiers = new() { { "primary", 5 }, { "ai", 5 } }, NextLevelTags = "ai" },
+                        new() { TextTemplate = "Optimizing database query speeds for millions of analytical rows.", WeightModifiers = new() { { "primary", 4 }, { "data", 5 } }, NextLevelTags = "data" },
+                        new() { TextTemplate = "Publishing a paper proving a new statistical correlation in customer behavior.", WeightModifiers = new() { { "primary", 4 }, { "ds", 5 } }, NextLevelTags = "ds" },
+                        new() { TextTemplate = "Structuring clean schema configurations for streaming telemetry.", WeightModifiers = new() { { "primary", 3 }, { "data", 4 } }, NextLevelTags = "data" }
+                    }
+                });
+
+                // 3 WorkStyle Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you prefer to approach modeling tasks in a {Title} project?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Deeply researching model architectures, loss functions, and hyperparameters.", WeightModifiers = new() { { "primary", 5 }, { "ml", 5 } } },
+                        new() { TextTemplate = "Cleaning messy datasets, handling missing values, and engineering features.", WeightModifiers = new() { { "primary", 5 }, { "ds", 5 } } },
+                        new() { TextTemplate = "Writing clean, production-ready Python pipelines and MLOps build scripts.", WeightModifiers = new() { { "primary", 4 }, { "ml", 5 } } },
+                        new() { TextTemplate = "Creating interactive dashboards (Streamlit/Tableau) to present findings.", WeightModifiers = new() { { "primary", 3 }, { "ds", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your approach to dealing with raw data quality issues in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Automating validation rules and data contracts at the ingestion layer.", WeightModifiers = new() { { "primary", 5 }, { "data", 5 } } },
+                        new() { TextTemplate = "Imputing values using statistical distributions and correlation matrices.", WeightModifiers = new() { { "primary", 5 }, { "ds", 5 } } },
+                        new() { TextTemplate = "Consulting domain experts to understand data entry anomalies.", WeightModifiers = new() { { "primary", 4 }, { "ds", 4 } } },
+                        new() { TextTemplate = "Manually pruning outliers and labeling data for active learning loops.", WeightModifiers = new() { { "primary", 3 }, { "ml", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When presenting analytical insights for {Title}, what do you focus on?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Visual charts, clear trends, and actionable business recommendations.", WeightModifiers = new() { { "primary", 5 }, { "ds", 5 } } },
+                        new() { TextTemplate = "Explaining the mathematical principles, weights, and confidence intervals.", WeightModifiers = new() { { "primary", 5 }, { "ml", 5 } } },
+                        new() { TextTemplate = "Demonstrating the scalability and cloud latency metrics of the model.", WeightModifiers = new() { { "primary", 4 }, { "data", 4 } } },
+                        new() { TextTemplate = "Detailing the data cleaning and source lineage documentation.", WeightModifiers = new() { { "primary", 3 }, { "data", 5 } } }
+                    }
+                });
+
+                // 3 Aptitude Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If your machine learning model is overfitting the training data in {Title}, how do you fix it?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Applying regularization techniques, dropout layers, or gathering more training samples.", WeightModifiers = new() { { "primary", 5 }, { "ml", 5 } } },
+                        new() { TextTemplate = "Reducing the number of features and selecting only highly correlated variables.", WeightModifiers = new() { { "primary", 5 }, { "ds", 5 } } },
+                        new() { TextTemplate = "Setting up cross-validation folds and hyperparameter grid searches.", WeightModifiers = new() { { "primary", 4 }, { "ml", 5 } } },
+                        new() { TextTemplate = "Pruning decision trees and simplifying the neural network architecture.", WeightModifiers = new() { { "primary", 3 }, { "ml", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you evaluate if a data pipeline is performing optimally in {Title}?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Measuring throughput, latency, partition distribution, and cluster resources.", WeightModifiers = new() { { "primary", 5 }, { "data", 5 } } },
+                        new() { TextTemplate = "Checking precision, recall, F1-scores, and ROC-AUC curves of downstream models.", WeightModifiers = new() { { "primary", 5 }, { "ml", 5 } } },
+                        new() { TextTemplate = "Running data integrity checks and schema validation tests.", WeightModifiers = new() { { "primary", 4 }, { "data", 5 } } },
+                        new() { TextTemplate = "Verifying statistical significance (p-values) of experimental tests.", WeightModifiers = new() { { "primary", 3 }, { "ds", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When a model's prediction accuracy drifts in production for {Title}, what is your diagnostic flow?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Comparing current production feature distributions with training distributions (Data Drift).", WeightModifiers = new() { { "primary", 5 }, { "ml", 5 } } },
+                        new() { TextTemplate = "Inspecting raw database inputs for format changes or missing values.", WeightModifiers = new() { { "primary", 5 }, { "data", 5 } } },
+                        new() { TextTemplate = "Re-training the model on the latest batch of transactions.", WeightModifiers = new() { { "primary", 4 }, { "ml", 5 } } },
+                        new() { TextTemplate = "Conducting manual audits of misclassified edge cases to update rules.", WeightModifiers = new() { { "primary", 3 }, { "ds", 5 } } }
+                    }
+                });
+                break;
+
+            case "medical":
+                // 3 Interest Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What area of clinical practice or patient care excites you the most in {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Diagnosing complex patient symptoms and designing custom treatment plans.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "mbbs" },
+                        new() { TextTemplate = "Conducting laboratory tests, analyzing blood work, and researching pathogens.", WeightModifiers = new() { { "primary", 4 }, { "path", 5 } }, NextLevelTags = "path" },
+                        new() { TextTemplate = "Caring for patients during recovery, administering medicine, and bedside care.", WeightModifiers = new() { { "primary", 3 }, { "nurse", 5 } }, NextLevelTags = "nurse" },
+                        new() { TextTemplate = "Performing surgical procedures, stitches, and manual medical interventions.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "mbbs" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If you were to attend a medical seminar on {Title}, what topic would you choose?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "New drug discoveries, pharmacokinetics, and therapeutic applications.", WeightModifiers = new() { { "primary", 5 }, { "pharm", 5 } }, NextLevelTags = "pharm" },
+                        new() { TextTemplate = "Advanced radiological imaging techniques, MRI, and diagnostics.", WeightModifiers = new() { { "primary", 5 }, { "radio", 5 } }, NextLevelTags = "radio" },
+                        new() { TextTemplate = "Genomics, gene editing, and cell-based therapeutic advancements.", WeightModifiers = new() { { "primary", 5 }, { "genetics", 5 } }, NextLevelTags = "genetics" },
+                        new() { TextTemplate = "Neurological pathways, brain-computer interfaces, and cognitive rehab.", WeightModifiers = new() { { "primary", 5 }, { "neuro", 5 } }, NextLevelTags = "neuro" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What aspect of healthcare system operations in {Title} interests you?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Preventing disease outbreaks, community vaccination, and public health policy.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "mbbs" },
+                        new() { TextTemplate = "Analyzing lab results, tissue biopsies, and writing pathology reports.", WeightModifiers = new() { { "primary", 5 }, { "path", 5 } }, NextLevelTags = "path" },
+                        new() { TextTemplate = "Rehabilitating physical injuries, muscle strengthening, and sports medicine.", WeightModifiers = new() { { "primary", 5 }, { "physio", 5 } }, NextLevelTags = "physio" },
+                        new() { TextTemplate = "Managing medical staff, hospital resources, and healthcare software.", WeightModifiers = new() { { "primary", 3 } }, NextLevelTags = "nurse" }
+                    }
+                });
+
+                // 3 WorkStyle Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you prefer to handle patient interactions or clinical schedules in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Patiently explaining diagnostics, options, and comfort care.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Focusing on fast diagnostic execution, lab scans, and writing reports.", WeightModifiers = new() { { "primary", 5 }, { "path", 5 } } },
+                        new() { TextTemplate = "Coordinating ward schedules, medicine dosages, and nurse rotations.", WeightModifiers = new() { { "primary", 4 }, { "nurse", 5 } } },
+                        new() { TextTemplate = "Undertaking high-pressure emergency surgeries and shifts.", WeightModifiers = new() { { "primary", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your approach to medical guidelines and research in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Sticking strictly to standard clinical protocols (evidence-based medicine).", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Participating in research trials and developing new diagnostic methods.", WeightModifiers = new() { { "primary", 5 }, { "genetics", 5 } } },
+                        new() { TextTemplate = "Evaluating patient posture, mobility, and adjusting physical therapy.", WeightModifiers = new() { { "primary", 5 }, { "physio", 5 } } },
+                        new() { TextTemplate = "Compounding formulations and verifying drug chemical safety logs.", WeightModifiers = new() { { "primary", 5 }, { "pharm", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When joining a new clinic or hospital for {Title}, what do you prioritize?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Reviewing patient histories, case files, and medication records.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Inspecting laboratory equipment, microscopes, and chemical reagents.", WeightModifiers = new() { { "primary", 5 }, { "path", 5 } } },
+                        new() { TextTemplate = "Verifying ICU equipment monitors, ventilators, and emergency supplies.", WeightModifiers = new() { { "primary", 4 }, { "nurse", 5 } } },
+                        new() { TextTemplate = "Calibrating X-ray, CT, or MRI imaging scanners.", WeightModifiers = new() { { "primary", 5 }, { "radio", 5 } } }
+                    }
+                });
+
+                // 3 Aptitude Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If a patient experiences an unexpected allergic reaction in {Title}, what is your first response?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Quickly administering emergency adrenaline and stabilizing airway.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Checking drug interaction charts and notifying the pharmacist.", WeightModifiers = new() { { "primary", 5 }, { "pharm", 5 } } },
+                        new() { TextTemplate = "Analyzing the chemical composition of the allergen in a pathology lab.", WeightModifiers = new() { { "primary", 4 }, { "path", 5 } } },
+                        new() { TextTemplate = "Calming the patient and updating their charts for follow-up studies.", WeightModifiers = new() { { "primary", 3 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you evaluate if a treatment plan is working for {Title}?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Monitoring patient vital signs, fever charts, and physical recovery.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Running follow-up blood tests, cultures, and diagnostic imaging.", WeightModifiers = new() { { "primary", 5 }, { "path", 5 } } },
+                        new() { TextTemplate = "Measuring joint range of motion and muscle strength recovery.", WeightModifiers = new() { { "primary", 5 }, { "physio", 5 } } },
+                        new() { TextTemplate = "Assessing if symptoms have reduced without drug side effects.", WeightModifiers = new() { { "primary", 5 }, { "pharm", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When a clinical audit occurs for {Title}, what is your focus?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Verifying patient consent forms, prescription sheets, and medical records.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Inspecting sterilization logs, surgical wards, and hygiene reviews.", WeightModifiers = new() { { "primary", 5 }, { "nurse", 5 } } },
+                        new() { TextTemplate = "Vetting drug inventory logs, storage temperatures, and expiry dates.", WeightModifiers = new() { { "primary", 5 }, { "pharm", 5 } } },
+                        new() { TextTemplate = "Confirming radiology calibration logs and radiation safety shielding.", WeightModifiers = new() { { "primary", 5 }, { "radio", 5 } } }
+                    }
+                });
+                break;
+
+            case "commerce_finance":
+                // 3 Interest Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "Which financial or business domain excites you the most in {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Analyzing tax laws, auditing ledgers, and certifying corporate accounts.", WeightModifiers = new() { { "primary", 5 }, { "ca", 5 }, { "acct", 5 } }, NextLevelTags = "ca" },
+                        new() { TextTemplate = "Valuing stocks, structuring corporate mergers, and investment strategies.", WeightModifiers = new() { { "primary", 5 }, { "cfa", 5 }, { "ib", 5 } }, NextLevelTags = "cfa" },
+                        new() { TextTemplate = "Coordinating corporate teams, setting project budgets, and scaling operations.", WeightModifiers = new() { { "primary", 4 }, { "mba", 5 } }, NextLevelTags = "mba" },
+                        new() { TextTemplate = "Developing automated quantitative trading algorithms and risk models.", WeightModifiers = new() { { "primary", 3 }, { "quant", 5 } }, NextLevelTags = "quant" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What project would you enjoy leading in {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Conducting a comprehensive risk assessment for a new investment portfolio.", WeightModifiers = new() { { "primary", 5 }, { "frm", 5 }, { "wealth", 5 } }, NextLevelTags = "frm" },
+                        new() { TextTemplate = "Formulating a long-term macro-economic policy proposal for inflation control.", WeightModifiers = new() { { "primary", 5 }, { "economist", 5 }, { "econ", 5 } }, NextLevelTags = "econ" },
+                        new() { TextTemplate = "Establishing corporate compliance standards and board resolution minutes.", WeightModifiers = new() { { "primary", 5 }, { "cs", 5 } }, NextLevelTags = "cs" },
+                        new() { TextTemplate = "Developing a new payment gateway or digital lending application.", WeightModifiers = new() { { "primary", 4 }, { "fintech", 5 } }, NextLevelTags = "fintech" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What kind of analysis sounds most interesting to you in {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Calculating cash flow projections, EBITDA, and internal rate of return (IRR).", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "cfa" },
+                        new() { TextTemplate = "Investigating asset records, balance sheets, and discovering tax savings.", WeightModifiers = new() { { "primary", 5 }, { "ca", 5 } }, NextLevelTags = "ca" },
+                        new() { TextTemplate = "Researching market size, competitive advantages, and customer engagement metrics.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "mba" },
+                        new() { TextTemplate = "Measuring standard deviations, tracking market indices, and hedging risk.", WeightModifiers = new() { { "primary", 4 }, { "frm", 5 } }, NextLevelTags = "frm" }
+                    }
+                });
+
+                // 3 WorkStyle Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you prefer to coordinate your team tasks in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Working on audit spreadsheets, validating receipts, and balancing ledgers.", WeightModifiers = new() { { "primary", 5 }, { "ca", 5 } } },
+                        new() { TextTemplate = "Conducting deal meetings with clients and pitching investment models.", WeightModifiers = new() { { "primary", 5 }, { "ib", 5 }, { "cfa", 5 } } },
+                        new() { TextTemplate = "Establishing weekly standups, delegation charts, and project milestones.", WeightModifiers = new() { { "primary", 4 }, { "mba", 5 } } },
+                        new() { TextTemplate = "Writing automated scripts to query financial APIs and fetch stock data.", WeightModifiers = new() { { "primary", 3 }, { "quant", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your approach to financial risk and market updates in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Prudently avoiding high-risk assets and planning secure, long-term reserves.", WeightModifiers = new() { { "primary", 5 }, { "frm", 5 } } },
+                        new() { TextTemplate = "Leveraging market opportunities using mathematical models and algorithmic trading.", WeightModifiers = new() { { "primary", 5 }, { "quant", 5 } } },
+                        new() { TextTemplate = "Adapting business strategies based on tax amendments and compliance updates.", WeightModifiers = new() { { "primary", 5 }, { "ca", 5 } } },
+                        new() { TextTemplate = "Drafting policy reports to influence government banking rates.", WeightModifiers = new() { { "primary", 4 }, { "econ", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When joining a new corporate team for {Title}, what is your initial step?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Reviewing the tax logs, financial statements, and ledger entries.", WeightModifiers = new() { { "primary", 5 }, { "ca", 5 } } },
+                        new() { TextTemplate = "Reviewing the capitalization table, investor agreements, and bylaws.", WeightModifiers = new() { { "primary", 5 }, { "cs", 5 } } },
+                        new() { TextTemplate = "Inspecting the database structure of the transactional ledger software.", WeightModifiers = new() { { "primary", 4 }, { "fintech", 5 } } },
+                        new() { TextTemplate = "Interviewing department heads to map business workflow bottlenecks.", WeightModifiers = new() { { "primary", 3 }, { "mba", 5 } } }
+                    }
+                });
+
+                // 3 Aptitude Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If a company's budget is overdrawn in {Title}, how do you diagnose the issue?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Performing a forensic audit of department ledger expenses.", WeightModifiers = new() { { "primary", 5 }, { "ca", 5 } } },
+                        new() { TextTemplate = "Analyzing fixed vs variable costs and optimizing product shipping models.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Reviewing marketing CAC vs customer LTV and stopping high-burn campaigns.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Negotiating refinancing options or short-term bank credit lines.", WeightModifiers = new() { { "primary", 4 }, { "ib", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you evaluate if a business investment is successful in {Title}?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Calculating the ROI, Net Present Value (NPV), and payback period.", WeightModifiers = new() { { "primary", 5 }, { "cfa", 5 } } },
+                        new() { TextTemplate = "Verifying if all operations comply with tax laws and corporate governance codes.", WeightModifiers = new() { { "primary", 5 }, { "ca", 5 }, { "cs", 5 } } },
+                        new() { TextTemplate = "Measuring customer acquisition growth rates and market share expansion.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Checking standard deviations of the stock portfolio against beta indices.", WeightModifiers = new() { { "primary", 3 }, { "frm", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When a financial audit reveals discrepancies in {Title}, what is your response?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Tracing transactions from bank statements to source vouchers.", WeightModifiers = new() { { "primary", 5 }, { "ca", 5 } } },
+                        new() { TextTemplate = "Reviewing board authorization minutes and compliance certificates.", WeightModifiers = new() { { "primary", 5 }, { "cs", 5 } } },
+                        new() { TextTemplate = "Analyzing database logs of the accounting software for manual overrides.", WeightModifiers = new() { { "primary", 4 }, { "fintech", 5 } } },
+                        new() { TextTemplate = "Recalculating tax liabilities and filing amended tax returns.", WeightModifiers = new() { { "primary", 4 }, { "ca", 4 } } }
+                    }
+                });
+                break;
+
+            case "design_creative":
+                // 3 Interest Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "Which creative process in {Title} do you enjoy the most?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Mapping user personas, wireframing screens, and creating clickable mockups.", WeightModifiers = new() { { "primary", 5 }, { "uiux", 5 } }, NextLevelTags = "uiux" },
+                        new() { TextTemplate = "Drawing digital illustrations, editing high-fidelity photos, and graphic styling.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "gd" },
+                        new() { TextTemplate = "Rigging 3D models, editing video sequences, and rendering movie VFX.", WeightModifiers = new() { { "primary", 4 }, { "anim", 5 } }, NextLevelTags = "anim" },
+                        new() { TextTemplate = "Designing apparel collections, sketching fashion drapes, or selecting fabric textures.", WeightModifiers = new() { { "primary", 3 }, { "fashion", 5 } }, NextLevelTags = "fashion" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If you had a free day to practice {Title}, what would you do?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Redesigning the interior layout, furniture, and lighting of a commercial cafe.", WeightModifiers = new() { { "primary", 5 }, { "interior", 5 } }, NextLevelTags = "interior" },
+                        new() { TextTemplate = "Cooking and presenting a multi-course gourmet menu with precise plating.", WeightModifiers = new() { { "primary", 5 }, { "cul", 5 } }, NextLevelTags = "cul" },
+                        new() { TextTemplate = "Writing a screenplay, filming documentary scenes, or adjusting video color grades.", WeightModifiers = new() { { "primary", 4 }, { "film", 5 } }, NextLevelTags = "film" },
+                        new() { TextTemplate = "Analyzing social trends, writing copy, and launching marketing campaigns.", WeightModifiers = new() { { "primary", 3 }, { "dm", 5 } }, NextLevelTags = "dm" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What outcome from a {Title} project makes you proud?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Seeing users interact effortlessly with an app without getting confused.", WeightModifiers = new() { { "primary", 5 }, { "uiux", 5 } }, NextLevelTags = "uiux" },
+                        new() { TextTemplate = "Having a logo or billboard design go viral and establish a brand identity.", WeightModifiers = new() { { "primary", 5 }, { "dm", 5 } }, NextLevelTags = "dm" },
+                        new() { TextTemplate = "Creating a beautiful physical space that makes people feel comfortable and inspired.", WeightModifiers = new() { { "primary", 4 }, { "interior", 5 } }, NextLevelTags = "interior" },
+                        new() { TextTemplate = "Serving a delicious meal that receives excellent guest feedback.", WeightModifiers = new() { { "primary", 3 }, { "cul", 5 } }, NextLevelTags = "cul" }
+                    }
+                });
+
+                // 3 WorkStyle Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you organize your workflow during a {Title} project?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Staging user testing sessions and gathering feedback on rough wireframes.", WeightModifiers = new() { { "primary", 5 }, { "uiux", 5 } } },
+                        new() { TextTemplate = "Creating multiple style guidelines and visual mood boards before final design.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Setting up rendering queues, layer groups, and timeline markers.", WeightModifiers = new() { { "primary", 4 }, { "anim", 5 } } },
+                        new() { TextTemplate = "Creating recipe batch calculations and testing menu items.", WeightModifiers = new() { { "primary", 3 }, { "cul", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your approach to feedback from clients or directors in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Analyzing the feedback using analytical metrics (like conversion rate or user tests).", WeightModifiers = new() { { "primary", 5 }, { "uiux", 5 } } },
+                        new() { TextTemplate = "Iterating visual palettes, fonts, and layouts to match the client's vision.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Adapting space planning to accommodate building code and client needs.", WeightModifiers = new() { { "primary", 4 }, { "interior", 5 } } },
+                        new() { TextTemplate = "Polishing food taste, spices, and plate presentation details.", WeightModifiers = new() { { "primary", 3 }, { "cul", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When starting a new {Title} project, what do you look at first?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "The design brief, brand guidelines, and visual references.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "User research data, survey responses, and customer journey maps.", WeightModifiers = new() { { "primary", 5 }, { "uiux", 5 } } },
+                        new() { TextTemplate = "Physical dimensions of the space, window directions, and layout constraints.", WeightModifiers = new() { { "primary", 4 }, { "interior", 5 } } },
+                        new() { TextTemplate = "Kitchen inventory logs, ingredient freshness, and menu pricing.", WeightModifiers = new() { { "primary", 3 }, { "cul", 5 } } }
+                    }
+                });
+
+                // 3 Aptitude Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If users find your {Title} layout hard to navigate, how do you diagnose it?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Running heatmaps, scroll-tracking tests, and recording user sessions.", WeightModifiers = new() { { "primary", 5 }, { "uiux", 5 } } },
+                        new() { TextTemplate = "Reviewing page grid layouts, line spacing, and contrast ratios.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Performing a walk-through audit of the physical floor space bottlenecks.", WeightModifiers = new() { { "primary", 4 }, { "interior", 5 } } },
+                        new() { TextTemplate = "Reviewing social media bounce rates, click-through rates, and drop-offs.", WeightModifiers = new() { { "primary", 3 }, { "dm", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you evaluate if a visual asset in {Title} is successful?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Confirming that it meets all accessibility standards (WCAG contrast, size).", WeightModifiers = new() { { "primary", 5 }, { "uiux", 5 } } },
+                        new() { TextTemplate = "Measuring audience engagement, shares, and conversion improvements.", WeightModifiers = new() { { "primary", 5 }, { "dm", 5 } } },
+                        new() { TextTemplate = "Inspecting structural safety, material durability, and lighting lumens.", WeightModifiers = new() { { "primary", 4 }, { "interior", 5 } } },
+                        new() { TextTemplate = "Verifying consistent food quality, temperature control, and cost margins.", WeightModifiers = new() { { "primary", 3 }, { "cul", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When a client complains about a design delay in {Title}, what is your recovery flow?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Showing progress wireframes immediately to align on the next design direction.", WeightModifiers = new() { { "primary", 5 }, { "uiux", 5 } } },
+                        new() { TextTemplate = "Providing a set of alternative visual mockups within a short deadline.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Re-evaluating spatial layouts and presenting a simplified floor blueprint.", WeightModifiers = new() { { "primary", 4 }, { "interior", 5 } } },
+                        new() { TextTemplate = "Offering a complimentary tasting session or replacing the menu item.", WeightModifiers = new() { { "primary", 3 }, { "cul", 5 } } }
+                    }
+                });
+                break;
+
+            case "law":
+                // 3 Interest Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What legal domain or practice area in {Title} interests you the most?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Drafting corporate contracts, commercial compliance, and shareholder agreements.", WeightModifiers = new() { { "primary", 5 }, { "corporate", 5 } }, NextLevelTags = "corporate" },
+                        new() { TextTemplate = "Defending rights in criminal trials, analyzing evidence, and presenting in court.", WeightModifiers = new() { { "primary", 5 }, { "criminal", 5 } }, NextLevelTags = "criminal" },
+                        new() { TextTemplate = "Reviewing lower court judgments, writing legal opinions, and judicial processes.", WeightModifiers = new() { { "primary", 5 }, { "judge", 5 } }, NextLevelTags = "judge" },
+                        new() { TextTemplate = "Mediating disputes, settlement negotiations, and family counseling.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "corporate" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If you were preparing for a trial in {Title}, how would you prepare?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Searching case law databases (SCC/Manupatra) for precedents and judgments.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "judge" },
+                        new() { TextTemplate = "Interviewing witnesses, reviewing crime scene logs, and validating cross-examinations.", WeightModifiers = new() { { "primary", 5 }, { "criminal", 5 } }, NextLevelTags = "criminal" },
+                        new() { TextTemplate = "Structuring corporate compliance sheets and reviewing company bylaws.", WeightModifiers = new() { { "primary", 5 }, { "corporate", 5 } }, NextLevelTags = "corporate" },
+                        new() { TextTemplate = "Writing legal summaries, briefs, and coordinating administrative courtroom filing.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "judge" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What career milestone in {Title} do you target?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Partner at a tier-1 corporate law firm advising on major acquisitions.", WeightModifiers = new() { { "primary", 5 }, { "corporate", 5 } }, NextLevelTags = "corporate" },
+                        new() { TextTemplate = "Leading criminal lawyer representing high-profile justice trials.", WeightModifiers = new() { { "primary", 5 }, { "criminal", 5 } }, NextLevelTags = "criminal" },
+                        new() { TextTemplate = "Passing the judicial services exam to become a magistrate in the court.", WeightModifiers = new() { { "primary", 5 }, { "judge", 5 } }, NextLevelTags = "judge" },
+                        new() { TextTemplate = "Legal advisor to a prominent international NGO or government policy think-tank.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "corporate" }
+                    }
+                });
+
+                // 3 WorkStyle Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you organize your legal research in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Categorizing judgments by court hierarchy, year, and relevance.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Drafting bulletproof contracts with precise definitions and indemnities.", WeightModifiers = new() { { "primary", 5 }, { "corporate", 5 } } },
+                        new() { TextTemplate = "Mapping out defense arguments against prosecution points sequentially.", WeightModifiers = new() { { "primary", 5 }, { "criminal", 5 } } },
+                        new() { TextTemplate = "Detailing statutory codes, local regulations, and administrative guidelines.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your approach to negotiations or trials in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Seeking compromise, amicable mediation, and fast settle terms.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Using strong logical rhetoric, citing precedents, and asserting courtroom presence.", WeightModifiers = new() { { "primary", 5 }, { "criminal", 5 } } },
+                        new() { TextTemplate = "Carefully reviewing corporate liabilities to minimize risk exposure.", WeightModifiers = new() { { "primary", 5 }, { "corporate", 5 } } },
+                        new() { TextTemplate = "Analyzing all details objectively to deliver a fair, neutral verdict.", WeightModifiers = new() { { "primary", 5 }, { "judge", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When starting on a new client case in {Title}, what do you look at first?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "The exact legal charge sheet, police records, or first information reports.", WeightModifiers = new() { { "primary", 5 }, { "criminal", 5 } } },
+                        new() { TextTemplate = "The underlying commercial agreement, equity structures, and financial terms.", WeightModifiers = new() { { "primary", 5 }, { "corporate", 5 } } },
+                        new() { TextTemplate = "Constitutional statutes, civil codes, and historical landmark judgments.", WeightModifiers = new() { { "primary", 5 }, { "judge", 5 } } },
+                        new() { TextTemplate = "The timeline of events, client testimonials, and written correspondence.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+
+                // 3 Aptitude Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If a contract clause is disputed in {Title}, how do you resolve it?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Analyzing case precedents on similar clauses and proposing an addendum.", WeightModifiers = new() { { "primary", 5 }, { "corporate", 5 } } },
+                        new() { TextTemplate = "Filing a motion in court to interpret the statutory meaning of the clause.", WeightModifiers = new() { { "primary", 5 }, { "judge", 5 } } },
+                        new() { TextTemplate = "Negotiating a commercial settlement with the opposing legal counsel.", WeightModifiers = new() { { "primary", 4 }, { "corporate", 5 } } },
+                        new() { TextTemplate = "Investigating the intent of the parties during the draft communications.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you evaluate if a legal strategy is successful in {Title}?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Whether it successfully secured a favorable verdict or case dismissal.", WeightModifiers = new() { { "primary", 5 }, { "criminal", 5 } } },
+                        new() { TextTemplate = "Whether it protected the client's corporate assets from litigation claims.", WeightModifiers = new() { { "primary", 5 }, { "corporate", 5 } } },
+                        new() { TextTemplate = "Whether the legal opinion remains consistent with constitutional standards.", WeightModifiers = new() { { "primary", 5 }, { "judge", 5 } } },
+                        new() { TextTemplate = "Whether the dispute was resolved with minimal court costs and delays.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When a new regulatory bill is passed in {Title}, what is your reaction?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Updating corporate training guidelines and amending template contracts.", WeightModifiers = new() { { "primary", 5 }, { "corporate", 5 } } },
+                        new() { TextTemplate = "Reviewing the bill's constitutionality and drafting public interest challenges.", WeightModifiers = new() { { "primary", 5 }, { "judge", 5 } } },
+                        new() { TextTemplate = "Analyzing how it impacts existing litigation cases on the court docket.", WeightModifiers = new() { { "primary", 5 }, { "judge", 5 } } },
+                        new() { TextTemplate = "Publishing a legal commentary explaining the practical changes of the law.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                break;
+
+            case "government":
+                // 3 Interest Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What area of public service or national administration in {Title} excites you?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Managing district administration, implementing policy, and resolving public grievances.", WeightModifiers = new() { { "primary", 5 }, { "civil", 5 }, { "upsc", 5 } }, NextLevelTags = "civil" },
+                        new() { TextTemplate = "Leading military operations, commanding platoons, and guarding national borders.", WeightModifiers = new() { { "primary", 5 }, { "def", 5 } }, NextLevelTags = "def" },
+                        new() { TextTemplate = "Inspecting bank operations, audit ledgers, and monetary compliance.", WeightModifiers = new() { { "primary", 5 }, { "bank", 5 } }, NextLevelTags = "bank" },
+                        new() { TextTemplate = "Writing state reports, analyzing rural development, and state government operations.", WeightModifiers = new() { { "primary", 4 }, { "state", 5 } }, NextLevelTags = "state" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How would you prefer to prepare for the {Title} entry process?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Deeply studying Indian Polity, History, Geography, and current affairs.", WeightModifiers = new() { { "primary", 5 }, { "civil", 5 }, { "upsc", 5 } }, NextLevelTags = "civil" },
+                        new() { TextTemplate = "Training physical fitness, leadership drills, and passing SSB military boards.", WeightModifiers = new() { { "primary", 5 }, { "def", 5 } }, NextLevelTags = "def" },
+                        new() { TextTemplate = "Practicing numerical aptitude, banking law, and general financial awareness.", WeightModifiers = new() { { "primary", 5 }, { "bank", 5 } }, NextLevelTags = "bank" },
+                        new() { TextTemplate = "Writing long essay answers on social reforms and public policy.", WeightModifiers = new() { { "primary", 4 }, { "civil", 5 } }, NextLevelTags = "civil" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What responsibility in {Title} sounds most appealing?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Having the authority to lead developmental changes in rural villages.", WeightModifiers = new() { { "primary", 5 }, { "civil", 5 }, { "upsc", 5 } }, NextLevelTags = "civil" },
+                        new() { TextTemplate = "Piloting air force fighter jets, commanding naval destroyers, or leading army troops.", WeightModifiers = new() { { "primary", 5 }, { "def", 5 } }, NextLevelTags = "def" },
+                        new() { TextTemplate = "Overseeing transactions at a major public sector branch and managing loans.", WeightModifiers = new() { { "primary", 5 }, { "bank", 5 } }, NextLevelTags = "bank" },
+                        new() { TextTemplate = "Managing tax collections, state revenues, and administrative audits.", WeightModifiers = new() { { "primary", 4 }, { "civil", 5 } }, NextLevelTags = "civil" }
+                    }
+                });
+
+                // 3 WorkStyle Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you handle public communication in a {Title} role?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Addressing public assemblies, explaining welfare plans, and resolving protests.", WeightModifiers = new() { { "primary", 5 }, { "civil", 5 }, { "upsc", 5 } } },
+                        new() { TextTemplate = "Issuing precise tactical orders and maintaining military chain-of-command.", WeightModifiers = new() { { "primary", 5 }, { "def", 5 } } },
+                        new() { TextTemplate = "Explaining interest rates, loan rules, and resolving customer account claims.", WeightModifiers = new() { { "primary", 5 }, { "bank", 5 } } },
+                        new() { TextTemplate = "Drafting official press statements and publishing budget files.", WeightModifiers = new() { { "primary", 4 }, { "state", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your approach to administrative rules and protocols in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Following state rules and official code-of-conduct manuals.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Executing orders with discipline, courage, and tactical operations.", WeightModifiers = new() { { "primary", 5 }, { "def", 5 } } },
+                        new() { TextTemplate = "Ensuring absolute monetary audit checks and ledger balances.", WeightModifiers = new() { { "primary", 5 }, { "bank", 5 } } },
+                        new() { TextTemplate = "Proposing policy adaptations based on field challenges.", WeightModifiers = new() { { "primary", 5 }, { "civil", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When starting a new deployment in {Title}, what is your focus?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Meeting local village heads, checking budget allocations, and auditing facilities.", WeightModifiers = new() { { "primary", 5 }, { "civil", 5 }, { "upsc", 5 } } },
+                        new() { TextTemplate = "Inspecting weapon systems, ammunition reserves, and base security walls.", WeightModifiers = new() { { "primary", 5 }, { "def", 5 } } },
+                        new() { TextTemplate = "Reviewing the branch transaction logs and cash vaults.", WeightModifiers = new() { { "primary", 5 }, { "bank", 5 } } },
+                        new() { TextTemplate = "Studying local crop yields, irrigation projects, and land record files.", WeightModifiers = new() { { "primary", 4 }, { "state", 5 } } }
+                    }
+                });
+
+                // 3 Aptitude Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If a developmental project is delayed due to local protests in {Title}, what is your response?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Holding public discussions with community heads and adjusting compensation.", WeightModifiers = new() { { "primary", 5 }, { "civil", 5 }, { "upsc", 5 } } },
+                        new() { TextTemplate = "Deploying patrol forces to guard the site boundaries and maintain order.", WeightModifiers = new() { { "primary", 5 }, { "def", 5 } } },
+                        new() { TextTemplate = "Auditing the local project budget to check for financial leakage.", WeightModifiers = new() { { "primary", 4 }, { "civil", 5 } } },
+                        new() { TextTemplate = "Filing a legal response defending state project authorizations.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you evaluate if a public policy is successful in {Title}?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Whether it reduced poverty metrics, improved literacy, and helped village heads.", WeightModifiers = new() { { "primary", 5 }, { "civil", 5 }, { "upsc", 5 } } },
+                        new() { TextTemplate = "Whether the military platoon achieved its strategic defense objectives safely.", WeightModifiers = new() { { "primary", 5 }, { "def", 5 } } },
+                        new() { TextTemplate = "Whether the banking branch met its annual loan recovery targets.", WeightModifiers = new() { { "primary", 5 }, { "bank", 5 } } },
+                        new() { TextTemplate = "Whether it increased state revenue collections without tax conflicts.", WeightModifiers = new() { { "primary", 4 }, { "state", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When a sudden emergency occurs in your jurisdiction in {Title}, what is your flow?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Establishing a disaster control center, allocating food, and coordinating police.", WeightModifiers = new() { { "primary", 5 }, { "civil", 5 }, { "upsc", 5 } } },
+                        new() { TextTemplate = "Enforcing immediate tactical lockdowns and initiating counter-ops.", WeightModifiers = new() { { "primary", 5 }, { "def", 5 } } },
+                        new() { TextTemplate = "Freezing disputed accounts and reporting transactions to the central bank.", WeightModifiers = new() { { "primary", 5 }, { "bank", 5 } } },
+                        new() { TextTemplate = "Drafting an emergency report to the state ministry requesting funds.", WeightModifiers = new() { { "primary", 4 }, { "state", 5 } } }
+                    }
+                });
+                break;
+
+            case "entrepreneurship":
+                // 3 Interest Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What aspect of startup building excites you the most in {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Validating a tech product idea, coding the MVP, and launching to users.", WeightModifiers = new() { { "primary", 5 }, { "startup", 5 } }, NextLevelTags = "startup" },
+                        new() { TextTemplate = "Designing product packaging, sourcing inventory, and scaling D2C e-commerce.", WeightModifiers = new() { { "primary", 5 }, { "d2c", 5 } }, NextLevelTags = "d2c" },
+                        new() { TextTemplate = "Running growth marketing campaigns, SEO hacks, and scaling customer acquisition.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "startup" },
+                        new() { TextTemplate = "Pitching business plans to venture capitalists and raising funding rounds.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "startup" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "Which challenge would you enjoy tackling in {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Finding product-market fit by interviewing early users and pivoting features.", WeightModifiers = new() { { "primary", 5 }, { "startup", 5 } }, NextLevelTags = "startup" },
+                        new() { TextTemplate = "Optimizing supply chain shipping costs and manufacturing pipeline efficiency.", WeightModifiers = new() { { "primary", 5 }, { "d2c", 5 } }, NextLevelTags = "d2c" },
+                        new() { TextTemplate = "Recruiting a core founding team of developers and designers.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "startup" },
+                        new() { TextTemplate = "Analyzing financial runways, burn rates, and unit economics metrics.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "startup" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your primary goal as a {Title} founder?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Building a high-growth technology company that disrupts an industry.", WeightModifiers = new() { { "primary", 5 }, { "startup", 5 } }, NextLevelTags = "startup" },
+                        new() { TextTemplate = "Creating a beloved consumer brand with premium, sustainable products.", WeightModifiers = new() { { "primary", 5 }, { "d2c", 5 } }, NextLevelTags = "d2c" },
+                        new() { TextTemplate = "Achieving financial independence and building a profitable lifestyle business.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "d2c" },
+                        new() { TextTemplate = "Developing an innovative solution that drives significant social impact.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "startup" }
+                    }
+                });
+
+                // 3 WorkStyle Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you organize daily operations as a {Title} founder?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Focusing on product design, developer sprints, and testing code features.", WeightModifiers = new() { { "primary", 5 }, { "startup", 5 } } },
+                        new() { TextTemplate = "Managing shipping tracking logs, factory manufacturing, and inventory orders.", WeightModifiers = new() { { "primary", 5 }, { "d2c", 5 } } },
+                        new() { TextTemplate = "Reviewing daily sales funnels, marketing copy, and customer support charts.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Conducting investor updates, financial modeling, and strategy workshops.", WeightModifiers = new() { { "primary", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your approach to dealing with competitive market changes in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Quickly iterating software features and launching product upgrades.", WeightModifiers = new() { { "primary", 5 }, { "startup", 5 } } },
+                        new() { TextTemplate = "Differentiating product quality, packaging, and brand storytelling.", WeightModifiers = new() { { "primary", 5 }, { "d2c", 5 } } },
+                        new() { TextTemplate = "Aggressively adjusting price discounts and running marketing blitzes.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Focusing on niche customer retention and building community loyalty.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When launching a new startup initiative for {Title}, what do you do first?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Building a quick landing page to gather email signups and validate interest.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Inspecting competitive products, pricing, and manufacturing options.", WeightModifiers = new() { { "primary", 5 }, { "d2c", 5 } } },
+                        new() { TextTemplate = "Creating a detailed pro-forma financial sheet showing cash runway.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Recruiting a technical co-founder to lead the product build.", WeightModifiers = new() { { "primary", 5 }, { "startup", 5 } } }
+                    }
+                });
+
+                // 3 Aptitude Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If user growth plateaus for {Title}, how do you diagnose it?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Analyzing funnel drop-offs, registration flows, and user retention charts.", WeightModifiers = new() { { "primary", 5 }, { "startup", 5 } } },
+                        new() { TextTemplate = "Reviewing customer feedback on product quality, shipping, and packaging.", WeightModifiers = new() { { "primary", 5 }, { "d2c", 5 } } },
+                        new() { TextTemplate = "A/B testing marketing copy, ad placements, and discount structures.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Analyzing customer churn rate and net promoter scores (NPS).", WeightModifiers = new() { { "primary", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you evaluate if your {Title} startup is ready to scale?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "When customer lifetime value (LTV) is at least three times the acquisition cost (CAC).", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "When product manufacturing can be automated and inventory runs smoothly.", WeightModifiers = new() { { "primary", 5 }, { "d2c", 5 } } },
+                        new() { TextTemplate = "When you have achieved consistent month-over-month revenue growth of over 15%.", WeightModifiers = new() { { "primary", 5 }, { "startup", 5 } } },
+                        new() { TextTemplate = "When you have a fully functional team that operates without founder intervention.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When cash runway drops below 3 months in {Title}, what is your action?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Immediately reducing operational expenses and pausing marketing experiments.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Launching a crowdfunding campaign or running an inventory clearance sale.", WeightModifiers = new() { { "primary", 5 }, { "d2c", 5 } } },
+                        new() { TextTemplate = "Accelerating pitch meetings with seed investors and venture capital firms.", WeightModifiers = new() { { "primary", 5 }, { "startup", 5 } } },
+                        new() { TextTemplate = "Pivoting the business model to focus only on highly profitable services.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                break;
+
+            case "vocational":
+            default:
+                // 3 Interest Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What vocational trade or hands-on practice in {Title} excites you?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Assembling electrical wiring layouts, switchboards, and power controls.", WeightModifiers = new() { { "primary", 5 }, { "elec", 5 } }, NextLevelTags = "elec" },
+                        new() { TextTemplate = "Operating lathes, fitting machinery components, and checking dimensions.", WeightModifiers = new() { { "primary", 5 }, { "fitter", 5 } }, NextLevelTags = "fitter" },
+                        new() { TextTemplate = "Performing arc welding, structural steel joining, and blueprint reading.", WeightModifiers = new() { { "primary", 5 }, { "welder", 5 } }, NextLevelTags = "welder" },
+                        new() { TextTemplate = "Designing piping layouts, fitting valves, and hot-water heating plumbing.", WeightModifiers = new() { { "primary", 5 }, { "plumb", 5 } }, NextLevelTags = "plumb" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What hands-on task would you prefer to perform in {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Installing solar panel converters and residential circuit breakers.", WeightModifiers = new() { { "primary", 5 }, { "elec", 5 } }, NextLevelTags = "elec" },
+                        new() { TextTemplate = "Diagnosing engine failures, transmission leaks, and doing vehicle tune-ups.", WeightModifiers = new() { { "primary", 5 }, { "mech", 5 } }, NextLevelTags = "mech" },
+                        new() { TextTemplate = "Fabricating metal support gates and welding heavy machinery parts.", WeightModifiers = new() { { "primary", 5 }, { "welder", 5 } }, NextLevelTags = "welder" },
+                        new() { TextTemplate = "Installing central heating systems, sewer drain pipes, and water fixtures.", WeightModifiers = new() { { "primary", 5 }, { "plumb", 5 } }, NextLevelTags = "plumb" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What working environment do you prefer in {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "On-site industrial workshop troubleshooting automation hardware.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "fitter" },
+                        new() { TextTemplate = "Construction site overseeing electrical or plumbing installations.", WeightModifiers = new() { { "primary", 5 }, { "elec", 5 } }, NextLevelTags = "elec" },
+                        new() { TextTemplate = "Manufacturing factory floor supervising machinery calibration.", WeightModifiers = new() { { "primary", 5 }, { "fitter", 5 } }, NextLevelTags = "fitter" },
+                        new() { TextTemplate = "Automobile repair garage fixing mechanical systems.", WeightModifiers = new() { { "primary", 5 }, { "mech", 5 } }, NextLevelTags = "mech" }
+                    }
+                });
+
+                // 3 WorkStyle Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you organize your work day in a {Title} trade role?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Reviewing blueprint schematics and preparing tool lists.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Inspecting wiring diagrams, testing currents, and calibrating voltage.", WeightModifiers = new() { { "primary", 5 }, { "elec", 5 } } },
+                        new() { TextTemplate = "Running lathe tests, checking calipers, and lubricating machinery parts.", WeightModifiers = new() { { "primary", 5 }, { "fitter", 5 } } },
+                        new() { TextTemplate = "Inspecting welding joints using dye penetrants and safety audits.", WeightModifiers = new() { { "primary", 5 }, { "welder", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your approach to work safety and tool maintenance in {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Sticking strictly to standard safety guidelines, wearing PPE, and safety locks.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Keeping tools organized, clean, and calibrated after every shift.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Replacing worn machinery parts and running scheduled maintenance.", WeightModifiers = new() { { "primary", 5 }, { "mech", 5 } } },
+                        new() { TextTemplate = "Verifying pipe pressure thresholds and testing for leaks.", WeightModifiers = new() { { "primary", 5 }, { "plumb", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When starting a new installation job for {Title}, what do you verify first?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "The structural blueprints, technical drawings, and tool specs.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "The main power grid isolation, circuit breakers, and grounding.", WeightModifiers = new() { { "primary", 5 }, { "elec", 5 } } },
+                        new() { TextTemplate = "The machinery alignment, lubrication levels, and bolt torques.", WeightModifiers = new() { { "primary", 5 }, { "mech", 5 } } },
+                        new() { TextTemplate = "The water supply pressures, valve seals, and piping routes.", WeightModifiers = new() { { "primary", 5 }, { "plumb", 5 } } }
+                    }
+                });
+
+                // 3 Aptitude Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If a machine or circuit fails to start in {Title}, how do you diagnose it?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Tracing voltage drops using a multimeter across circuit links.", WeightModifiers = new() { { "primary", 5 }, { "elec", 5 } } },
+                        new() { TextTemplate = "Checking mechanical logs, inspecting belts, and looking for mechanical wear.", WeightModifiers = new() { { "primary", 5 }, { "mech", 5 } } },
+                        new() { TextTemplate = "Testing the structural integrity of welded brackets under stress.", WeightModifiers = new() { { "primary", 5 }, { "welder", 5 } } },
+                        new() { TextTemplate = "Performing a pressure test to find pipes containing blocks or leaks.", WeightModifiers = new() { { "primary", 5 }, { "plumb", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you evaluate if a task is successfully completed in {Title}?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Verifying that circuit voltage levels are consistent and safe.", WeightModifiers = new() { { "primary", 5 }, { "elec", 5 } } },
+                        new() { TextTemplate = "Measuring dimensions with a digital micrometer to match specifications.", WeightModifiers = new() { { "primary", 5 }, { "fitter", 5 } } },
+                        new() { TextTemplate = "Ensuring welds are clean, free of cracks, and pass safety inspections.", WeightModifiers = new() { { "primary", 5 }, { "welder", 5 } } },
+                        new() { TextTemplate = "Running a full pressure test on the piping network without any leaks.", WeightModifiers = new() { { "primary", 5 }, { "plumb", 5 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When a sudden component failure happens during operations in {Title}, what do you do?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Immediately triggering the main emergency power cut-off switch.", WeightModifiers = new() { { "primary", 5 }, { "elec", 5 } } },
+                        new() { TextTemplate = "Stopping the engine and using mechanical lock-out tag-out protocols.", WeightModifiers = new() { { "primary", 5 }, { "mech", 5 } } },
+                        new() { TextTemplate = "Inspecting the failed metal joint and planning a reinforce weld.", WeightModifiers = new() { { "primary", 5 }, { "welder", 5 } } },
+                        new() { TextTemplate = "Closing the main water shut-off valve to prevent flooding.", WeightModifiers = new() { { "primary", 5 }, { "plumb", 5 } } }
+                    }
+                });
+                break;
+
+            case "tech_software":
+                // 3 Interest Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What type of software development tasks excite you the most when working with {Title}?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Building high-performance APIs and optimizing server databases.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "back" },
+                        new() { TextTemplate = "Designing responsive UI components, micro-frontends, and user flows.", WeightModifiers = new() { { "primary", 3 }, { "design", 5 } }, NextLevelTags = "front" },
+                        new() { TextTemplate = "Architecting cloud infrastructure, serverless functions, and CI/CD pipelines.", WeightModifiers = new() { { "primary", 3 }, { "devops", 5 } }, NextLevelTags = "devops" },
+                        new() { TextTemplate = "Working on game physics, graphics pipelines, or interactive simulations.", WeightModifiers = new() { { "primary", 2 } }, NextLevelTags = "game" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If you were to work on a weekend hackathon project for {Title}, what would you choose?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Creating a real-time web application using a modern fullstack framework.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "full" },
+                        new() { TextTemplate = "Developing an embedded system driver for IoT devices or microcontrollers.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "embed" },
+                        new() { TextTemplate = "Securing systems, performing vulnerability scans, and pen-testing APIs.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "cyber" },
+                        new() { TextTemplate = "Writing smart contracts and deploying decentralized Web3 applications.", WeightModifiers = new() { { "primary", 3 } }, NextLevelTags = "block" }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "Which aspect of technology system design for {Title} interests you the most?",
+                    AptitudeType = "Interest",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Scaling applications to handle millions of requests with message queues.", WeightModifiers = new() { { "primary", 5 } }, NextLevelTags = "arch" },
+                        new() { TextTemplate = "Optimizing application bundle sizes and client-side rendering speeds.", WeightModifiers = new() { { "primary", 4 } }, NextLevelTags = "front" },
+                        new() { TextTemplate = "Establishing zero-downtime deployments and containerized cluster orchestration.", WeightModifiers = new() { { "primary", 4 }, { "devops", 5 } }, NextLevelTags = "devops" },
+                        new() { TextTemplate = "Writing clear, modular clean-code documentation for developers.", WeightModifiers = new() { { "primary", 3 } }, NextLevelTags = "se" }
+                    }
+                });
+
+                // 3 WorkStyle Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you prefer to collaborate with your team when shipping {Title} features?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Focusing on writing clean code, pull request reviews, and refactoring.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Coordinating with product managers to scope features and translate requirements.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Troubleshooting infrastructure issues, on-call alert systems, and post-mortems.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Conducting design sprints and prototyping mockups with Figma.", WeightModifiers = new() { { "primary", 2 }, { "design", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "What is your philosophy on adopting new developer tools and frameworks for {Title}?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Pioneering state-of-the-art libraries even if they have unstable ecosystems.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Standardizing mature, battle-tested programming patterns to ensure system longevity.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Automating script configurations and build steps to minimize developer friction.", WeightModifiers = new() { { "primary", 4 }, { "devops", 5 } } },
+                        new() { TextTemplate = "Sticking strictly to official SDK guidelines and hardware spec sheets.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When joining a new {Title} project, what is your first step?",
+                    AptitudeType = "WorkStyle",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Reviewing the repository codebase, folder structure, and existing unit tests.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Checking the system architecture diagram and database entity relations.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Running the project locally and inspecting the network calls in developer tools.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Inspecting the Dockerfile, env settings, and staging deployment pipeline.", WeightModifiers = new() { { "primary", 4 }, { "devops", 5 } } }
+                    }
+                });
+
+                // 3 Aptitude Questions
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "If you encounter a performance bottleneck in your {Title} application, how do you diagnose it?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Using profiling tools to trace slow database queries, indexes, and locking.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Inspecting chrome performance timelines for long tasks and main-thread blocks.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Monitoring server CPU, memory utilization, and container garbage collection.", WeightModifiers = new() { { "primary", 4 } } },
+                        new() { TextTemplate = "Analyzing network bandwidth limits and CDN caching configurations.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "How do you ensure code safety, reliability, and security in your {Title} project?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Setting up automated unit/integration tests with high code coverage metrics.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Enforcing strict static typing, dependency injection, and architectural patterns.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Configuring security scan actions in CI/CD and implementing JWT/OAuth best practices.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Testing error handling bounds, hardware interrupts, and power consumption.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                list.Add(new QuestionTemplate {
+                    TextTemplate = "When a critical bug is reported in production for {Title}, what is your debugging flow?",
+                    AptitudeType = "Aptitude",
+                    Options = new List<OptionTemplate> {
+                        new() { TextTemplate = "Searching centralized server logs (Kibana/Datadog) for exact stack traces.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Isolating the issue using test suites and step-through debuggers.", WeightModifiers = new() { { "primary", 5 } } },
+                        new() { TextTemplate = "Reverting the recent deployment branch instantly to restore system health.", WeightModifiers = new() { { "primary", 4 }, { "devops", 5 } } },
+                        new() { TextTemplate = "Simulating user network throttles or local storage conditions to reproduce the bug.", WeightModifiers = new() { { "primary", 4 } } }
+                    }
+                });
+                break;
+        }
+
+        return list;
+    }
+
     private static async Task SeedHierarchicalQuizQuestionsAsync(ApplicationDbContext context)
     {
         if (context.HierarchicalQuizQuestions.Any())
@@ -1045,107 +2251,390 @@ public static class DatabaseSeeder
         var paths = await context.CareerPaths.ToListAsync();
         var questionsList = new List<HierarchicalQuizQuestion>();
 
-        // Seed 3 base Level 1 questions
+        // Seed base Level 1 questions (Interest & Aptitude) tailored for each of the 9 streams
         var level1Questions = new List<HierarchicalQuizQuestion>
         {
+            // After 10th Grade
             new HierarchicalQuizQuestion
             {
-                Id = "hq-lvl1-1",
-                QuestionText = "Which academic discipline or domain of work excites you the most when reading news or blogs?",
+                Id = "hq-lvl1-10th-i",
+                QuestionText = "Which academic discipline or domain of study excites you the most as you think about your next step?",
                 HierarchyLevel = 1,
-                StreamType = "After10th, After12th, AfterGraduation, AfterPostGraduation, CareerSwitch, Upskilling, Entrepreneurship, GovernmentJobs, InternationalEducation",
+                StreamType = "After10th",
                 AptitudeType = "Interest",
-                TargetCareerTags = "science,commerce,arts,diploma",
+                TargetCareerTags = "sci,com,art,dip",
                 OptionsJson = "[" +
-                              "{\"text\": \"Scientific inventions, engineering marvels, or medical discoveries.\", \"weights\": {\"science\": 3, \"pcm\": 2, \"pcb\": 2}, \"nextLevelTags\": \"science\"}," +
-                              "{\"text\": \"Stock markets, finance trends, corporate mergers, or startups.\", \"weights\": {\"commerce\": 3, \"finance\": 2, \"management\": 2}, \"nextLevelTags\": \"commerce\"}," +
-                              "{\"text\": \"Graphic designs, legal analyses, media reporting, or writing.\", \"weights\": {\"arts\": 3, \"creative\": 2, \"law\": 2}, \"nextLevelTags\": \"arts\"}," +
-                              "{\"text\": \"Practical hands-on repairs, workshop machines, or technical polytechnics.\", \"weights\": {\"diploma\": 3, \"polytech\": 2, \"vocational\": 2}, \"nextLevelTags\": \"diploma\"}" +
+                              "{\"text\": \"Scientific concepts, laboratory experiments, or mathematics.\", \"weights\": {\"sci\": 3, \"pcm\": 2, \"pcb\": 2}, \"nextLevelTags\": \"sci\"}," +
+                              "{\"text\": \"Corporate trade, accounting, household budgets, and business news.\", \"weights\": {\"com\": 3, \"finance\": 2}, \"nextLevelTags\": \"com\"}," +
+                              "{\"text\": \"Writing stories, historical analysis, painting, or media journalism.\", \"weights\": {\"art\": 3, \"creative\": 2}, \"nextLevelTags\": \"art\"}," +
+                              "{\"text\": \"Practical hands-on workshops, repair tools, or polytechnic trades.\", \"weights\": {\"dip\": 3, \"vocational\": 2}, \"nextLevelTags\": \"dip\"}" +
                               "]"
             },
             new HierarchicalQuizQuestion
             {
-                Id = "hq-lvl1-3",
-                QuestionText = "How do you naturally approach problem solving or task organization?",
+                Id = "hq-lvl1-10th-a",
+                QuestionText = "How do you prefer to solve problems or complete school projects?",
                 HierarchyLevel = 1,
-                StreamType = "After10th, After12th, AfterGraduation, AfterPostGraduation, CareerSwitch, Upskilling, Entrepreneurship, GovernmentJobs, InternationalEducation",
+                StreamType = "After10th",
                 AptitudeType = "Aptitude",
-                TargetCareerTags = "science,commerce,arts,diploma",
+                TargetCareerTags = "sci,com,art,dip",
                 OptionsJson = "[" +
-                              "{\"text\": \"By collecting data, analyzing equations, and modeling logical steps.\", \"weights\": {\"science\": 3, \"pcm\": 2}, \"nextLevelTags\": \"science\"}," +
-                              "{\"text\": \"By measuring cash flows, estimating risk, and negotiating resource allocation.\", \"weights\": {\"commerce\": 3, \"finance\": 2}, \"nextLevelTags\": \"commerce\"}," +
-                              "{\"text\": \"By evaluating emotional response, visual aesthetics, and cultural impact.\", \"weights\": {\"arts\": 3, \"creative\": 2}, \"nextLevelTags\": \"arts\"}," +
-                              "{\"text\": \"By physically disassembling the device, testing parts, and repairing manually.\", \"weights\": {\"diploma\": 3, \"polytech\": 2}, \"nextLevelTags\": \"diploma\"}" +
+                              "{\"text\": \"By analyzing scientific data, formula equations, or logical proofs.\", \"weights\": {\"sci\": 3, \"pcm\": 2}, \"nextLevelTags\": \"sci\"}," +
+                              "{\"text\": \"By managing resource allocations, cost estimation, or leadership organization.\", \"weights\": {\"com\": 3, \"finance\": 2}, \"nextLevelTags\": \"com\"}," +
+                              "{\"text\": \"By designing visual displays, writing reports, or verbal presentations.\", \"weights\": {\"art\": 3, \"creative\": 2}, \"nextLevelTags\": \"art\"}," +
+                              "{\"text\": \"By physically assembling components, fixing wires, or testing mechanisms.\", \"weights\": {\"dip\": 3, \"polytech\": 2}, \"nextLevelTags\": \"dip\"}" +
+                              "]"
+            },
+
+            // After 12th Grade
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-12th-i",
+                QuestionText = "Given your stream background in 11th-12th grade, what type of degree or domain matches your ambitions?",
+                HierarchyLevel = 1,
+                StreamType = "After12th",
+                AptitudeType = "Interest",
+                TargetCareerTags = "pcm,pcb,com,art",
+                OptionsJson = "[" +
+                              "{\"text\": \"Engineering, code development, architecture, or technical sciences.\", \"weights\": {\"pcm\": 3, \"eng\": 2}, \"nextLevelTags\": \"pcm\"}," +
+                              "{\"text\": \"Clinical medicine, dental care, nursing, or biological research.\", \"weights\": {\"pcb\": 3, \"med\": 2}, \"nextLevelTags\": \"pcb\"}," +
+                              "{\"text\": \"Chartered accountancy, stocks, corporate business, or economics.\", \"weights\": {\"com\": 3, \"fin\": 2}, \"nextLevelTags\": \"com\"}," +
+                              "{\"text\": \"Legal advocacy, product design, humanities, or civil service study.\", \"weights\": {\"art\": 3, \"law\": 2}, \"nextLevelTags\": \"art\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-12th-a",
+                QuestionText = "What kind of complex problems are you most eager to study and solve in your career?",
+                HierarchyLevel = 1,
+                StreamType = "After12th",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "pcm,pcb,com,art",
+                OptionsJson = "[" +
+                              "{\"text\": \"Designing algorithms, debugging software scripts, or building structures.\", \"weights\": {\"pcm\": 3, \"eng\": 2}, \"nextLevelTags\": \"pcm\"}," +
+                              "{\"text\": \"Diagnosing patient symptoms, reviewing pathology, or drug chemical profiles.\", \"weights\": {\"pcb\": 3, \"med\": 2}, \"nextLevelTags\": \"pcb\"}," +
+                              "{\"text\": \"Analyzing financial statements, auditing ledgers, or business trends.\", \"weights\": {\"com\": 3, \"fin\": 2}, \"nextLevelTags\": \"com\"}," +
+                              "{\"text\": \"Drafting legal defense cases, wireframing digital apps, or writing policy.\", \"weights\": {\"art\": 3, \"law\": 2}, \"nextLevelTags\": \"art\"}" +
+                              "]"
+            },
+
+            // After Graduation
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-grad-i",
+                QuestionText = "As a university graduate, which professional sector align with your post-graduation career goals?",
+                HierarchyLevel = 1,
+                StreamType = "AfterGraduation",
+                AptitudeType = "Interest",
+                TargetCareerTags = "eng,cs,bus,med,art",
+                OptionsJson = "[" +
+                              "{\"text\": \"Technical software engineering, data science pipelines, or IT infrastructure.\", \"weights\": {\"eng\": 3, \"cs\": 2}, \"nextLevelTags\": \"cs\"}," +
+                              "{\"text\": \"Business operations, MBA consulting, corporate finance, or marketing.\", \"weights\": {\"bus\": 3, \"mgmt\": 2}, \"nextLevelTags\": \"bus\"}," +
+                              "{\"text\": \"Clinical healthcare practice, pharmacy operations, or nursing care.\", \"weights\": {\"med\": 3, \"hc\": 2}, \"nextLevelTags\": \"med\"}," +
+                              "{\"text\": \"Creative brand design, interior layouts, movie VFX, or photography.\", \"weights\": {\"art\": 3, \"des\": 2}, \"nextLevelTags\": \"art\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-grad-a",
+                QuestionText = "Which advanced professional skill set do you wish to leverage daily?",
+                HierarchyLevel = 1,
+                StreamType = "AfterGraduation",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "eng,cs,bus,med,art",
+                OptionsJson = "[" +
+                              "{\"text\": \"Fullstack coding scripts, database profiling, or DevOps builds.\", \"weights\": {\"eng\": 3, \"cs\": 2}, \"nextLevelTags\": \"cs\"}," +
+                              "{\"text\": \"Corporate team coordination, budgeting spreadsheets, or brand strategy.\", \"weights\": {\"bus\": 3, \"mgmt\": 2}, \"nextLevelTags\": \"bus\"}," +
+                              "{\"text\": \"Patient clinical diagnosis, radiological scanning, or pharmaceutical audits.\", \"weights\": {\"med\": 3, \"hc\": 2}, \"nextLevelTags\": \"med\"}," +
+                              "{\"text\": \"UI/UX screen wireframing, industrial prototype models, or fashion sketches.\", \"weights\": {\"art\": 3, \"des\": 2}, \"nextLevelTags\": \"art\"}" +
+                              "]"
+            },
+
+            // After Post Graduation
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-pg-i",
+                QuestionText = "With your postgraduate degree completed, what type of advanced work environment do you target?",
+                HierarchyLevel = 1,
+                StreamType = "AfterPostGraduation",
+                AptitudeType = "Interest",
+                TargetCareerTags = "phd,prof",
+                OptionsJson = "[" +
+                              "{\"text\": \"Academic research labs, writing thesis papers, or university teaching.\", \"weights\": {\"phd\": 3, \"academic\": 2}, \"nextLevelTags\": \"phd\"}," +
+                              "{\"text\": \"Specialist corporate consulting, lead engineering practice, or clinical consulting.\", \"weights\": {\"prof\": 3, \"practice\": 2}, \"nextLevelTags\": \"prof\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-pg-a",
+                QuestionText = "How do you prefer to apply your advanced specialist knowledge?",
+                HierarchyLevel = 1,
+                StreamType = "AfterPostGraduation",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "phd,prof",
+                OptionsJson = "[" +
+                              "{\"text\": \"By publishing scientific discoveries, reviews, and leading lectures.\", \"weights\": {\"phd\": 3, \"academic\": 2}, \"nextLevelTags\": \"phd\"}," +
+                              "{\"text\": \"By resolving enterprise problems, patents, and senior team deliverables.\", \"weights\": {\"prof\": 3, \"practice\": 2}, \"nextLevelTags\": \"prof\"}" +
+                              "]"
+            },
+
+            // Career Switch
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-switch-i",
+                QuestionText = "Which high-growth digital industry are you looking to switch into?",
+                HierarchyLevel = 1,
+                StreamType = "CareerSwitch",
+                AptitudeType = "Interest",
+                TargetCareerTags = "tech,mgmt,des",
+                OptionsJson = "[" +
+                              "{\"text\": \"Software development, mobile apps coding, or cloud architecture.\", \"weights\": {\"tech\": 3, \"cs\": 2}, \"nextLevelTags\": \"tech\"}," +
+                              "{\"text\": \"Product management, business analysis, or scrum facilitation.\", \"weights\": {\"mgmt\": 3, \"prod\": 2}, \"nextLevelTags\": \"mgmt\"}," +
+                              "{\"text\": \"User interface (UI/UX) design, graphic wireframes, or digital assets creation.\", \"weights\": {\"des\": 3, \"uiux\": 2}, \"nextLevelTags\": \"des\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-switch-a",
+                QuestionText = "What is your main transferable skill or alignment for this career switch?",
+                HierarchyLevel = 1,
+                StreamType = "CareerSwitch",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "tech,mgmt,des",
+                OptionsJson = "[" +
+                              "{\"text\": \"I enjoy writing automation scripts, logic, and building functional tools.\", \"weights\": {\"tech\": 3, \"cs\": 2}, \"nextLevelTags\": \"tech\"}," +
+                              "{\"text\": \"I excel at coordinate schedules, translating guidelines, and public communication.\", \"weights\": {\"mgmt\": 3, \"prod\": 2}, \"nextLevelTags\": \"mgmt\"}," +
+                              "{\"text\": \"I have a strong eye for visual layouts, color patterns, and user flows.\", \"weights\": {\"des\": 3, \"uiux\": 2}, \"nextLevelTags\": \"des\"}" +
+                              "]"
+            },
+
+            // Upskilling
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-upskill-i",
+                QuestionText = "Which tech specialization area represents your target upskilling certification?",
+                HierarchyLevel = 1,
+                StreamType = "Upskilling",
+                AptitudeType = "Interest",
+                TargetCareerTags = "cloud,ai,cyber",
+                OptionsJson = "[" +
+                              "{\"text\": \"Cloud environments (AWS/Azure/GCP), container pipelines, or DevOps.\", \"weights\": {\"cloud\": 3, \"devops\": 2}, \"nextLevelTags\": \"cloud\"}," +
+                              "{\"text\": \"Deep learning models, neural weights tuning, Python data profiling, or ML.\", \"weights\": {\"ai\": 3, \"ml\": 2}, \"nextLevelTags\": \"ai\"}," +
+                              "{\"text\": \"System vulnerability scanning, API pen-testing, or security compliance.\", \"weights\": {\"cyber\": 3, \"security\": 2}, \"nextLevelTags\": \"cyber\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-upskill-a",
+                QuestionText = "Which technical challenge aligns with your current level of professional upgrade?",
+                HierarchyLevel = 1,
+                StreamType = "Upskilling",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "cloud,ai,cyber",
+                OptionsJson = "[" +
+                              "{\"text\": \"Automating CI/CD pipelines, scaling database nodes, or server config.\", \"weights\": {\"cloud\": 3, \"devops\": 2}, \"nextLevelTags\": \"cloud\"}," +
+                              "{\"text\": \"Fine-tuning neural transformer parameters or clean dataset parsing.\", \"weights\": {\"ai\": 3, \"ml\": 2}, \"nextLevelTags\": \"ai\"}," +
+                              "{\"text\": \"Setting up firewalls, verifying audit logs, or patching vulnerabilities.\", \"weights\": {\"cyber\": 3, \"security\": 2}, \"nextLevelTags\": \"cyber\"}" +
+                              "]"
+            },
+
+            // Entrepreneurship
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-ent-i",
+                QuestionText = "What type of startup business model do you wish to launch as a founder?",
+                HierarchyLevel = 1,
+                StreamType = "Entrepreneurship",
+                AptitudeType = "Interest",
+                TargetCareerTags = "startup,d2c",
+                OptionsJson = "[" +
+                              "{\"text\": \"High-growth software-as-a-service (SaaS) or mobile app tools.\", \"weights\": {\"startup\": 3, \"tech\": 2}, \"nextLevelTags\": \"startup\"}," +
+                              "{\"text\": \"Consumer brand (D2C), direct manufacturing, or e-commerce shop.\", \"weights\": {\"d2c\": 3, \"brand\": 2}, \"nextLevelTags\": \"d2c\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-ent-a",
+                QuestionText = "How do you plan to validate your business idea and launch to early users?",
+                HierarchyLevel = 1,
+                StreamType = "Entrepreneurship",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "startup,d2c",
+                OptionsJson = "[" +
+                              "{\"text\": \"By writing a clean software prototype and hosting it on startup directories.\", \"weights\": {\"startup\": 3, \"tech\": 2}, \"nextLevelTags\": \"startup\"}," +
+                              "{\"text\": \"By sourcing initial supplier samples, packaging, and social marketing campaigns.\", \"weights\": {\"d2c\": 3, \"brand\": 2}, \"nextLevelTags\": \"d2c\"}" +
+                              "]"
+            },
+
+            // Government Jobs
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-gov-i",
+                QuestionText = "Which public administration sector represents your career goal?",
+                HierarchyLevel = 1,
+                StreamType = "GovernmentJobs",
+                AptitudeType = "Interest",
+                TargetCareerTags = "civil,bank,def",
+                OptionsJson = "[" +
+                              "{\"text\": \"IAS/IPS civil services administrative desks, public welfare, and state policy.\", \"weights\": {\"civil\": 3, \"upsc\": 2}, \"nextLevelTags\": \"civil\"}," +
+                              "{\"text\": \"Banking officer (PO) branch operations, audit compliance, or RBI reserves.\", \"weights\": {\"bank\": 3, \"finance\": 2}, \"nextLevelTags\": \"bank\"}," +
+                              "{\"text\": \"Military platoon command, fighter jet operations, or naval commission.\", \"weights\": {\"def\": 3, \"military\": 2}, \"nextLevelTags\": \"def\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-gov-a",
+                QuestionText = "Which national level screening process best aligns with your strengths?",
+                HierarchyLevel = 1,
+                StreamType = "GovernmentJobs",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "civil,bank,def",
+                OptionsJson = "[" +
+                              "{\"text\": \"Solving GS descriptive essay questions, history, polity, and interviews.\", \"weights\": {\"civil\": 3, \"upsc\": 2}, \"nextLevelTags\": \"civil\"}," +
+                              "{\"text\": \"Speed quantitative aptitude tests, banking codes, and logical puzzles.\", \"weights\": {\"bank\": 3, \"finance\": 2}, \"nextLevelTags\": \"bank\"}," +
+                              "{\"text\": \"SSB officer commission tasks, physical drills, and tactical command tests.\", \"weights\": {\"def\": 3, \"military\": 2}, \"nextLevelTags\": \"def\"}" +
+                              "]"
+            },
+
+            // International Education
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-intl-i",
+                QuestionText = "Which global postgraduate program format are you planning to apply for?",
+                HierarchyLevel = 1,
+                StreamType = "InternationalEducation",
+                AptitudeType = "Interest",
+                TargetCareerTags = "ms,mba",
+                OptionsJson = "[" +
+                              "{\"text\": \"Master of Science (MS) in STEM domains focusing on laboratory research.\", \"weights\": {\"ms\": 3, \"stem\": 2}, \"nextLevelTags\": \"ms\"}," +
+                              "{\"text\": \"Global Master of Business Administration (MBA) focusing on consulting/strategy.\", \"weights\": {\"mba\": 3, \"business\": 2}, \"nextLevelTags\": \"mba\"}" +
+                              "]"
+            },
+            new HierarchicalQuizQuestion
+            {
+                Id = "hq-lvl1-intl-a",
+                QuestionText = "What is your primary expected post-study career placement outcome?",
+                HierarchyLevel = 1,
+                StreamType = "InternationalEducation",
+                AptitudeType = "Aptitude",
+                TargetCareerTags = "ms,mba",
+                OptionsJson = "[" +
+                              "{\"text\": \"Joining corporate R&D divisions or specialized technical roles abroad.\", \"weights\": {\"ms\": 3, \"stem\": 2}, \"nextLevelTags\": \"ms\"}," +
+                              "{\"text\": \"Entering international investment banks, global consulting, or strategy desks.\", \"weights\": {\"mba\": 3, \"business\": 2}, \"nextLevelTags\": \"mba\"}" +
                               "]"
             }
         };
         questionsList.AddRange(level1Questions);
 
-        // For each career path at Level 2, 3, 4, 5, generate 9 questions
+        // For each career path at Level 2, 3, 4, 5, generate domain-specific questions
         var targetPaths = paths.Where(p => p.Level >= 2).ToList();
 
         foreach (var path in targetPaths)
         {
             var pathTags = path.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
             string primaryTag = pathTags.LastOrDefault() ?? "general";
+            string category = GetRoadmapCategory(path.Id);
+            var templates = GetTemplatesForCategory(category);
 
             // Generate 3 Interest questions
             for (int i = 1; i <= 3; i++)
             {
+                var template = templates[i - 1];
+                var optionsList = new List<object>();
+
+                foreach (var opt in template.Options)
+                {
+                    var finalWeights = new Dictionary<string, int>();
+                    foreach (var kv in opt.WeightModifiers)
+                    {
+                        string key = kv.Key == "primary" ? primaryTag : kv.Key;
+                        finalWeights[key] = kv.Value;
+                    }
+
+                    optionsList.Add(new {
+                        text = opt.TextTemplate,
+                        weights = finalWeights,
+                        nextLevelTags = !string.IsNullOrEmpty(opt.NextLevelTags) ? opt.NextLevelTags : primaryTag
+                    });
+                }
+
                 questionsList.Add(new HierarchicalQuizQuestion
                 {
                     Id = $"hq-g-{path.Id}-i{i}",
-                    QuestionText = $"Regarding {path.Title}, what aspect of interest excites you the most (Scenario {i})?",
+                    QuestionText = template.TextTemplate.Replace("{Title}", path.Title),
                     HierarchyLevel = path.Level,
                     StreamType = path.StreamType,
                     AptitudeType = "Interest",
-                    TargetCareerTags = primaryTag,
-                    OptionsJson = "[" +
-                                  $"{{\"text\": \"Deep diving into core {path.Title} workflows and mastering its details.\", \"weights\": {{\"{primaryTag}\": 5}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
-                                  $"{{\"text\": \"Coordinating high-level strategies surrounding {path.Title}.\", \"weights\": {{\"{primaryTag}\": 3}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
-                                  $"{{\"text\": \"Working on visual layout designs and aesthetics for {path.Title}.\", \"weights\": {{\"creative\": 2, \"design\": 2}}, \"nextLevelTags\": \"design\"}}," +
-                                  $"{{\"text\": \"Dealing with basic system setups, network routers, and support.\", \"weights\": {{\"diploma\": 2, \"tech\": 2}}, \"nextLevelTags\": \"diploma\"}}" +
-                                  "]"
+                    TargetCareerTags = path.Tags.ToLower(),
+                    OptionsJson = JsonSerializer.Serialize(optionsList)
                 });
             }
 
             // Generate 3 WorkStyle questions
             for (int i = 1; i <= 3; i++)
             {
+                var template = templates[i + 2];
+                var optionsList = new List<object>();
+
+                foreach (var opt in template.Options)
+                {
+                    var finalWeights = new Dictionary<string, int>();
+                    foreach (var kv in opt.WeightModifiers)
+                    {
+                        string key = kv.Key == "primary" ? primaryTag : kv.Key;
+                        finalWeights[key] = kv.Value;
+                    }
+
+                    optionsList.Add(new {
+                        text = opt.TextTemplate,
+                        weights = finalWeights,
+                        nextLevelTags = !string.IsNullOrEmpty(opt.NextLevelTags) ? opt.NextLevelTags : primaryTag
+                    });
+                }
+
                 questionsList.Add(new HierarchicalQuizQuestion
                 {
                     Id = $"hq-g-{path.Id}-w{i}",
-                    QuestionText = $"In a day-to-day role in {path.Title}, how do you prefer to approach your team tasks (Scenario {i})?",
+                    QuestionText = template.TextTemplate.Replace("{Title}", path.Title),
                     HierarchyLevel = path.Level,
                     StreamType = path.StreamType,
                     AptitudeType = "WorkStyle",
-                    TargetCareerTags = primaryTag,
-                    OptionsJson = "[" +
-                                  $"{{\"text\": \"Independently focusing on technical deliverables and specifications for {path.Title}.\", \"weights\": {{\"{primaryTag}\": 5}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
-                                  $"{{\"text\": \"Collaborating in agile sprint planning sessions with business analysts.\", \"weights\": {{\"{primaryTag}\": 3, \"management\": 2}}, \"nextLevelTags\": \"management\"}}," +
-                                  $"{{\"text\": \"Creating vector mockups, icons, and aesthetic layouts.\", \"weights\": {{\"creative\": 2, \"design\": 2}}, \"nextLevelTags\": \"design\"}}," +
-                                  $"{{\"text\": \"Troubleshooting physical machines, switchboards, or server terminals.\", \"weights\": {{\"diploma\": 2, \"tech\": 2}}, \"nextLevelTags\": \"diploma\"}}" +
-                                  "]"
+                    TargetCareerTags = path.Tags.ToLower(),
+                    OptionsJson = JsonSerializer.Serialize(optionsList)
                 });
             }
 
             // Generate 3 Aptitude questions
             for (int i = 1; i <= 3; i++)
             {
+                var template = templates[i + 5];
+                var optionsList = new List<object>();
+
+                foreach (var opt in template.Options)
+                {
+                    var finalWeights = new Dictionary<string, int>();
+                    foreach (var kv in opt.WeightModifiers)
+                    {
+                        string key = kv.Key == "primary" ? primaryTag : kv.Key;
+                        finalWeights[key] = kv.Value;
+                    }
+
+                    optionsList.Add(new {
+                        text = opt.TextTemplate,
+                        weights = finalWeights,
+                        nextLevelTags = !string.IsNullOrEmpty(opt.NextLevelTags) ? opt.NextLevelTags : primaryTag
+                    });
+                }
+
                 questionsList.Add(new HierarchicalQuizQuestion
                 {
                     Id = $"hq-g-{path.Id}-a{i}",
-                    QuestionText = $"If a critical block occurs during a {path.Title} project, what is your diagnostic method (Scenario {i})?",
+                    QuestionText = template.TextTemplate.Replace("{Title}", path.Title),
                     HierarchyLevel = path.Level,
                     StreamType = path.StreamType,
                     AptitudeType = "Aptitude",
-                    TargetCareerTags = primaryTag,
-                    OptionsJson = "[" +
-                                  $"{{\"text\": \"Deep diving into the underlying logic or ledger data of {path.Title}.\", \"weights\": {{\"{primaryTag}\": 5}}, \"nextLevelTags\": \"{primaryTag}\"}}," +
-                                  $"{{\"text\": \"Formulating new business strategies and negotiating project scope changes.\", \"weights\": {{\"{primaryTag}\": 3, \"finance\": 2}}, \"nextLevelTags\": \"finance\"}}," +
-                                  $"{{\"text\": \"Vetting user persona reviews and redesigning wireframes.\", \"weights\": {{\"creative\": 2, \"design\": 2}}, \"nextLevelTags\": \"design\"}}," +
-                                  $"{{\"text\": \"Disassembling components, checking logs, and applying quick hotfixes.\", \"weights\": {{\"diploma\": 2, \"tech\": 2}}, \"nextLevelTags\": \"diploma\"}}" +
-                                  "]"
+                    TargetCareerTags = path.Tags.ToLower(),
+                    OptionsJson = JsonSerializer.Serialize(optionsList)
                 });
             }
         }

@@ -122,6 +122,11 @@ public class ProgressService : IProgressService
             .Select(ump => ump.CompletedAt!.Value.Date)
             .ToListAsync();
 
+        var customModuleActivityDays = await _context.UserCustomModuleProgressions
+            .Where(ump => ump.UserId == userId && ump.IsCompleted && ump.CompletedAt.HasValue)
+            .Select(ump => ump.CompletedAt!.Value.Date)
+            .ToListAsync();
+
         var quizActivityDays = await _context.QuizResponses
             .Where(qr => qr.UserId == userId)
             .Select(qr => qr.AnsweredAt.Date)
@@ -129,6 +134,7 @@ public class ProgressService : IProgressService
 
         var activityDays = skillActivityDays
             .Concat(moduleActivityDays)
+            .Concat(customModuleActivityDays)
             .Concat(quizActivityDays)
             .Distinct()
             .ToHashSet();

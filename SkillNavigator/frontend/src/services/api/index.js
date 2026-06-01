@@ -15,3 +15,4 @@ export { chatApi } from './chat';
 export { adminApi } from './admin';
 export { sessionsApi } from './sessions';
 export { peerRoomsApi } from './peerRooms';
+export { careerGuidanceApi } from './careerGuidance';

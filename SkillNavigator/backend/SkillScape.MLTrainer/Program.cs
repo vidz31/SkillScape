@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Microsoft.ML;
 using Microsoft.ML.Data;
@@ -46,7 +46,7 @@ namespace SkillScape.MLTrainer
             var mlContext = new MLContext(seed: 1);
             
             // 1. Train Career Predictor
-            // TrainCareerPredictor(mlContext);
+            TrainCareerPredictor(mlContext);
 
             // 2. Train Salary Predictor
             // TrainSalaryPredictor(mlContext);
@@ -81,7 +81,7 @@ namespace SkillScape.MLTrainer
             string modelPath = Path.Combine(Environment.CurrentDirectory, "CareerPredictor.zip");
 
             Console.WriteLine("Loading data...");
-            IDataView dataView = mlContext.Data.LoadFromTextFile<QuizData>(dataPath, hasHeader: true, separatorChar: ',');
+            IDataView dataView = mlContext.Data.LoadFromTextFile<QuizData>(dataPath, hasHeader: true, separatorChar: '\t');
 
             var splitInfo = mlContext.Data.TrainTestSplit(dataView, testFraction: 0.2);
 

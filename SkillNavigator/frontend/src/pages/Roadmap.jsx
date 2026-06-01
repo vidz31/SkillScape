@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -161,6 +162,8 @@ const RoadmapPage = () => {
     setSelectedDomainId(payload?.domainId || domainId);
   };
 
+  const location = useLocation();
+
   const initializeRoadmap = async () => {
     try {
       setLoading(true);
@@ -169,7 +172,8 @@ const RoadmapPage = () => {
       const options = optionsRes.data?.data || [];
       setRoadmapOptions(options);
 
-      const recommendedDomainId = options.find(o => o.isRecommended)?.domainId;
+      const queryDomain = new URLSearchParams(location.search).get('domain');
+      const recommendedDomainId = queryDomain || options.find(o => o.isRecommended)?.domainId;
       const initialDomainId = recommendedDomainId || options[0]?.domainId || '';
 
       if (initialDomainId) {

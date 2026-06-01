@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -26,18 +27,18 @@ import { Link } from 'react-router-dom';
 
 // Map color themes dynamically for UI accents
 const COLOR_THEMES = {
-  blue: { bg: 'bg-blue-950/40', border: 'border-blue-500/50', text: 'text-blue-400', glow: 'shadow-blue-500/20' },
-  green: { bg: 'bg-green-950/40', border: 'border-green-500/50', text: 'text-green-400', glow: 'shadow-green-500/20' },
-  purple: { bg: 'bg-purple-950/40', border: 'border-purple-500/50', text: 'text-purple-400', glow: 'shadow-purple-500/20' },
-  cyan: { bg: 'bg-cyan-950/40', border: 'border-cyan-500/50', text: 'text-cyan-400', glow: 'shadow-cyan-500/20' },
-  pink: { bg: 'bg-pink-950/40', border: 'border-pink-500/50', text: 'text-pink-400', glow: 'shadow-pink-500/20' },
-  indigo: { bg: 'bg-indigo-950/40', border: 'border-indigo-500/50', text: 'text-indigo-400', glow: 'shadow-indigo-500/20' },
-  rose: { bg: 'bg-rose-950/40', border: 'border-rose-500/50', text: 'text-rose-400', glow: 'shadow-rose-500/20' },
-  violet: { bg: 'bg-violet-950/40', border: 'border-violet-500/50', text: 'text-violet-400', glow: 'shadow-violet-500/20' },
-  fuchsia: { bg: 'bg-fuchsia-950/40', border: 'border-fuchsia-500/50', text: 'text-fuchsia-400', glow: 'shadow-fuchsia-500/20' },
-  emerald: { bg: 'bg-emerald-950/40', border: 'border-emerald-500/50', text: 'text-emerald-400', glow: 'shadow-emerald-500/20' },
-  amber: { bg: 'bg-amber-950/40', border: 'border-amber-500/50', text: 'text-amber-400', glow: 'shadow-amber-500/20' },
-  red: { bg: 'bg-red-950/40', border: 'border-red-500/50', text: 'text-red-400', glow: 'shadow-red-500/20' }
+  blue: { bg: 'bg-blue-50/70 dark:bg-blue-950/40', border: 'border-blue-200 dark:border-blue-500/50', text: 'text-blue-600 dark:text-blue-400', glow: 'shadow-blue-100/50 dark:shadow-blue-500/20' },
+  green: { bg: 'bg-green-50/70 dark:bg-green-950/40', border: 'border-green-200 dark:border-green-500/50', text: 'text-green-600 dark:text-green-400', glow: 'shadow-green-100/50 dark:shadow-green-500/20' },
+  purple: { bg: 'bg-purple-50/70 dark:bg-purple-950/40', border: 'border-purple-200 dark:border-purple-500/50', text: 'text-purple-600 dark:text-purple-400', glow: 'shadow-purple-100/50 dark:shadow-purple-500/20' },
+  cyan: { bg: 'bg-cyan-50/70 dark:bg-cyan-950/40', border: 'border-cyan-200 dark:border-cyan-500/50', text: 'text-cyan-600 dark:text-cyan-400', glow: 'shadow-cyan-100/50 dark:shadow-cyan-500/20' },
+  pink: { bg: 'bg-pink-50/70 dark:bg-pink-950/40', border: 'border-pink-200 dark:border-pink-500/50', text: 'text-pink-600 dark:text-pink-400', glow: 'shadow-pink-100/50 dark:shadow-pink-500/20' },
+  indigo: { bg: 'bg-indigo-50/70 dark:bg-indigo-950/40', border: 'border-indigo-200 dark:border-indigo-500/50', text: 'text-indigo-600 dark:text-indigo-400', glow: 'shadow-indigo-100/50 dark:shadow-indigo-500/20' },
+  rose: { bg: 'bg-rose-50/70 dark:bg-rose-950/40', border: 'border-rose-200 dark:border-rose-500/50', text: 'text-rose-600 dark:text-rose-400', glow: 'shadow-rose-100/50 dark:shadow-rose-500/20' },
+  violet: { bg: 'bg-violet-50/70 dark:bg-violet-950/40', border: 'border-violet-200 dark:border-violet-500/50', text: 'text-violet-600 dark:text-violet-400', glow: 'shadow-violet-100/50 dark:shadow-violet-500/20' },
+  fuchsia: { bg: 'bg-fuchsia-50/70 dark:bg-fuchsia-950/40', border: 'border-fuchsia-200 dark:border-fuchsia-500/50', text: 'text-fuchsia-600 dark:text-fuchsia-400', glow: 'shadow-fuchsia-100/50 dark:shadow-fuchsia-500/20' },
+  emerald: { bg: 'bg-emerald-50/70 dark:bg-emerald-950/40', border: 'border-emerald-200 dark:border-emerald-500/50', text: 'text-emerald-600 dark:text-emerald-400', glow: 'shadow-emerald-100/50 dark:shadow-emerald-500/20' },
+  amber: { bg: 'bg-amber-50/70 dark:bg-amber-950/40', border: 'border-amber-200 dark:border-amber-500/50', text: 'text-amber-600 dark:text-amber-400', glow: 'shadow-amber-100/50 dark:shadow-amber-500/20' },
+  red: { bg: 'bg-red-50/70 dark:bg-red-950/40', border: 'border-red-200 dark:border-red-500/50', text: 'text-red-600 dark:text-red-400', glow: 'shadow-red-100/50 dark:shadow-red-500/20' }
 };
 
 const getIcon = (iconName) => {
@@ -77,6 +78,7 @@ const CustomCareerNode = ({ data }) => {
   const isExpanded = data.isExpanded;
   const hasChildren = data.hasChildren;
   const raw = data.raw || {};
+  const isDark = data.isDark;
 
   // Salary level ($ to $$$)
   const maxSalary = raw.salaryData ? Math.max(...Object.values(raw.salaryData)) : 0;
@@ -88,30 +90,30 @@ const CustomCareerNode = ({ data }) => {
   const isHighlighted = data.isHighlighted;
 
   return (
-    <div className={`p-4 rounded-xl border backdrop-blur-md transition-all duration-300 shadow-lg ${theme.bg} ${theme.border} ${theme.glow} ${isHighlighted ? 'scale-110 border-indigo-400 border-2 shadow-indigo-500/40' : 'hover:scale-105'} min-w-[220px]`}>
+    <div className={`p-4 rounded-xl border backdrop-blur-md transition-all duration-300 shadow-lg ${theme.bg} ${theme.border} ${theme.glow} ${isHighlighted ? 'scale-110 border-indigo-500 border-2 shadow-indigo-500/40' : 'hover:scale-105'} min-w-[220px]`}>
       {/* Input Handle */}
       {data.level > 1 && (
         <Handle
           type="target"
           position={Position.Top}
-          style={{ background: '#475569', width: 8, height: 8 }}
+          style={{ background: isDark ? '#475569' : '#cbd5e1', width: 8, height: 8 }}
         />
       )}
 
       {/* Node Header */}
       <div className="flex items-start gap-3">
-        <div className={`p-2 rounded-lg bg-slate-900/80 border ${theme.border} ${theme.text} mt-0.5`}>
+        <div className={`p-2 rounded-lg bg-secondary/80 border ${theme.border} ${theme.text} mt-0.5`}>
           {getIcon(data.icon)}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-1.5 justify-between">
             <span className="text-[9px] uppercase tracking-wider font-semibold opacity-60">Level {data.level}</span>
             {/* Salary Indicator Badge */}
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400">
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-secondary border border-border text-emerald-600 dark:text-emerald-400">
               {salaryBadge}
             </span>
           </div>
-          <h4 className="text-sm font-bold text-white leading-tight mt-0.5">{data.title}</h4>
+          <h4 className="text-sm font-bold text-foreground leading-tight mt-0.5">{data.title}</h4>
         </div>
       </div>
 
@@ -119,25 +121,25 @@ const CustomCareerNode = ({ data }) => {
       {(isHighGrowth || isHighAiRisk) && (
         <div className="mt-2.5 flex flex-wrap gap-1.5">
           {isHighGrowth && (
-            <span className="text-[9px] font-medium bg-orange-950/60 border border-orange-500/30 text-orange-400 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+            <span className="text-[9px] font-medium bg-orange-500/10 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-500/30 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
               🔥 High Growth
             </span>
           )}
           {isHighAiRisk && (
-            <span className="text-[9px] font-medium bg-rose-950/60 border border-rose-500/30 text-rose-400 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+            <span className="text-[9px] font-medium bg-rose-500/10 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
               ⚠️ AI Risk
             </span>
           )}
         </div>
       )}
 
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-800/60 pt-2.5">
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/60 pt-2.5">
         <button
           onClick={(e) => {
             e.stopPropagation();
             data.onViewDetails(data.raw);
           }}
-          className="text-[11px] font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
+          className="text-[11px] font-medium text-indigo-650 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
         >
           <Info className="w-3.5 h-3.5" /> Details
         </button>
@@ -148,7 +150,7 @@ const CustomCareerNode = ({ data }) => {
               e.stopPropagation();
               data.onToggleExpand(data.id);
             }}
-            className="p-1 rounded bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors"
+            className="p-1 rounded bg-secondary/60 hover:bg-secondary text-muted-foreground hover:text-foreground border border-border transition-colors"
           >
             {isExpanded ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
           </button>
@@ -171,10 +173,37 @@ const CustomCareerNode = ({ data }) => {
 // Main Career Explorer Page (Inner Component utilizing React Flow Instance)
 // ----------------------------------------------------
 function CareerExplorer() {
+  const navigate = useNavigate();
   const [selectedStream, setSelectedStream] = useState('After12th');
   const [pathsRaw, setPathsRaw] = useState([]);
   const [expandedNodes, setExpandedNodes] = useState(new Set());
   const [selectedCareer, setSelectedCareer] = useState(null);
+  const [accepting, setAccepting] = useState(false);
+  const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
+
+  // Monitor theme changes on root html element
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  const handleAcceptCareer = async (pathId) => {
+    if (!pathId) return;
+    try {
+      setAccepting(true);
+      await careerGuidanceApi.acceptCareer(pathId);
+      toast.success('Career accepted! Redirecting to your custom roadmap...');
+      navigate('/roadmap');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to accept career path.');
+    } finally {
+      setAccepting(false);
+    }
+  };
   
   // Search & Filter state
   const [searchText, setSearchText] = useState('');
@@ -188,6 +217,7 @@ function CareerExplorer() {
   const [compareId1, setCompareId1] = useState('');
   const [compareId2, setCompareId2] = useState('');
 
+  const location = useLocation();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -206,6 +236,14 @@ function CareerExplorer() {
   ];
 
   const nodeTypes = useMemo(() => ({ careerNode: CustomCareerNode }), []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const highlight = params.get('highlight');
+    if (highlight) {
+      setHighlightedNodeId(highlight);
+    }
+  }, [location.search]);
 
   // Fetch Tree Paths
   const fetchPaths = async (stream) => {
@@ -275,7 +313,8 @@ function CareerExplorer() {
           isExpanded,
           hasChildren,
           onToggleExpand: handleToggleExpand,
-          onViewDetails: handleViewDetails
+          onViewDetails: handleViewDetails,
+          isDark
         }
       });
 
@@ -305,7 +344,7 @@ function CareerExplorer() {
     });
 
     return list;
-  }, [expandedNodes, handleToggleExpand, handleViewDetails]);
+  }, [expandedNodes, handleToggleExpand, handleViewDetails, isDark]);
 
   // Sync React Flow nodes and edges when tree changes
   useEffect(() => {
@@ -441,46 +480,46 @@ function CareerExplorer() {
   const compCareer2 = useMemo(() => allCareersList.find(c => c.id === compareId2)?.raw, [compareId2, allCareersList]);
 
   return (
-    <div className="h-[calc(100vh-80px)] w-full flex flex-col bg-slate-950 text-white overflow-hidden relative">
+    <div className="h-[calc(100vh-80px)] w-full flex flex-col bg-background text-foreground overflow-hidden relative">
       {/* Glow Effects */}
-      <div className="absolute top-[-10%] left-[20%] w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[10%] w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[140px]" />
+      <div className="absolute top-[-10%] left-[20%] w-[400px] h-[400px] bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[10%] w-[500px] h-[500px] bg-cyan-500/5 dark:bg-cyan-500/10 rounded-full blur-[140px]" />
 
       {/* Control Header & Filters Toolbar */}
-      <div className="z-10 p-4 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="z-10 p-4 border-b border-border bg-background/90 backdrop-blur-md flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-indigo-400" /> Career Mind Map
+            <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> Career Mind Map
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">Filter by growth potential, search paths, and compare options</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Filter by growth potential, search paths, and compare options</p>
         </div>
 
         {/* Toolbar Controls */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Search bar */}
-          <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 focus-within:border-indigo-500 transition-colors w-full sm:w-60">
-            <Search className="w-4 h-4 text-slate-500 mr-2 shrink-0" />
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-secondary border border-border rounded-xl px-3 py-1.5 focus-within:border-indigo-500 transition-colors w-full sm:w-60">
+            <Search className="w-4 h-4 text-muted-foreground mr-2 shrink-0" />
             <input
               type="text"
               placeholder="Search careers or tags..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none w-full"
+              className="bg-transparent text-xs text-foreground placeholder-muted-foreground focus:outline-none w-full"
             />
             {searchText && (
-              <button type="button" onClick={() => setSearchText('')} className="text-slate-500 hover:text-white ml-1">
+              <button type="button" onClick={() => setSearchText('')} className="text-muted-foreground hover:text-foreground ml-1">
                 <X className="w-3 h-3" />
               </button>
             )}
           </form>
 
           {/* Level expand tools */}
-          <div className="flex bg-slate-900/60 p-0.5 rounded-xl border border-slate-800">
-            <Button variant="ghost" className="h-7 text-[10px] px-2 text-slate-300 hover:text-white" onClick={handleExpandAll}>
+          <div className="flex bg-secondary/60 p-0.5 rounded-xl border border-border">
+            <Button variant="ghost" className="h-7 text-[10px] px-2 text-muted-foreground hover:text-foreground" onClick={handleExpandAll}>
               Expand All
             </Button>
-            <div className="w-px bg-slate-800 self-stretch my-1" />
-            <Button variant="ghost" className="h-7 text-[10px] px-2 text-slate-300 hover:text-white" onClick={handleCollapseAll}>
+            <div className="w-px bg-border self-stretch my-1" />
+            <Button variant="ghost" className="h-7 text-[10px] px-2 text-muted-foreground hover:text-foreground" onClick={handleCollapseAll}>
               Collapse All
             </Button>
           </div>
@@ -488,13 +527,13 @@ function CareerExplorer() {
           {/* Compare trigger button */}
           <Button
             onClick={() => setIsCompareOpen(true)}
-            className="h-8 text-xs bg-slate-900 hover:bg-slate-800 border border-slate-800 text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
+            className="h-8 text-xs bg-secondary hover:bg-secondary/80 border border-border text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center gap-1"
           >
             <Layers className="w-3.5 h-3.5" /> Compare Pathways
           </Button>
 
           {/* Stream Selector */}
-          <div className="flex gap-1.5 bg-slate-900/60 p-1 rounded-xl border border-slate-800/80">
+          <div className="flex gap-1.5 bg-secondary p-1 rounded-xl border border-border">
             {STREAMS.map((s) => (
               <button
                 key={s.id}
@@ -502,7 +541,7 @@ function CareerExplorer() {
                 className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-all duration-300 ${
                   selectedStream === s.id
                     ? 'bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-md shadow-indigo-600/25'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/40'
                 }`}
               >
                 {s.label}
@@ -513,10 +552,10 @@ function CareerExplorer() {
       </div>
 
       {/* Advanced Filters Drawer (Embedded directly below header) */}
-      <div className="z-10 px-6 py-3 bg-slate-950/60 border-b border-slate-900/80 flex flex-wrap items-center gap-6 text-xs text-slate-400">
+      <div className="z-10 px-6 py-3 bg-background/60 border-b border-border/80 flex flex-wrap items-center gap-6 text-xs text-muted-foreground">
         {/* Salary Slider */}
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-300">Min. Senior Salary:</span>
+          <span className="font-semibold text-foreground">Min. Senior Salary:</span>
           <input
             type="range"
             min="1000000"
@@ -526,11 +565,11 @@ function CareerExplorer() {
             onChange={(e) => setMinSalaryFilter(parseInt(e.target.value))}
             className="w-24 accent-indigo-500 cursor-pointer"
           />
-          <span className="text-[10px] text-indigo-400 font-mono">
+          <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono">
             ₹{(minSalaryFilter / 100000).toFixed(1)}L/yr
           </span>
           {minSalaryFilter > 0 && (
-            <button onClick={() => setMinSalaryFilter(0)} className="text-rose-400 hover:underline text-[9px] ml-1">
+            <button onClick={() => setMinSalaryFilter(0)} className="text-rose-500 dark:text-rose-400 hover:underline text-[9px] ml-1">
               Reset
             </button>
           )}
@@ -538,7 +577,7 @@ function CareerExplorer() {
 
         {/* CAGR Growth Slider */}
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-300">Min. Growth Rate (CAGR):</span>
+          <span className="font-semibold text-foreground">Min. Growth Rate (CAGR):</span>
           <input
             type="range"
             min="0"
@@ -548,11 +587,11 @@ function CareerExplorer() {
             onChange={(e) => setMinCagrFilter(parseInt(e.target.value))}
             className="w-24 accent-orange-500 cursor-pointer"
           />
-          <span className="text-[10px] text-orange-400 font-mono">
+          <span className="text-[10px] text-orange-650 dark:text-orange-400 font-mono">
             {minCagrFilter}%+
           </span>
           {minCagrFilter > 0 && (
-            <button onClick={() => setMinCagrFilter(0)} className="text-rose-400 hover:underline text-[9px] ml-1">
+            <button onClick={() => setMinCagrFilter(0)} className="text-rose-500 dark:text-rose-400 hover:underline text-[9px] ml-1">
               Reset
             </button>
           )}
@@ -564,14 +603,14 @@ function CareerExplorer() {
             type="checkbox"
             checked={hideHighRisk}
             onChange={(e) => setHideHighRisk(e.target.checked)}
-            className="rounded border-slate-800 bg-slate-900 text-indigo-600 focus:ring-0 w-3.5 h-3.5 cursor-pointer accent-indigo-500"
+            className="rounded border-border bg-secondary text-indigo-600 focus:ring-0 w-3.5 h-3.5 cursor-pointer accent-indigo-500"
           />
-          <span className="text-slate-300 font-semibold">Hide High AI Risk (&gt;50%)</span>
+          <span className="text-foreground font-semibold">Hide High AI Risk (&gt;50%)</span>
         </label>
       </div>
 
       {/* React Flow Workspace */}
-      <div className="flex-1 w-full bg-slate-950 relative">
+      <div className="flex-1 w-full bg-background relative">
         <ReactFlow
           nodes={filteredNodes}
           edges={filteredEdges}
@@ -583,19 +622,19 @@ function CareerExplorer() {
           minZoom={0.15}
           maxZoom={1.5}
         >
-          <Background color="#1e293b" gap={28} size={1.2} />
-          <Controls className="bg-slate-900 border border-slate-800 rounded-lg p-1 text-slate-300" />
+          <Background color={isDark ? "#334155" : "#cbd5e1"} gap={28} size={1.2} />
+          <Controls className="bg-card border border-border rounded-lg p-1 text-foreground" />
           <MiniMap
             nodeStrokeColor={() => '#6366f1'}
-            nodeColor={() => '#090d16'}
-            maskColor="rgba(15, 23, 42, 0.7)"
-            className="bg-slate-900 border border-slate-800 rounded-lg"
+            nodeColor={() => (isDark ? '#090d16' : '#ffffff')}
+            maskColor={isDark ? "rgba(15, 23, 42, 0.7)" : "rgba(255, 255, 255, 0.7)"}
+            className="bg-card border border-border rounded-lg"
           />
         </ReactFlow>
 
         {/* Floating Instruction Banner */}
-        <div className="absolute bottom-6 left-6 z-10 bg-slate-900/80 border border-slate-800/80 backdrop-blur-md px-3 py-2.5 rounded-lg text-[11px] text-slate-400 flex items-center gap-2.5 max-w-sm shadow-xl pointer-events-none">
-          <Info className="w-4 h-4 text-indigo-400 shrink-0" />
+        <div className="absolute bottom-6 left-6 z-10 bg-card/85 border border-border backdrop-blur-md px-3 py-2.5 rounded-lg text-[11px] text-muted-foreground flex items-center gap-2.5 max-w-sm shadow-xl pointer-events-none">
+          <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
           <span>Use mouse wheel to zoom. Drag canvas to pan. Use Details for advanced specs. Filter paths above.</span>
         </div>
       </div>
@@ -618,21 +657,21 @@ function CareerExplorer() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 22, stiffness: 110 }}
-              className="absolute top-0 right-0 h-full w-full sm:w-[480px] bg-slate-900 border-l border-slate-800 z-30 flex flex-col shadow-2xl overflow-y-auto"
+              className="absolute top-0 right-0 h-full w-full sm:w-[480px] bg-card border-l border-border z-30 flex flex-col shadow-2xl overflow-y-auto"
             >
               {/* Header */}
-              <div className="p-6 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-slate-900 z-10">
+              <div className="p-6 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-xl border bg-slate-950/80 text-${selectedCareer.color}-400 border-${selectedCareer.color}-500/50`}>
+                  <div className={`p-2.5 rounded-xl border bg-background text-${selectedCareer.color}-600 dark:text-${selectedCareer.color}-400 border-${selectedCareer.color}-200 dark:border-${selectedCareer.color}-500/50`}>
                     {getIcon(selectedCareer.icon)}
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white leading-tight">{selectedCareer.title}</h3>
+                    <h3 className="text-base font-bold text-foreground leading-tight">{selectedCareer.title}</h3>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-[9px] font-semibold bg-slate-800 text-slate-300 px-2 py-0.5 rounded uppercase tracking-wider">
+                      <span className="text-[9px] font-semibold bg-secondary text-muted-foreground px-2 py-0.5 rounded uppercase tracking-wider">
                         Level {selectedCareer.level}
                       </span>
-                      <span className="text-[9px] font-semibold bg-slate-950 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
+                      <span className="text-[9px] font-semibold bg-background text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
                         Difficulty: {selectedCareer.difficultyLevel || 'Medium'}
                       </span>
                     </div>
@@ -641,7 +680,7 @@ function CareerExplorer() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-full text-slate-400 hover:text-white"
+                  className="rounded-full text-muted-foreground hover:text-foreground"
                   onClick={() => setSelectedCareer(null)}
                 >
                   <X className="w-5 h-5" />
@@ -652,8 +691,8 @@ function CareerExplorer() {
               <div className="flex-1 p-6 space-y-6">
                 {/* Description */}
                 <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Description</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/50 border border-slate-800/80 p-4 rounded-xl">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Description</h4>
+                  <p className="text-xs text-foreground leading-relaxed bg-background border border-border p-4 rounded-xl">
                     {selectedCareer.description}
                   </p>
                 </div>
@@ -661,10 +700,10 @@ function CareerExplorer() {
                 {/* Core Study Details */}
                 {selectedCareer.whatYouWillStudy && (
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5 text-indigo-400" /> Syllabus Overview (What you will study)
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1">
+                      <BookOpen className="w-3.5 h-3.5 text-indigo-650 dark:text-indigo-400" /> Syllabus Overview (What you will study)
                     </h4>
-                    <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/30 border border-slate-800/60 p-3.5 rounded-xl">
+                    <p className="text-xs text-foreground leading-relaxed bg-background/30 border border-border/60 p-3.5 rounded-xl">
                       {selectedCareer.whatYouWillStudy}
                     </p>
                   </div>
@@ -672,34 +711,34 @@ function CareerExplorer() {
 
                 {/* Grid of details: Environment, MBTI, Degrees */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-xl">
-                    <span className="text-[10px] font-medium text-slate-500 block mb-1">Work Environment</span>
-                    <span className="text-xs font-semibold text-white">{selectedCareer.workEnvironment || 'Office'}</span>
+                  <div className="bg-background border border-border p-3.5 rounded-xl">
+                    <span className="text-[10px] font-medium text-muted-foreground block mb-1">Work Environment</span>
+                    <span className="text-xs font-semibold text-foreground">{selectedCareer.workEnvironment || 'Office'}</span>
                   </div>
 
-                  <div className="bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-xl">
-                    <span className="text-[10px] font-medium text-slate-500 block mb-1">MBTI Personality Match</span>
-                    <span className="text-xs font-semibold text-indigo-400 font-mono">{selectedCareer.personalityMatch || 'Not Specified'}</span>
+                  <div className="bg-background border border-border p-3.5 rounded-xl">
+                    <span className="text-[10px] font-medium text-muted-foreground block mb-1">MBTI Personality Match</span>
+                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 font-mono">{selectedCareer.personalityMatch || 'Not Specified'}</span>
                   </div>
 
-                  <div className="bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-xl">
-                    <span className="text-[10px] font-medium text-slate-500 block mb-1">Remote Work Options</span>
-                    <span className="text-xs font-semibold text-white">{selectedCareer.remoteWorkPossibility}%</span>
+                  <div className="bg-background border border-border p-3.5 rounded-xl">
+                    <span className="text-[10px] font-medium text-muted-foreground block mb-1">Remote Work Options</span>
+                    <span className="text-xs font-semibold text-foreground">{selectedCareer.remoteWorkPossibility}%</span>
                   </div>
 
-                  <div className="bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-xl">
-                    <span className="text-[10px] font-medium text-slate-500 block mb-1">Entrepreneurship Index</span>
-                    <span className="text-xs font-semibold text-white">{selectedCareer.entrepreneurshipPotential}%</span>
+                  <div className="bg-background border border-border p-3.5 rounded-xl">
+                    <span className="text-[10px] font-medium text-muted-foreground block mb-1">Entrepreneurship Index</span>
+                    <span className="text-xs font-semibold text-foreground">{selectedCareer.entrepreneurshipPotential}%</span>
                   </div>
                 </div>
 
                 {/* Recommended Subjects */}
                 {selectedCareer.recommendedSubjects && selectedCareer.recommendedSubjects.length > 0 && (
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Recommended Subjects</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Recommended Subjects</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedCareer.recommendedSubjects.map((sub, idx) => (
-                        <span key={idx} className="text-xs bg-slate-950 text-slate-300 border border-slate-800 px-2.5 py-1 rounded-lg">
+                        <span key={idx} className="text-xs bg-background text-foreground border border-border px-2.5 py-1 rounded-lg">
                           {sub}
                         </span>
                       ))}
@@ -709,12 +748,12 @@ function CareerExplorer() {
 
                 {/* Skills Required */}
                 <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Required Skills</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Required Skills</h4>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedCareer.skillsRequired?.map((skill, index) => (
                       <span
                         key={index}
-                        className="text-xs bg-slate-950 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-full font-medium"
+                        className="text-xs bg-background text-indigo-650 dark:text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-full font-medium"
                       >
                         {skill}
                       </span>
@@ -725,12 +764,12 @@ function CareerExplorer() {
                 {/* Indian Colleges */}
                 {selectedCareer.colleges && selectedCareer.colleges.length > 0 && selectedCareer.colleges[0] !== "" && (
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
-                      <School className="w-3.5 h-3.5 text-emerald-400" /> Key Indian Colleges / Institutes
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                      <School className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Key Indian Colleges / Institutes
                     </h4>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedCareer.colleges.map((college, index) => (
-                        <span key={index} className="text-xs bg-slate-950 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg">
+                        <span key={index} className="text-xs bg-background text-emerald-650 dark:text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg">
                           {college}
                         </span>
                       ))}
@@ -742,16 +781,16 @@ function CareerExplorer() {
                 {((selectedCareer.learningResources && selectedCareer.learningResources.length > 0 && selectedCareer.learningResources[0] !== "") ||
                   (selectedCareer.youtubeResources && selectedCareer.youtubeResources.length > 0 && selectedCareer.youtubeResources[0] !== "")) && (
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Learning & Reference Resources</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Learning & Reference Resources</h4>
                     <div className="space-y-2">
                       {selectedCareer.learningResources?.map((res, index) => (
-                        <div key={index} className="text-xs text-slate-300 bg-slate-950/40 p-2.5 rounded-lg border border-slate-800 flex items-start gap-2">
-                          <Compass className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                        <div key={index} className="text-xs text-foreground bg-background/40 p-2.5 rounded-lg border border-border flex items-start gap-2">
+                          <Compass className="w-4 h-4 text-indigo-650 dark:text-indigo-400 shrink-0 mt-0.5" />
                           <span>{res}</span>
                         </div>
                       ))}
                       {selectedCareer.youtubeResources?.map((yt, index) => (
-                        <div key={index} className="text-xs text-slate-300 bg-red-950/10 p-2.5 rounded-lg border border-red-500/10 flex items-start gap-2">
+                        <div key={index} className="text-xs text-foreground bg-red-500/5 p-2.5 rounded-lg border border-red-500/10 flex items-start gap-2">
                           <Flame className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                           <span>YouTube: {yt}</span>
                         </div>
@@ -762,19 +801,19 @@ function CareerExplorer() {
 
                 {/* Salary, CAGR, and AI Risk stats */}
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-xl text-center">
-                    <span className="text-[9px] font-semibold text-slate-500 block mb-1">Growth (CAGR)</span>
-                    <span className="text-sm font-extrabold text-orange-400">{selectedCareer.industryGrowth}%</span>
+                  <div className="bg-background border border-border p-3 rounded-xl text-center">
+                    <span className="text-[9px] font-semibold text-muted-foreground block mb-1">Growth (CAGR)</span>
+                    <span className="text-sm font-extrabold text-orange-650 dark:text-orange-400">{selectedCareer.industryGrowth}%</span>
                   </div>
 
-                  <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-xl text-center">
-                    <span className="text-[9px] font-semibold text-slate-500 block mb-1">Demand Index</span>
-                    <span className="text-sm font-extrabold text-cyan-400">{selectedCareer.demandIndex}%</span>
+                  <div className="bg-background border border-border p-3 rounded-xl text-center">
+                    <span className="text-[9px] font-semibold text-muted-foreground block mb-1">Demand Index</span>
+                    <span className="text-sm font-extrabold text-cyan-650 dark:text-cyan-400">{selectedCareer.demandIndex}%</span>
                   </div>
 
-                  <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-xl text-center">
-                    <span className="text-[9px] font-semibold text-slate-500 block mb-1">AI Risk</span>
-                    <span className={`text-sm font-extrabold ${selectedCareer.automationRisk >= 50 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                  <div className="bg-background border border-border p-3 rounded-xl text-center">
+                    <span className="text-[9px] font-semibold text-muted-foreground block mb-1">AI Risk</span>
+                    <span className={`text-sm font-extrabold ${selectedCareer.automationRisk >= 50 ? 'text-rose-650 dark:text-rose-400' : 'text-emerald-655 dark:text-emerald-400'}`}>
                       {selectedCareer.automationRisk}%
                     </span>
                   </div>
@@ -783,7 +822,7 @@ function CareerExplorer() {
                 {/* Related Careers Navigation */}
                 {selectedCareer.relatedCareerIds && selectedCareer.relatedCareerIds.split(',').filter(Boolean).length > 0 && (
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Related Careers (Network Graph)</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Related Careers (Network Graph)</h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedCareer.relatedCareerIds.split(',').filter(Boolean).map((relId) => {
                         const careerObj = allCareersList.find(c => c.id === relId);
@@ -791,7 +830,7 @@ function CareerExplorer() {
                           <button
                             key={relId}
                             onClick={() => handleRelatedCareerClick(relId)}
-                            className="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-800 text-indigo-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+                            className="text-xs bg-secondary hover:bg-secondary/80 border border-border text-indigo-600 dark:text-indigo-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
                           >
                             <span>{careerObj?.title || relId}</span>
                             <ArrowRight className="w-3 h-3" />
@@ -802,16 +841,31 @@ function CareerExplorer() {
                   </div>
                 )}
 
+                {/* Scope Outlook */}
                 <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Scope Outlook</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed bg-slate-950/20 border border-slate-800/60 p-3 rounded-lg">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Scope Outlook</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed bg-background/25 border border-border/60 p-3 rounded-lg">
                     {selectedCareer.futureScope}
                   </p>
                 </div>
               </div>
 
               {/* Action Footer */}
-              <div className="p-6 border-t border-slate-800 bg-slate-900/90 sticky bottom-0 z-10 flex gap-2">
+              <div className="p-6 border-t border-border bg-card/90 sticky bottom-0 z-10 flex gap-2 flex-col sm:flex-row">
+                <Button
+                  onClick={() => handleAcceptCareer(selectedCareer.id)}
+                  disabled={accepting}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-bold text-white flex-1 border-0 animate-none"
+                >
+                  {accepting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                      Accepting...
+                    </>
+                  ) : (
+                    'Accept Career & Start Roadmap'
+                  )}
+                </Button>
                 <Button
                   onClick={() => {
                     setCompareId1(selectedCareer.id);
@@ -823,7 +877,7 @@ function CareerExplorer() {
                 >
                   <Layers className="w-4 h-4 mr-1.5" /> Add to Compare
                 </Button>
-                <Button asChild variant="outline" className="border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white flex-1 text-xs">
+                <Button asChild variant="outline" className="border-border bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground flex-1 text-xs">
                   <Link to={`/salary-forecast?id=${selectedCareer.id}`}>
                     Forecast Salary
                   </Link>
@@ -852,18 +906,18 @@ function CareerExplorer() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 22, stiffness: 110 }}
-              className="absolute top-0 left-0 h-full w-full sm:w-[500px] bg-slate-900 border-r border-slate-800 z-30 flex flex-col shadow-2xl overflow-y-auto"
+              className="absolute top-0 left-0 h-full w-full sm:w-[500px] bg-card border-r border-border z-30 flex flex-col shadow-2xl overflow-y-auto"
             >
               {/* Header */}
-              <div className="p-6 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-slate-900 z-10">
+              <div className="p-6 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
                 <div className="flex items-center gap-2.5">
-                  <Layers className="w-5 h-5 text-indigo-400" />
-                  <h3 className="text-base font-bold text-white">Compare Career Pathways</h3>
+                  <Layers className="w-5 h-5 text-indigo-650 dark:text-indigo-400" />
+                  <h3 className="text-base font-bold text-foreground">Compare Career Pathways</h3>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-full text-slate-400 hover:text-white"
+                  className="rounded-full text-muted-foreground hover:text-foreground"
                   onClick={() => setIsCompareOpen(false)}
                 >
                   <X className="w-5 h-5" />
@@ -873,13 +927,13 @@ function CareerExplorer() {
               {/* Body */}
               <div className="p-6 flex-1 space-y-6">
                 {/* Selectors */}
-                <div className="grid grid-cols-2 gap-4 bg-slate-950/40 p-4 rounded-xl border border-slate-800">
+                <div className="grid grid-cols-2 gap-4 bg-background/40 p-4 rounded-xl border border-border">
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5">Career 1</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">Career 1</label>
                     <select
                       value={compareId1}
                       onChange={(e) => setCompareId1(e.target.value)}
-                      className="bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white w-full focus:outline-none focus:border-indigo-500"
+                      className="bg-background border border-border rounded-lg p-2 text-xs text-foreground w-full focus:outline-none focus:border-indigo-500"
                     >
                       <option value="">-- Choose Career --</option>
                       {allCareersList.map(c => (
@@ -888,11 +942,11 @@ function CareerExplorer() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5">Career 2</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">Career 2</label>
                     <select
                       value={compareId2}
                       onChange={(e) => setCompareId2(e.target.value)}
-                      className="bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white w-full focus:outline-none focus:border-indigo-500"
+                      className="bg-background border border-border rounded-lg p-2 text-xs text-foreground w-full focus:outline-none focus:border-indigo-500"
                     >
                       <option value="">-- Choose Career --</option>
                       {allCareersList.map(c => (
@@ -905,91 +959,91 @@ function CareerExplorer() {
                 {compCareer1 && compCareer2 ? (
                   <div className="space-y-4">
                     {/* Comparative Table */}
-                    <div className="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden text-xs">
+                    <div className="bg-background border border-border rounded-xl overflow-hidden text-xs">
                       {/* Metric: Title */}
-                      <div className="grid grid-cols-3 border-b border-slate-800 font-bold bg-slate-900/50">
-                        <div className="p-3 text-slate-400">Metric</div>
-                        <div className="p-3 text-indigo-400">{compCareer1.title}</div>
-                        <div className="p-3 text-cyan-400">{compCareer2.title}</div>
+                      <div className="grid grid-cols-3 border-b border-border font-bold bg-secondary/50">
+                        <div className="p-3 text-muted-foreground">Metric</div>
+                        <div className="p-3 text-indigo-600 dark:text-indigo-400">{compCareer1.title}</div>
+                        <div className="p-3 text-cyan-600 dark:text-cyan-400">{compCareer2.title}</div>
                       </div>
 
                       {/* Metric: Level */}
-                      <div className="grid grid-cols-3 border-b border-slate-800">
-                        <div className="p-3 text-slate-400 font-medium">Level</div>
+                      <div className="grid grid-cols-3 border-b border-border">
+                        <div className="p-3 text-muted-foreground font-medium">Level</div>
                         <div className="p-3">Level {compCareer1.level}</div>
                         <div className="p-3">Level {compCareer2.level}</div>
                       </div>
 
                       {/* Metric: CAGR Growth */}
-                      <div className="grid grid-cols-3 border-b border-slate-800">
-                        <div className="p-3 text-slate-400 font-medium">CAGR Growth</div>
-                        <div className="p-3 text-orange-400 font-semibold">{compCareer1.industryGrowth}%</div>
-                        <div className="p-3 text-orange-400 font-semibold">{compCareer2.industryGrowth}%</div>
+                      <div className="grid grid-cols-3 border-b border-border">
+                        <div className="p-3 text-muted-foreground font-medium">CAGR Growth</div>
+                        <div className="p-3 text-orange-600 dark:text-orange-400 font-semibold">{compCareer1.industryGrowth}%</div>
+                        <div className="p-3 text-orange-600 dark:text-orange-400 font-semibold">{compCareer2.industryGrowth}%</div>
                       </div>
 
                       {/* Metric: Automation Risk */}
-                      <div className="grid grid-cols-3 border-b border-slate-800">
-                        <div className="p-3 text-slate-400 font-medium">AI displacement Risk</div>
-                        <div className={`p-3 font-semibold ${compCareer1.automationRisk >= 50 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                      <div className="grid grid-cols-3 border-b border-border">
+                        <div className="p-3 text-muted-foreground font-medium">AI displacement Risk</div>
+                        <div className={`p-3 font-semibold ${compCareer1.automationRisk >= 50 ? 'text-rose-650 dark:text-rose-400' : 'text-emerald-650 dark:text-emerald-400'}`}>
                           {compCareer1.automationRisk}%
                         </div>
-                        <div className={`p-3 font-semibold ${compCareer2.automationRisk >= 50 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        <div className={`p-3 font-semibold ${compCareer2.automationRisk >= 50 ? 'text-rose-655 dark:text-rose-400' : 'text-emerald-650 dark:text-emerald-400'}`}>
                           {compCareer2.automationRisk}%
                         </div>
                       </div>
 
                       {/* Metric: Work Environment */}
-                      <div className="grid grid-cols-3 border-b border-slate-800">
-                        <div className="p-3 text-slate-400 font-medium">Work Environment</div>
+                      <div className="grid grid-cols-3 border-b border-border">
+                        <div className="p-3 text-muted-foreground font-medium">Work Environment</div>
                         <div className="p-3">{compCareer1.workEnvironment}</div>
                         <div className="p-3">{compCareer2.workEnvironment}</div>
                       </div>
 
                       {/* Metric: Remote Work Possibility */}
-                      <div className="grid grid-cols-3 border-b border-slate-800">
-                        <div className="p-3 text-slate-400 font-medium">Remote Options</div>
+                      <div className="grid grid-cols-3 border-b border-border">
+                        <div className="p-3 text-muted-foreground font-medium">Remote Options</div>
                         <div className="p-3">{compCareer1.remoteWorkPossibility}%</div>
                         <div className="p-3">{compCareer2.remoteWorkPossibility}%</div>
                       </div>
 
                       {/* Metric: Difficulty */}
-                      <div className="grid grid-cols-3 border-b border-slate-800">
-                        <div className="p-3 text-slate-400 font-medium">Difficulty</div>
+                      <div className="grid grid-cols-3 border-b border-border">
+                        <div className="p-3 text-muted-foreground font-medium">Difficulty</div>
                         <div className="p-3">{compCareer1.difficultyLevel}</div>
                         <div className="p-3">{compCareer2.difficultyLevel}</div>
                       </div>
 
                       {/* Metric: Personality Match */}
-                      <div className="grid grid-cols-3 border-b border-slate-800">
-                        <div className="p-3 text-slate-400 font-medium">Personality Type</div>
-                        <div className="p-3 font-mono text-indigo-400">{compCareer1.personalityMatch || 'N/A'}</div>
-                        <div className="p-3 font-mono text-cyan-400">{compCareer2.personalityMatch || 'N/A'}</div>
+                      <div className="grid grid-cols-3 border-b border-border">
+                        <div className="p-3 text-muted-foreground font-medium">Personality Type</div>
+                        <div className="p-3 font-mono text-indigo-600 dark:text-indigo-400">{compCareer1.personalityMatch || 'N/A'}</div>
+                        <div className="p-3 font-mono text-cyan-600 dark:text-cyan-400">{compCareer2.personalityMatch || 'N/A'}</div>
                       </div>
                     </div>
 
                     {/* Compare Skills */}
                     <div className="grid grid-cols-2 gap-4 text-xs">
-                      <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800">
-                        <span className="font-semibold text-indigo-400 block mb-1">{compCareer1.title} Skills:</span>
+                      <div className="bg-background/40 p-3 rounded-lg border border-border">
+                        <span className="font-semibold text-indigo-650 dark:text-indigo-400 block mb-1">{compCareer1.title} Skills:</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {compCareer1.skillsRequired?.map((s, i) => (
-                            <span key={i} className="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-300">{s}</span>
+                            <span key={i} className="text-[10px] bg-secondary px-2 py-0.5 rounded text-foreground">{s}</span>
                           ))}
                         </div>
                       </div>
-                      <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800">
-                        <span className="font-semibold text-cyan-400 block mb-1">{compCareer2.title} Skills:</span>
+                      <div className="bg-background/40 p-3 rounded-lg border border-border">
+                        <span className="font-semibold text-cyan-650 dark:text-cyan-400 block mb-1">{compCareer2.title} Skills:</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {compCareer2.skillsRequired?.map((s, i) => (
-                            <span key={i} className="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-300">{s}</span>
+                            <span key={i} className="text-[10px] bg-secondary px-2 py-0.5 rounded text-foreground">{s}</span>
                           ))}
                         </div>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center p-12 text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-950/20">
-                    <Layers className="w-8 h-8 text-slate-600 mb-2" />
+                  <div className="flex flex-col items-center justify-center p-12 text-muted-foreground border border-dashed border-border rounded-xl bg-background/20">
+                    <Layers className="w-8 h-8 text-muted-foreground/60 mb-2" />
                     <p className="text-xs text-center">Select two career paths above to perform a side-by-side comparative analysis of salaries, CAGR, AI risk, and required subjects.</p>
                   </div>
                 )}

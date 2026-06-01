@@ -13,7 +13,7 @@ import ForgotPasswordPage from "@/pages/ForgotPassword";
 import ResetPasswordPage from "@/pages/ResetPassword";
 import DashboardPage from "@/pages/Dashboard";
 import MentorDashboard from "@/pages/MentorDashboard";
-import QuizPage from "@/pages/Quiz";
+import QuizEngine from "@/pages/QuizEngine";
 import RoadmapPage from "@/pages/Roadmap";
 import ProgressPage from "@/pages/Progress";
 import ResumePage from "@/pages/Resume";
@@ -30,7 +30,6 @@ import NotFound from "@/pages/NotFound";
 
 // Career Guidance Module Pages
 import CareerExplorer from "@/pages/CareerExplorer";
-import QuizEngine from "@/pages/QuizEngine";
 import CareerInsights from "@/pages/CareerInsights";
 import SalaryForecast from "@/pages/SalaryForecast";
 import CareerAnalytics from "@/pages/CareerAnalytics";
@@ -97,11 +96,11 @@ const App = () => (
               <Route path="/mentor-dashboard/feedback" element={<MentorDashboard />} />
               <Route path="/mentor-dashboard/schedule" element={<MentorDashboard />} />
               <Route path="/sessions" element={<SessionsCalendar />} />
-              <Route path="/quiz" element={<QuizPage />} />
+              <Route path="/quiz" element={<QuizEngine />} />
               
               {/* Career Guidance Module Routes */}
               <Route path="/career-explorer" element={<CareerExplorer />} />
-              <Route path="/career-quiz" element={<QuizEngine />} />
+              <Route path="/career-quiz" element={<Navigate to="/quiz" replace />} />
               <Route path="/career-insights" element={<CareerInsights />} />
               <Route path="/salary-forecast" element={<SalaryForecast />} />
               <Route path="/career-analytics" element={<CareerAnalytics />} />

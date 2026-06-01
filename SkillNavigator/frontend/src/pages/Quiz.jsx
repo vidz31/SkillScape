@@ -91,8 +91,8 @@ const QuizPage = () => {
     const fetchFirstQuestion = async () => {
       try {
         setLoading(true);
-        const response = await quizApi.getNextQuestion({ responses: [] });
-        setCurrentQuestionData(response.data);
+        const question = await quizApi.getNextQuestion({ responses: [] });
+        setCurrentQuestionData(question);
       } catch (error) {
         console.error('Failed to fetch first quiz question:', error);
         toast.error('Failed to load quiz');
@@ -113,9 +113,9 @@ const QuizPage = () => {
   const submitQuiz = async (finalResponses) => {
     try {
       setSubmitting(true);
-      const response = await quizApi.submit({ responses: finalResponses });
-      setQuizResult(response.data);
-      setSelectedDomain(response.data.recommendedDomainId);
+      const result = await quizApi.submit({ responses: finalResponses });
+      setQuizResult(result);
+      setSelectedDomain(result?.recommendedDomainId);
       setShowResult(true);
       toast.success('Quiz completed! Here\'s your career recommendation');
       return true;
@@ -140,10 +140,10 @@ const QuizPage = () => {
       setCurrentResponses(newResponses);
       setCurrentSelection(null);
 
-      const response = await quizApi.getNextQuestion({ responses: newResponses });
+      const nextQuestion = await quizApi.getNextQuestion({ responses: newResponses });
 
-      if (response.data) {
-        setCurrentQuestionData(response.data);
+      if (nextQuestion) {
+        setCurrentQuestionData(nextQuestion);
       } else {
         // Quiz is over (7 questions reached or no more questions)
         const success = await submitQuiz(newResponses);

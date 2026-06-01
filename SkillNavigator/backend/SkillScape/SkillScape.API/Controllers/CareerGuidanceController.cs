@@ -112,6 +112,10 @@ public class CareerGuidanceController : ControllerBase
             var result = await _guidanceService.SubmitQuizAnswersAsync(userId, request);
             return Ok(ApiResponse<UserCareerProfileDto>.SuccessResponse(result, "Quiz recommendation generated successfully"));
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ApiResponse<UserCareerProfileDto>.ErrorResponse(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ApiResponse<UserCareerProfileDto>.ErrorResponse(ex.Message));
@@ -140,6 +144,10 @@ public class CareerGuidanceController : ControllerBase
 
             return Ok(ApiResponse<UserCareerProfileDto>.SuccessResponse(result, "User career profile retrieved"));
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ApiResponse<UserCareerProfileDto>.ErrorResponse(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ApiResponse<UserCareerProfileDto>.ErrorResponse(ex.Message));
@@ -164,6 +172,42 @@ public class CareerGuidanceController : ControllerBase
             string msg = bookmarked ? "Path bookmarked successfully" : "Path removed from bookmarks";
             return Ok(ApiResponse<bool>.SuccessResponse(bookmarked, msg));
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ApiResponse<bool>.ErrorResponse(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ApiResponse<bool>.ErrorResponse(ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Accept a career path and copy its roadmap as the active profile roadmap
+    /// </summary>
+    [HttpPost("accept/{id}")]
+    public async Task<ActionResult<ApiResponse<bool>>> AcceptCareer(string id)
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ApiResponse<bool>.ErrorResponse("User not authenticated"));
+            }
+
+            var result = await _guidanceService.AcceptCareerPathAsync(userId, id);
+            if (!result)
+            {
+                return NotFound(ApiResponse<bool>.ErrorResponse("Career path not found"));
+            }
+
+            return Ok(ApiResponse<bool>.SuccessResponse(true, "Career path accepted and roadmap initialized"));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ApiResponse<bool>.ErrorResponse(ex.Message));
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ApiResponse<bool>.ErrorResponse(ex.Message));
@@ -186,6 +230,10 @@ public class CareerGuidanceController : ControllerBase
 
             var result = await _guidanceService.GetBookmarkedPathsAsync(userId);
             return Ok(ApiResponse<List<CareerPathDto>>.SuccessResponse(result, "Bookmarked career paths retrieved"));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ApiResponse<List<CareerPathDto>>.ErrorResponse(ex.Message));
         }
         catch (Exception ex)
         {

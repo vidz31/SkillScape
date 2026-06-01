@@ -18,6 +18,8 @@ public interface ICareerGuidanceService
     
     Task<bool> ToggleBookmarkPathAsync(string userId, string pathId);
     
+    Task<bool> AcceptCareerPathAsync(string userId, string pathId);
+    
     Task<List<CareerPathDto>> GetBookmarkedPathsAsync(string userId);
     
     Task<SalaryForecastDto> ForecastSalaryAsync(SalaryForecastRequest request);

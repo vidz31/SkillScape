@@ -10,7 +10,7 @@ export const quizApi = {
    */
   getQuestions: async () => {
     const response = await apiClient.get('/quiz/questions');
-    return response.data;
+    return response.data?.data;
   },
 
   /**
@@ -18,7 +18,7 @@ export const quizApi = {
    */
   getNextQuestion: async (answers) => {
     const response = await apiClient.post('/quiz/next', answers);
-    return response.data;
+    return response.data?.data;
   },
 
   /**
@@ -26,7 +26,7 @@ export const quizApi = {
    */
   submit: async (answers) => {
     const response = await apiClient.post('/quiz/submit', answers);
-    return response.data;
+    return response.data?.data;
   },
 
   /**
@@ -34,7 +34,7 @@ export const quizApi = {
    */
   confirm: async (data) => {
     const response = await apiClient.post('/quiz/confirm', data);
-    return response.data;
+    return response.data?.data;
   },
 
   /**
@@ -42,7 +42,7 @@ export const quizApi = {
    */
   getResult: async (userId) => {
     const response = await apiClient.get(`/quiz/result/${userId}`);
-    return response.data;
+    return response.data?.data;
   },
 
   /**
@@ -50,7 +50,7 @@ export const quizApi = {
    */
   getMyResult: async () => {
     const response = await apiClient.get('/quiz/my-result');
-    return response.data;
+    return response.data?.data;
   },
 };
 

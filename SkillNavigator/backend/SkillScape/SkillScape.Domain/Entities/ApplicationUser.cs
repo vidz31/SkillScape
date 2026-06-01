@@ -1,10 +1,17 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace SkillScape.Domain.Entities;
 
 /// <summary>
 /// User entity - extends ASP.NET Identity User
 /// </summary>
+[BsonIgnoreExtraElements]
 public class ApplicationUser
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.String)]
     public string Id { get; set; } = Guid.NewGuid().ToString();
     
     public string Email { get; set; } = string.Empty;
@@ -16,6 +23,9 @@ public class ApplicationUser
     public string? ProfileImageUrl { get; set; }
     
     public string Role { get; set; } = "Student";
+
+    [NotMapped]
+    public string? PasswordHash { get; set; }
 
     public bool ProfileCompleted { get; set; } = false;
     
@@ -40,13 +50,22 @@ public class ApplicationUser
     public DateTime? PasswordResetTokenExpiry { get; set; }
     
     // Navigation properties
+    [BsonIgnore]
     public ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
+    [BsonIgnore]
     public ICollection<UserProgress> UserProgressions { get; set; } = new List<UserProgress>();
+    [BsonIgnore]
     public ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
+    [BsonIgnore]
     public ICollection<QuizResponse> QuizResponses { get; set; } = new List<QuizResponse>();
+    [BsonIgnore]
     public ICollection<MentorRequest> SentRequests { get; set; } = new List<MentorRequest>();
+    [BsonIgnore]
     public ICollection<MentorSession> StudentSessions { get; set; } = new List<MentorSession>();
+    [BsonIgnore]
     public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+    [BsonIgnore]
     public ICollection<MentorshipProgress> MentorshipProgressEntries { get; set; } = new List<MentorshipProgress>();
-    public ApplicationMentor? MentorProfile { get; set; }
+    [BsonIgnore]    public ICollection<UserCustomModuleProgress> UserCustomModuleProgresses { get; set; } = new List<UserCustomModuleProgress>();
+    [BsonIgnore]    public ApplicationMentor? MentorProfile { get; set; }
 }

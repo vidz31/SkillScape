@@ -1218,6 +1218,12 @@ public class MentorService : IMentorService
                 .ToListAsync()
             : new List<UserModuleProgress>();
 
+        var completedCustomModuleProgress = studentIds.Count > 0
+            ? await _context.UserCustomModuleProgressions
+                .Where(ump => studentIds.Contains(ump.UserId) && ump.IsCompleted)
+                .ToListAsync()
+            : new List<UserCustomModuleProgress>();
+
         var completedUserSkills = studentIds.Count > 0
             ? await _context.UserSkills
                 .Where(us => studentIds.Contains(us.UserId) && us.IsCompleted)
@@ -1259,6 +1265,22 @@ public class MentorService : IMentorService
         var hoursByStudent = completedModuleProgress
             .GroupBy(ump => ump.UserId)
             .ToDictionary(g => g.Key, g => g.Sum(x => x.Module?.EstimatedHours ?? 0));
+
+        var customHoursByStudent = completedCustomModuleProgress
+            .GroupBy(ump => ump.UserId)
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.EstimatedHours));
+
+        foreach (var customEntry in customHoursByStudent)
+        {
+            if (hoursByStudent.ContainsKey(customEntry.Key))
+            {
+                hoursByStudent[customEntry.Key] += customEntry.Value;
+            }
+            else
+            {
+                hoursByStudent[customEntry.Key] = customEntry.Value;
+            }
+        }
 
         var skillsCompletedByStudent = completedUserSkills
             .GroupBy(us => us.UserId)
