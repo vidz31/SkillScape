@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
 using SkillScape.Application.DTOs;
 using SkillScape.Application.Interfaces;
 using SkillScape.Domain.Entities;
@@ -12,25 +11,22 @@ namespace SkillScape.Infrastructure.Services;
 public class AuthService : IAuthService
 {
     private readonly ApplicationDbContext _context;
-    private readonly MongoDbContext _mongoContext;
     private readonly ITokenService _tokenService;
     private readonly IEmailService _emailService;
 
     public AuthService(
         ApplicationDbContext context,
         ITokenService tokenService,
-        IEmailService emailService,
-        MongoDbContext mongoContext)
+        IEmailService emailService)
     {
         _context = context;
         _tokenService = tokenService;
         _emailService = emailService;
-        _mongoContext = mongoContext;
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await GetMongoUserByEmailAsync(request.Email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
         if (user == null)
             throw new UnauthorizedAccessException("Invalid email or password");
@@ -41,23 +37,15 @@ public class AuthService : IAuthService
         if (string.IsNullOrEmpty(user.PasswordHash) || !VerifyPassword(request.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid email or password");
 
-        var sqlUser = await _context.Users.FindAsync(user.Id);
-        if (sqlUser == null)
-        {
-            sqlUser = MapToSqlUser(user);
-            _context.Users.Add(sqlUser);
-            await _context.SaveChangesAsync();
-        }
-
         var token = _tokenService.GenerateAccessToken(user.Id, user.Email, user.Role);
 
         return new AuthResponse
         {
-            Id = sqlUser.Id,
-            Email = sqlUser.Email,
-            FullName = sqlUser.FullName,
-            Role = sqlUser.Role,
-            ProfileCompleted = sqlUser.ProfileCompleted,
+            Id = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            Role = user.Role,
+            ProfileCompleted = user.ProfileCompleted,
             Token = token,
             ExpiresAt = DateTime.UtcNow.AddMinutes(60)
         };
@@ -68,7 +56,7 @@ public class AuthService : IAuthService
         if (request.Password != request.ConfirmPassword)
             throw new InvalidOperationException("Passwords do not match");
 
-        var existingUser = await GetMongoUserByEmailAsync(request.Email);
+        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
         if (existingUser != null)
             throw new InvalidOperationException("Email already registered");
 
@@ -89,17 +77,6 @@ public class AuthService : IAuthService
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
-
-        try
-        {
-            await _mongoContext.Users.InsertOneAsync(user);
-        }
-        catch
-        {
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            throw;
-        }
 
         var token = _tokenService.GenerateAccessToken(user.Id, user.Email, user.Role);
 
@@ -136,14 +113,6 @@ public class AuthService : IAuthService
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
 
-        var update = Builders<ApplicationUser>.Update
-            .Set(u => u.FullName, user.FullName)
-            .Set(u => u.Bio, user.Bio)
-            .Set(u => u.ProfileImageUrl, user.ProfileImageUrl)
-            .Set(u => u.UpdatedAt, user.UpdatedAt);
-
-        await _mongoContext.Users.UpdateOneAsync(u => u.Id == userId, update);
-
         return MapToProfileDto(user);
     }
 
@@ -155,18 +124,13 @@ public class AuthService : IAuthService
         var user = await _context.Users.FindAsync(userId)
             ?? throw new InvalidOperationException("User not found");
 
+        user.PasswordHash = HashPassword(request.NewPassword);
         user.UpdatedAt = DateTime.UtcNow;
+        user.PasswordResetToken = null;
+        user.PasswordResetTokenExpiry = null;
+        
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
-
-        var passwordHash = HashPassword(request.NewPassword);
-        var update = Builders<ApplicationUser>.Update
-            .Set(u => u.PasswordHash, passwordHash)
-            .Set(u => u.UpdatedAt, user.UpdatedAt)
-            .Set(u => u.PasswordResetToken, null)
-            .Set(u => u.PasswordResetTokenExpiry, null);
-
-        await _mongoContext.Users.UpdateOneAsync(u => u.Id == userId, update);
     }
 
     public async Task DeleteAccountAsync(string userId)
@@ -176,13 +140,11 @@ public class AuthService : IAuthService
 
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
-
-        await _mongoContext.Users.DeleteOneAsync(u => u.Id == userId);
     }
 
     public async Task<string> ForgotPasswordAsync(ForgotPasswordRequest request)
     {
-        var user = await GetMongoUserByEmailAsync(request.Email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
         if (user == null)
         {
@@ -194,22 +156,8 @@ public class AuthService : IAuthService
         user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
         user.UpdatedAt = DateTime.UtcNow;
 
-        var update = Builders<ApplicationUser>.Update
-            .Set(u => u.PasswordResetToken, user.PasswordResetToken)
-            .Set(u => u.PasswordResetTokenExpiry, user.PasswordResetTokenExpiry)
-            .Set(u => u.UpdatedAt, user.UpdatedAt);
-
-        await _mongoContext.Users.UpdateOneAsync(u => u.Id == user.Id, update);
-
-        var sqlUser = await _context.Users.FindAsync(user.Id);
-        if (sqlUser != null)
-        {
-            sqlUser.PasswordResetToken = user.PasswordResetToken;
-            sqlUser.PasswordResetTokenExpiry = user.PasswordResetTokenExpiry;
-            sqlUser.UpdatedAt = user.UpdatedAt;
-            _context.Users.Update(sqlUser);
-            await _context.SaveChangesAsync();
-        }
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
 
         try
         {
@@ -225,29 +173,18 @@ public class AuthService : IAuthService
 
     public async Task ResetPasswordAsync(ResetPasswordRequest request)
     {
-        var user = await _mongoContext.Users.Find(u => u.PasswordResetToken == request.Token).FirstOrDefaultAsync();
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == request.Token);
 
         if (user == null || user.PasswordResetTokenExpiry == null || user.PasswordResetTokenExpiry < DateTime.UtcNow)
             throw new InvalidOperationException("Invalid or expired reset token");
 
-        var newHash = HashPassword(request.Password);
-        var update = Builders<ApplicationUser>.Update
-            .Set(u => u.PasswordHash, newHash)
-            .Set(u => u.PasswordResetToken, null)
-            .Set(u => u.PasswordResetTokenExpiry, null)
-            .Set(u => u.UpdatedAt, DateTime.UtcNow);
-
-        await _mongoContext.Users.UpdateOneAsync(u => u.Id == user.Id, update);
-
-        var sqlUser = await _context.Users.FindAsync(user.Id);
-        if (sqlUser != null)
-        {
-            sqlUser.PasswordResetToken = null;
-            sqlUser.PasswordResetTokenExpiry = null;
-            sqlUser.UpdatedAt = DateTime.UtcNow;
-            _context.Users.Update(sqlUser);
-            await _context.SaveChangesAsync();
-        }
+        user.PasswordHash = HashPassword(request.Password);
+        user.PasswordResetToken = null;
+        user.PasswordResetTokenExpiry = null;
+        user.UpdatedAt = DateTime.UtcNow;
+        
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
     }
 
     private static UserProfileDto MapToProfileDto(ApplicationUser user)
@@ -266,16 +203,6 @@ public class AuthService : IAuthService
             CurrentStreak = user.CurrentStreak,
             CreatedAt = user.CreatedAt
         };
-    }
-
-    private async Task<ApplicationUser?> GetMongoUserByEmailAsync(string email)
-    {
-        return await _mongoContext.Users.Find(u => u.Email == email).FirstOrDefaultAsync();
-    }
-
-    private async Task<ApplicationUser?> GetMongoUserByIdAsync(string userId)
-    {
-        return await _mongoContext.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
     }
 
     private static string HashPassword(string password)
@@ -298,29 +225,5 @@ public class AuthService : IAuthService
         using var algorithm = new Rfc2898DeriveBytes(password, salt, 100_000, HashAlgorithmName.SHA256);
         var computedHash = algorithm.GetBytes(32);
         return CryptographicOperations.FixedTimeEquals(storedBytes, computedHash);
-    }
-
-    private static ApplicationUser MapToSqlUser(ApplicationUser mongoUser)
-    {
-        return new ApplicationUser
-        {
-            Id = mongoUser.Id,
-            Email = mongoUser.Email,
-            FullName = mongoUser.FullName,
-            Bio = mongoUser.Bio,
-            ProfileImageUrl = mongoUser.ProfileImageUrl,
-            Role = mongoUser.Role,
-            ProfileCompleted = mongoUser.ProfileCompleted,
-            Level = mongoUser.Level,
-            TotalXP = mongoUser.TotalXP,
-            CurrentStreak = mongoUser.CurrentStreak,
-            CreatedAt = mongoUser.CreatedAt,
-            UpdatedAt = mongoUser.UpdatedAt,
-            IsActive = mongoUser.IsActive,
-            IsBlocked = mongoUser.IsBlocked,
-            BlockedReason = mongoUser.BlockedReason,
-            PasswordResetToken = mongoUser.PasswordResetToken,
-            PasswordResetTokenExpiry = mongoUser.PasswordResetTokenExpiry
-        };
     }
 }

@@ -14,9 +14,7 @@ using SkillScape.API.Middleware;
 using FluentValidation;
 using Microsoft.Extensions.ML;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Load environment variables from .env file
+// Load environment variables from .env file before the configuration is built
 void LoadEnvFile(string path)
 {
     if (File.Exists(path))
@@ -40,6 +38,8 @@ void LoadEnvFile(string path)
 LoadEnvFile(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
 // Try parent directory (common for solution-level .env)
 LoadEnvFile(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())?.FullName ?? "", ".env"));
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers().AddJsonOptions(options =>

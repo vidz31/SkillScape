@@ -24,7 +24,6 @@ public class ApplicationUser
     
     public string Role { get; set; } = "Student";
 
-    [NotMapped]
     public string? PasswordHash { get; set; }
 
     public bool ProfileCompleted { get; set; } = false;
