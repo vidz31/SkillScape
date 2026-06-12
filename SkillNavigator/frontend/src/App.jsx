@@ -33,6 +33,7 @@ import CareerExplorer from "@/pages/CareerExplorer";
 import CareerInsights from "@/pages/CareerInsights";
 import SalaryForecast from "@/pages/SalaryForecast";
 import CareerAnalytics from "@/pages/CareerAnalytics";
+import PlacementReadiness from "@/pages/PlacementReadiness";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +98,7 @@ const App = () => (
               <Route path="/mentor-dashboard/schedule" element={<MentorDashboard />} />
               <Route path="/sessions" element={<SessionsCalendar />} />
               <Route path="/quiz" element={<QuizEngine />} />
+              <Route path="/placement" element={<PlacementReadiness />} />
               
               {/* Career Guidance Module Routes */}
               <Route path="/career-explorer" element={<CareerExplorer />} />

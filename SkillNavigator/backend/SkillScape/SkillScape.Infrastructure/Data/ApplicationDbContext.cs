@@ -46,6 +46,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<HierarchicalQuizQuestion> HierarchicalQuizQuestions { get; set; } = null!;
     public DbSet<UserCareerProfile> UserCareerProfiles { get; set; } = null!;
 
+    // ── Placement Readiness & Skill Gap Analysis Module ──────────────────────
+    public DbSet<PlacementAssessmentQuestion> PlacementAssessmentQuestions { get; set; } = null!;
+    public DbSet<PlacementAssessment> PlacementAssessments { get; set; } = null!;
+    public DbSet<RoleSkillProfile> RoleSkillProfiles { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -577,6 +582,49 @@ public class ApplicationDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.RecommendedCareerId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── Placement Readiness Module ────────────────────────────────────────
+
+        // RoleSkillProfile
+        modelBuilder.Entity<RoleSkillProfile>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.RoleName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.SkillsJson).IsRequired();
+            entity.HasIndex(e => e.RoleName).IsUnique();
+        });
+
+        // PlacementAssessmentQuestion
+        modelBuilder.Entity<PlacementAssessmentQuestion>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.QuestionText).IsRequired();
+            entity.Property(e => e.OptionsJson).IsRequired();
+            entity.Property(e => e.CorrectAnswer).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.SkillMapped).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Category).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Difficulty).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.ApplicableRoles).IsRequired().HasMaxLength(1000);
+        });
+
+        // PlacementAssessment
+        modelBuilder.Entity<PlacementAssessment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.TargetRole).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.SkillScoresJson).IsRequired();
+            entity.Property(e => e.StrongSkillsJson).IsRequired();
+            entity.Property(e => e.WeakSkillsJson).IsRequired();
+            entity.Property(e => e.RecommendationsJson).IsRequired();
+            entity.Property(e => e.RoadmapJson).IsRequired();
+
+            entity.HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => new { e.UserId, e.CreatedAt });
         });
     }
 }

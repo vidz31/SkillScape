@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +17,9 @@ public static class DatabaseSeeder
         // Seed Hierarchical Career Guidance Module Data first if not present
         await SeedCareerPathsAsync(context);
         await SeedHierarchicalQuizQuestionsAsync(context);
+
+        // Seed Placement Readiness Module data (idempotent)
+        await SeedPlacementDataAsync(context);
 
         // Skip if data already exists
         if (context.CareerDomains.Any())
@@ -652,11 +655,11 @@ public static class DatabaseSeeder
     {
         return new List<Badge>
         {
-            new Badge { Id = Guid.NewGuid().ToString(), Name = "First Steps", Description = "Complete your first skill", IconUrl = "👣", Rarity = "Common", XPRequired = 0, SkillsCompletedRequired = 1, IsActive = true },
-            new Badge { Id = Guid.NewGuid().ToString(), Name = "Quick Learner", Description = "Complete 5 skills", IconUrl = "⚡", Rarity = "Rare", XPRequired = 0, SkillsCompletedRequired = 5, IsActive = true },
-            new Badge { Id = Guid.NewGuid().ToString(), Name = "Skill Master", Description = "Complete 10 skills", IconUrl = "🏆", Rarity = "Epic", XPRequired = 0, SkillsCompletedRequired = 10, IsActive = true },
-            new Badge { Id = Guid.NewGuid().ToString(), Name = "Legendary", Description = "Reach 500 XP", IconUrl = "👑", Rarity = "Legendary", XPRequired = 500, IsActive = true },
-            new Badge { Id = Guid.NewGuid().ToString(), Name = "Domain Expert", Description = "Complete a full domain", IconUrl = "🔥", Rarity = "Epic", XPRequired = 100, IsActive = true }
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "First Steps", Description = "Complete your first skill", IconUrl = "ðŸ‘£", Rarity = "Common", XPRequired = 0, SkillsCompletedRequired = 1, IsActive = true },
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "Quick Learner", Description = "Complete 5 skills", IconUrl = "âš¡", Rarity = "Rare", XPRequired = 0, SkillsCompletedRequired = 5, IsActive = true },
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "Skill Master", Description = "Complete 10 skills", IconUrl = "ðŸ†", Rarity = "Epic", XPRequired = 0, SkillsCompletedRequired = 10, IsActive = true },
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "Legendary", Description = "Reach 500 XP", IconUrl = "ðŸ‘‘", Rarity = "Legendary", XPRequired = 500, IsActive = true },
+            new Badge { Id = Guid.NewGuid().ToString(), Name = "Domain Expert", Description = "Complete a full domain", IconUrl = "ðŸ”¥", Rarity = "Epic", XPRequired = 100, IsActive = true }
         };
     }
 
@@ -2649,5 +2652,521 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync();
         }
         context.ChangeTracker.AutoDetectChangesEnabled = true;
+    }
+
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // PLACEMENT READINESS & SKILL GAP ANALYSIS MODULE â€” SEED DATA
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    private static async Task SeedPlacementDataAsync(ApplicationDbContext context)
+    {
+        // Idempotent: only seed if no role skill profiles exist yet
+        if (context.RoleSkillProfiles.Any()) return;
+
+        // 1. Seed RoleSkillProfiles
+        var profiles = SeedRoleSkillProfiles();
+        context.RoleSkillProfiles.AddRange(profiles);
+        await context.SaveChangesAsync();
+
+        // 2. Seed PlacementAssessmentQuestions
+        var questions = SeedPlacementAssessmentQuestions();
+        context.PlacementAssessmentQuestions.AddRange(questions);
+        await context.SaveChangesAsync();
+    }
+
+    private static List<RoleSkillProfile> SeedRoleSkillProfiles()
+    {
+        var profiles = new List<RoleSkillProfile>();
+        string Req(List<SkillRequirement> reqs) => JsonSerializer.Serialize(reqs);
+
+        profiles.Add(new RoleSkillProfile { Id = "rsp-software-dev", RoleName = "Software Developer",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Data Structures", Category = "Technical", RequiredLevel = 85, Weightage = 25 },
+                new() { SkillName = "Problem Solving", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "OOP", Category = "Technical", RequiredLevel = 75, Weightage = 15 },
+                new() { SkillName = "Database", Category = "Technical", RequiredLevel = 70, Weightage = 15 },
+                new() { SkillName = "System Design", Category = "Technical", RequiredLevel = 65, Weightage = 10 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 70, Weightage = 10 },
+                new() { SkillName = "Soft Skills", Category = "SoftSkill", RequiredLevel = 65, Weightage = 5 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-fullstack-dev", RoleName = "Full Stack Developer",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "JavaScript", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "REST APIs", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Database", Category = "Technical", RequiredLevel = 75, Weightage = 15 },
+                new() { SkillName = "Problem Solving", Category = "Technical", RequiredLevel = 70, Weightage = 15 },
+                new() { SkillName = "System Design", Category = "Technical", RequiredLevel = 65, Weightage = 10 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 65, Weightage = 10 },
+                new() { SkillName = "Soft Skills", Category = "SoftSkill", RequiredLevel = 70, Weightage = 10 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-data-scientist", RoleName = "Data Scientist",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Python", Category = "Technical", RequiredLevel = 85, Weightage = 25 },
+                new() { SkillName = "Statistics", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Machine Learning", Category = "Technical", RequiredLevel = 75, Weightage = 20 },
+                new() { SkillName = "SQL", Category = "Technical", RequiredLevel = 70, Weightage = 15 },
+                new() { SkillName = "Data Visualization", Category = "Technical", RequiredLevel = 65, Weightage = 10 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 75, Weightage = 5 },
+                new() { SkillName = "Soft Skills", Category = "SoftSkill", RequiredLevel = 65, Weightage = 5 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-ai-engineer", RoleName = "AI Engineer",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Python", Category = "Technical", RequiredLevel = 90, Weightage = 25 },
+                new() { SkillName = "Deep Learning", Category = "Technical", RequiredLevel = 85, Weightage = 25 },
+                new() { SkillName = "Machine Learning", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "NLP", Category = "Technical", RequiredLevel = 70, Weightage = 15 },
+                new() { SkillName = "Problem Solving", Category = "Technical", RequiredLevel = 75, Weightage = 10 },
+                new() { SkillName = "Soft Skills", Category = "SoftSkill", RequiredLevel = 60, Weightage = 5 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-cybersecurity", RoleName = "Cybersecurity Analyst",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Networking", Category = "Technical", RequiredLevel = 85, Weightage = 25 },
+                new() { SkillName = "Linux", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Cryptography", Category = "Technical", RequiredLevel = 75, Weightage = 20 },
+                new() { SkillName = "Problem Solving", Category = "Technical", RequiredLevel = 70, Weightage = 15 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 70, Weightage = 10 },
+                new() { SkillName = "Soft Skills", Category = "SoftSkill", RequiredLevel = 65, Weightage = 10 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-cloud-engineer", RoleName = "Cloud Engineer",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Networking", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Linux", Category = "Technical", RequiredLevel = 75, Weightage = 20 },
+                new() { SkillName = "Docker", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "System Design", Category = "Technical", RequiredLevel = 75, Weightage = 15 },
+                new() { SkillName = "Problem Solving", Category = "Technical", RequiredLevel = 70, Weightage = 10 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 65, Weightage = 10 },
+                new() { SkillName = "Soft Skills", Category = "SoftSkill", RequiredLevel = 65, Weightage = 5 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-devops-engineer", RoleName = "DevOps Engineer",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Linux", Category = "Technical", RequiredLevel = 85, Weightage = 20 },
+                new() { SkillName = "Docker", Category = "Technical", RequiredLevel = 85, Weightage = 20 },
+                new() { SkillName = "Networking", Category = "Technical", RequiredLevel = 75, Weightage = 15 },
+                new() { SkillName = "System Design", Category = "Technical", RequiredLevel = 75, Weightage = 15 },
+                new() { SkillName = "Problem Solving", Category = "Technical", RequiredLevel = 70, Weightage = 15 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 65, Weightage = 10 },
+                new() { SkillName = "Soft Skills", Category = "SoftSkill", RequiredLevel = 65, Weightage = 5 },
+            }) });
+
+        // â”€â”€ NEW ROLES â”€â”€
+        profiles.Add(new RoleSkillProfile { Id = "rsp-doctor-mbbs", RoleName = "Doctor (MBBS)",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Anatomy", Category = "Technical", RequiredLevel = 85, Weightage = 20 },
+                new() { SkillName = "Physiology", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Pharmacology", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Clinical Diagnosis", Category = "Technical", RequiredLevel = 85, Weightage = 20 },
+                new() { SkillName = "Patient Care", Category = "SoftSkill", RequiredLevel = 80, Weightage = 10 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 70, Weightage = 10 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-psychiatrist", RoleName = "Psychiatrist",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Psychology", Category = "Technical", RequiredLevel = 85, Weightage = 25 },
+                new() { SkillName = "Psychopathology", Category = "Technical", RequiredLevel = 80, Weightage = 25 },
+                new() { SkillName = "Counseling", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Pharmacotherapy", Category = "Technical", RequiredLevel = 75, Weightage = 15 },
+                new() { SkillName = "Ethics", Category = "SoftSkill", RequiredLevel = 80, Weightage = 10 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 70, Weightage = 5 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-pharmacist", RoleName = "Pharmacist",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Pharmacology", Category = "Technical", RequiredLevel = 90, Weightage = 25 },
+                new() { SkillName = "Drug Interactions", Category = "Technical", RequiredLevel = 85, Weightage = 25 },
+                new() { SkillName = "Chemistry", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Patient Counseling", Category = "SoftSkill", RequiredLevel = 75, Weightage = 15 },
+                new() { SkillName = "Regulations", Category = "SoftSkill", RequiredLevel = 70, Weightage = 10 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 70, Weightage = 5 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-chartered-accountant", RoleName = "Chartered Accountant",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Accounting", Category = "Technical", RequiredLevel = 90, Weightage = 25 },
+                new() { SkillName = "Taxation", Category = "Technical", RequiredLevel = 85, Weightage = 25 },
+                new() { SkillName = "Auditing", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Financial Analysis", Category = "Technical", RequiredLevel = 75, Weightage = 15 },
+                new() { SkillName = "Business Law", Category = "SoftSkill", RequiredLevel = 70, Weightage = 10 },
+                new() { SkillName = "Aptitude", Category = "Aptitude", RequiredLevel = 75, Weightage = 5 },
+            }) });
+        profiles.Add(new RoleSkillProfile { Id = "rsp-graphic-designer", RoleName = "Graphic Designer",
+            SkillsJson = Req(new List<SkillRequirement> {
+                new() { SkillName = "Visual Design", Category = "Technical", RequiredLevel = 85, Weightage = 25 },
+                new() { SkillName = "Typography", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Color Theory", Category = "Technical", RequiredLevel = 80, Weightage = 20 },
+                new() { SkillName = "Adobe Suite", Category = "Technical", RequiredLevel = 85, Weightage = 20 },
+                new() { SkillName = "UI/UX", Category = "Technical", RequiredLevel = 75, Weightage = 10 },
+                new() { SkillName = "Soft Skills", Category = "SoftSkill", RequiredLevel = 65, Weightage = 5 },
+            }) });
+
+        return profiles;
+    }
+
+    private static List<PlacementAssessmentQuestion> SeedPlacementAssessmentQuestions()
+    {
+        var q = new List<PlacementAssessmentQuestion>();
+        int order = 1;
+
+        PlacementAssessmentQuestion Q(
+            string roles, string text, List<string> opts, string correct,
+            string skill, string category, string difficulty) =>
+            new PlacementAssessmentQuestion
+            {
+                Id = $"paq-{order++}",
+                ApplicableRoles = roles,
+                QuestionText = text,
+                OptionsJson = JsonSerializer.Serialize(opts),
+                CorrectAnswer = correct,
+                SkillMapped = skill,
+                Category = category,
+                Difficulty = difficulty,
+                IsActive = true,
+                DisplayOrder = order - 1
+            };
+
+        const string SD = "Software Developer";
+        const string FS = "Full Stack Developer";
+        const string DS = "Data Scientist";
+        const string AI = "AI Engineer";
+        const string CY = "Cybersecurity Analyst";
+        const string CL = "Cloud Engineer";
+        const string DO = "DevOps Engineer";
+        const string DR = "Doctor (MBBS)";
+        const string PS = "Psychiatrist";
+        const string PH = "Pharmacist";
+        const string CA = "Chartered Accountant";
+        const string GD = "Graphic Designer";
+        string TECH = $"{SD},{FS},{AI},{CL},{DO}";
+        string MED  = $"{DR},{PS},{PH}";
+        string ALL  = $"{SD},{FS},{DS},{AI},{CY},{CL},{DO},{DR},{PS},{PH},{CA},{GD}";
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // SOFTWARE DEVELOPER â€” Data Structures
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{SD},{FS}", "What is the time complexity of binary search on a sorted array?",
+            new(){"O(n)","O(log n)","O(nÂ²)","O(1)"}, "O(log n)", "Data Structures", "Technical", "Easy"));
+        q.Add(Q($"{SD},{FS}", "Which data structure uses LIFO ordering?",
+            new(){"Queue","Linked List","Stack","Heap"}, "Stack", "Data Structures", "Technical", "Easy"));
+        q.Add(Q($"{SD},{FS}", "What is the worst-case time complexity of QuickSort?",
+            new(){"O(n log n)","O(n)","O(nÂ²)","O(log n)"}, "O(nÂ²)", "Data Structures", "Technical", "Medium"));
+        q.Add(Q($"{SD},{FS}", "Which traversal of a BST gives nodes in sorted order?",
+            new(){"Pre-order","Post-order","In-order","Level-order"}, "In-order", "Data Structures", "Technical", "Medium"));
+        q.Add(Q($"{SD},{FS}", "A hash table with chaining has average-case lookup time complexity of:",
+            new(){"O(n)","O(log n)","O(1)","O(n log n)"}, "O(1)", "Data Structures", "Technical", "Medium"));
+        q.Add(Q($"{SD},{FS}", "In Dijkstra's shortest-path algorithm, which data structure gives optimal performance?",
+            new(){"Stack","Queue","Min-Heap (Priority Queue)","Linked List"}, "Min-Heap (Priority Queue)", "Data Structures", "Technical", "Hard"));
+
+        // â”€â”€ Problem Solving â”€â”€
+        q.Add(Q($"{SD},{FS},{AI}", "Dynamic programming is best applied when a problem has:",
+            new(){"No repeated sub-problems","Overlapping sub-problems and optimal substructure","Only greedy choices","Linear recursion"},
+            "Overlapping sub-problems and optimal substructure", "Problem Solving", "Technical", "Medium"));
+        q.Add(Q($"{SD},{FS},{AI}", "Which approach solves the 0/1 Knapsack problem optimally?",
+            new(){"Greedy","Dynamic Programming","Divide and Conquer","Backtracking"},
+            "Dynamic Programming", "Problem Solving", "Technical", "Medium"));
+
+        // â”€â”€ OOP / System Design â”€â”€
+        q.Add(Q($"{SD},{FS},{DO}", "Which SOLID principle states a class should have only one reason to change?",
+            new(){"Open/Closed","Single Responsibility","Liskov Substitution","Dependency Inversion"},
+            "Single Responsibility", "OOP", "Technical", "Easy"));
+        q.Add(Q($"{SD},{FS},{DO}", "Which design pattern ensures only one instance of a class exists?",
+            new(){"Factory","Observer","Singleton","Strategy"}, "Singleton", "OOP", "Technical", "Easy"));
+        q.Add(Q($"{SD},{FS},{CL},{DO}", "CAP theorem states a distributed system can guarantee at most how many of: Consistency, Availability, Partition Tolerance?",
+            new(){"All three","Two","One","None"}, "Two", "System Design", "Technical", "Medium"));
+        q.Add(Q($"{SD},{FS},{CL},{DO}", "Which architectural pattern decomposes an application into small independently deployable services?",
+            new(){"Monolithic","Microservices","Serverless","Event-Driven"}, "Microservices", "System Design", "Technical", "Easy"));
+
+        // â”€â”€ Database / SQL â”€â”€
+        q.Add(Q($"{SD},{FS},{DS}", "Which SQL clause filters groups after GROUP BY?",
+            new(){"WHERE","HAVING","FILTER","ORDER BY"}, "HAVING", "Database", "Technical", "Easy"));
+        q.Add(Q($"{SD},{FS},{DS}", "What does ACID stand for in database transactions?",
+            new(){"Atomicity, Consistency, Isolation, Durability","Access, Control, Integrity, Data","Atomicity, Concurrency, Indexing, Durability","Availability, Consistency, Isolation, Data"},
+            "Atomicity, Consistency, Isolation, Durability", "Database", "Technical", "Medium"));
+        q.Add(Q($"{SD},{FS},{DS}", "In SQL, which JOIN returns all rows from both tables with NULLs where no match exists?",
+            new(){"INNER JOIN","LEFT JOIN","FULL OUTER JOIN","CROSS JOIN"}, "FULL OUTER JOIN", "SQL", "Technical", "Medium"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // FULL STACK â€” REST APIs & JavaScript
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{FS}", "Which HTTP method is idempotent and used to fully update a resource?",
+            new(){"POST","PATCH","PUT","GET"}, "PUT", "REST APIs", "Technical", "Medium"));
+        q.Add(Q($"{FS}", "What does Promise.all([p1, p2, p3]) return in JavaScript?",
+            new(){"The first resolved promise","A promise that resolves when all promises resolve","A promise that resolves to the fastest result","An array of pending promises"},
+            "A promise that resolves when all promises resolve", "JavaScript", "Technical", "Medium"));
+        q.Add(Q($"{FS}", "What is the primary purpose of JWT in web applications?",
+            new(){"Storing session data on the server","Stateless authentication by encoding user claims in a signed token","Encrypting API responses","Caching database queries"},
+            "Stateless authentication by encoding user claims in a signed token", "REST APIs", "Technical", "Medium"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // DATA SCIENTIST â€” Python, Statistics, ML
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{DS},{AI}", "Which Python library is primarily used for numerical computing?",
+            new(){"pandas","matplotlib","numpy","scikit-learn"}, "numpy", "Python", "Technical", "Easy"));
+        q.Add(Q($"{DS},{AI}", "What does df.dropna() do in pandas?",
+            new(){"Drops all columns","Removes rows with missing values","Fills missing values with 0","Sorts the DataFrame"},
+            "Removes rows with missing values", "Python", "Technical", "Easy"));
+        q.Add(Q($"{DS},{AI}", "Which metric is most appropriate for evaluating a classifier on imbalanced data?",
+            new(){"Accuracy","Mean Squared Error","F1-Score","R-Squared"}, "F1-Score", "Machine Learning", "Technical", "Medium"));
+        q.Add(Q($"{DS},{AI}", "What is the purpose of train-test split in machine learning?",
+            new(){"Increase training data","Evaluate model on unseen data to prevent overfitting","Speed up training","Reduce feature count"},
+            "Evaluate model on unseen data to prevent overfitting", "Machine Learning", "Technical", "Easy"));
+        q.Add(Q($"{DS},{AI}", "Which statistical measure is most affected by extreme outliers?",
+            new(){"Median","Mode","Mean","IQR"}, "Mean", "Statistics", "Technical", "Easy"));
+        q.Add(Q($"{DS},{AI}", "In a normal distribution, approximately what percentage of data falls within 2 standard deviations?",
+            new(){"68%","95%","99.7%","50%"}, "95%", "Statistics", "Technical", "Medium"));
+        q.Add(Q($"{DS}", "Which chart type best shows correlation between two continuous variables?",
+            new(){"Bar chart","Pie chart","Scatter plot","Histogram"}, "Scatter plot", "Data Visualization", "Technical", "Easy"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // AI ENGINEER â€” Deep Learning, NLP
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{AI}", "Which activation function outputs values between 0 and 1 for binary classification?",
+            new(){"ReLU","Tanh","Sigmoid","Softmax"}, "Sigmoid", "Deep Learning", "Technical", "Easy"));
+        q.Add(Q($"{AI}", "What problem does the vanishing gradient primarily affect?",
+            new(){"Convolutional Networks","Deep Recurrent Networks","Shallow Networks","Linear Regression"},
+            "Deep Recurrent Networks", "Deep Learning", "Technical", "Medium"));
+        q.Add(Q($"{AI}", "Which NLP technique converts words into dense vector representations capturing semantic meaning?",
+            new(){"One-hot encoding","TF-IDF","Word Embeddings (Word2Vec)","Bag of Words"},
+            "Word Embeddings (Word2Vec)", "NLP", "Technical", "Medium"));
+        q.Add(Q($"{AI}", "The Transformer self-attention mechanism has time complexity of:",
+            new(){"O(n)","O(n log n)","O(nÂ²)","O(1)"}, "O(nÂ²)", "Deep Learning", "Technical", "Hard"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // CYBERSECURITY / CLOUD / DEVOPS
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{CY},{CL},{DO}", "Which OSI layer handles routing between networks?",
+            new(){"Data Link","Transport","Network","Session"}, "Network", "Networking", "Technical", "Easy"));
+        q.Add(Q($"{CY},{CL},{DO}", "Which protocol provides reliable, connection-oriented communication?",
+            new(){"UDP","ICMP","TCP","ARP"}, "TCP", "Networking", "Technical", "Easy"));
+        q.Add(Q($"{CY},{CL},{DO}", "What is a subnet mask 255.255.255.0 equivalent to in CIDR notation?",
+            new(){"/16","/24","/8","/32"}, "/24", "Networking", "Technical", "Medium"));
+        q.Add(Q($"{CY},{CL},{DO}", "Which Linux command displays all running processes?",
+            new(){"ls","ps aux","netstat","df"}, "ps aux", "Linux", "Technical", "Easy"));
+        q.Add(Q($"{CY},{CL},{DO}", "What permission does chmod 755 grant?",
+            new(){"Owner: rwx, Group: r-x, Others: r-x","Owner: rw-, Group: r--, Others: r--","Owner: rwx, Group: rwx, Others: r--","Owner: r-x, Group: r-x, Others: r-x"},
+            "Owner: rwx, Group: r-x, Others: r-x", "Linux", "Technical", "Medium"));
+        q.Add(Q($"{CY}", "Which encryption type uses the same key for encryption and decryption?",
+            new(){"Asymmetric","Symmetric","Hashing","Digital Signature"}, "Symmetric", "Cryptography", "Technical", "Easy"));
+        q.Add(Q($"{CY}", "Which OWASP vulnerability involves executing malicious SQL through user inputs?",
+            new(){"XSS","IDOR","SQL Injection","CSRF"}, "SQL Injection", "Cryptography", "Technical", "Easy"));
+        q.Add(Q($"{CY}", "TLS primarily protects against which attack?",
+            new(){"SQL Injection","Man-in-the-Middle attacks during data transit","Cross-Site Scripting","Denial of Service"},
+            "Man-in-the-Middle attacks during data transit", "Cryptography", "Technical", "Medium"));
+        q.Add(Q($"{CL},{DO}", "What is the primary difference between a Docker image and container?",
+            new(){"Images are running; containers are blueprints","Containers are running instances of images","They are the same","Images run on VMs only"},
+            "Containers are running instances of images", "Docker", "Technical", "Easy"));
+        q.Add(Q($"{CL},{DO}", "In Kubernetes, which resource manages identical pods and ensures a desired replica count?",
+            new(){"Service","Deployment","ConfigMap","Ingress"}, "Deployment", "Docker", "Technical", "Medium"));
+        q.Add(Q($"{CL},{DO}", "What does CI/CD stand for?",
+            new(){"Code Integration / Code Deployment","Continuous Integration / Continuous Delivery","Continuous Inspection / Continuous Design","Core Integration / Core Deployment"},
+            "Continuous Integration / Continuous Delivery", "System Design", "Technical", "Easy"));
+        q.Add(Q($"{CL},{DO}", "Which cloud service model provides virtualized computing infrastructure over the internet?",
+            new(){"SaaS","PaaS","IaaS","FaaS"}, "IaaS", "System Design", "Technical", "Easy"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // DOCTOR (MBBS)
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{DR}", "Which organ filters blood and produces urine?",
+            new(){"Liver","Heart","Kidney","Spleen"}, "Kidney", "Anatomy", "Technical", "Easy"));
+        q.Add(Q($"{DR}", "The brachial plexus supplies nerves primarily to which body region?",
+            new(){"Lower limb","Upper limb","Thorax","Abdomen"}, "Upper limb", "Anatomy", "Technical", "Medium"));
+        q.Add(Q($"{DR}", "Which cranial nerve controls movement of the tongue?",
+            new(){"Vagus (X)","Glossopharyngeal (IX)","Hypoglossal (XII)","Facial (VII)"}, "Hypoglossal (XII)", "Anatomy", "Technical", "Hard"));
+        q.Add(Q($"{DR}", "What is the primary pacemaker of the heart?",
+            new(){"AV Node","Bundle of His","SA Node","Purkinje Fibers"}, "SA Node", "Physiology", "Technical", "Easy"));
+        q.Add(Q($"{DR}", "Which hormone regulates blood glucose by promoting cellular uptake?",
+            new(){"Glucagon","Cortisol","Insulin","Epinephrine"}, "Insulin", "Physiology", "Technical", "Easy"));
+        q.Add(Q($"{DR}", "The Frank-Starling law states cardiac output increases when:",
+            new(){"Heart rate increases","Venous return (preload) increases","Afterload decreases","Blood viscosity decreases"},
+            "Venous return (preload) increases", "Physiology", "Technical", "Medium"));
+        q.Add(Q($"{DR},{PH}", "Which class of antibiotics inhibits bacterial cell wall synthesis?",
+            new(){"Aminoglycosides","Macrolides","Beta-lactams (Penicillins)","Tetracyclines"}, "Beta-lactams (Penicillins)", "Pharmacology", "Technical", "Easy"));
+        q.Add(Q($"{DR},{PH}", "What is the mechanism of action of aspirin?",
+            new(){"Blocks opioid receptors","Inhibits cyclooxygenase (COX) enzymes","Blocks calcium channels","Activates GABA receptors"},
+            "Inhibits cyclooxygenase (COX) enzymes", "Pharmacology", "Technical", "Medium"));
+        q.Add(Q($"{DR}", "A patient presents with chest pain, dyspnea, and elevated troponin. Most likely diagnosis?",
+            new(){"Pneumothorax","Acute Myocardial Infarction","Pulmonary Embolism","Aortic Dissection"},
+            "Acute Myocardial Infarction", "Clinical Diagnosis", "Technical", "Medium"));
+        q.Add(Q($"{DR}", "Preferred imaging for acute ischemic stroke within first 6 hours?",
+            new(){"X-Ray","MRI with diffusion-weighted imaging","Ultrasound","PET Scan"},
+            "MRI with diffusion-weighted imaging", "Clinical Diagnosis", "Technical", "Hard"));
+        q.Add(Q($"{DR}", "Glasgow Coma Scale assesses level of consciousness across which three domains?",
+            new(){"Breathing, Pulse, Reflexes","Eye Opening, Verbal Response, Motor Response","Pain, Temperature, Touch","Memory, Orientation, Attention"},
+            "Eye Opening, Verbal Response, Motor Response", "Clinical Diagnosis", "Technical", "Medium"));
+        q.Add(Q($"{DR}", "Which communication model is recommended when breaking bad news to a patient?",
+            new(){"SOAP notes","SPIKES protocol","APGAR score","ABCDE assessment"}, "SPIKES protocol", "Patient Care", "SoftSkill", "Medium"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // PSYCHIATRIST
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{PS}", "In Freud's structural model, which component operates on the reality principle?",
+            new(){"Id","Ego","Superego","Unconscious"}, "Ego", "Psychology", "Technical", "Easy"));
+        q.Add(Q($"{PS}", "Maslow's hierarchy places which need at the top of the pyramid?",
+            new(){"Safety","Belonging","Self-actualization","Esteem"}, "Self-actualization", "Psychology", "Technical", "Easy"));
+        q.Add(Q($"{PS}", "Which neurotransmitter is most associated with reward and motivation?",
+            new(){"Serotonin","Dopamine","GABA","Acetylcholine"}, "Dopamine", "Psychology", "Technical", "Medium"));
+        q.Add(Q($"{PS}", "CBT primarily focuses on:",
+            new(){"Dream analysis","Identifying and restructuring negative thought patterns","Free association","Family systems dynamics"},
+            "Identifying and restructuring negative thought patterns", "Psychology", "Technical", "Medium"));
+        q.Add(Q($"{PS}", "Which disorder is characterized by persistent delusions, hallucinations, and disorganized thinking?",
+            new(){"Major Depressive Disorder","Bipolar I Disorder","Schizophrenia","Generalized Anxiety Disorder"}, "Schizophrenia", "Psychopathology", "Technical", "Easy"));
+        q.Add(Q($"{PS}", "DSM-5 classifies PTSD under which category?",
+            new(){"Mood Disorders","Anxiety Disorders","Trauma- and Stressor-Related Disorders","Personality Disorders"},
+            "Trauma- and Stressor-Related Disorders", "Psychopathology", "Technical", "Medium"));
+        q.Add(Q($"{PS}", "Which Cluster B personality disorder is characterized by grandiosity and lack of empathy?",
+            new(){"Borderline","Antisocial","Narcissistic","Histrionic"}, "Narcissistic", "Psychopathology", "Technical", "Medium"));
+        q.Add(Q($"{PS}", "In motivational interviewing, the therapist should primarily use:",
+            new(){"Direct confrontation","Open-ended questions and reflective listening","Prescribing medication first","Structured homework assignments"},
+            "Open-ended questions and reflective listening", "Counseling", "Technical", "Medium"));
+        q.Add(Q($"{PS}", "Which class of medication is first-line for Major Depressive Disorder?",
+            new(){"Benzodiazepines","SSRIs","Antipsychotics","Mood stabilizers"}, "SSRIs", "Pharmacotherapy", "Technical", "Easy"));
+        q.Add(Q($"{PS}", "Lithium is the gold-standard treatment for which psychiatric condition?",
+            new(){"Schizophrenia","ADHD","Bipolar Disorder","OCD"}, "Bipolar Disorder", "Pharmacotherapy", "Technical", "Medium"));
+        q.Add(Q($"{PS}", "A psychiatrist discovers a patient plans to harm a specific individual. Ethically the psychiatrist must:",
+            new(){"Maintain strict confidentiality","Warn the potential victim and notify authorities (Duty to Warn)","Prescribe sedatives immediately","Terminate the relationship"},
+            "Warn the potential victim and notify authorities (Duty to Warn)", "Ethics", "SoftSkill", "Medium"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // PHARMACIST
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{PH}", "What does 'bioavailability' refer to?",
+            new(){"Speed of drug metabolism","Fraction of administered drug reaching systemic circulation","Drug binding to plasma proteins","Rate of renal excretion"},
+            "Fraction of administered drug reaching systemic circulation", "Pharmacology", "Technical", "Easy"));
+        q.Add(Q($"{PH}", "Which phase of drug metabolism involves oxidation, reduction, and hydrolysis?",
+            new(){"Phase I","Phase II","Phase III","Phase 0"}, "Phase I", "Pharmacology", "Technical", "Medium"));
+        q.Add(Q($"{PH}", "Therapeutic index is calculated as:",
+            new(){"ED50 / LD50","LD50 / ED50","MIC / MBC","Cmax / Cmin"}, "LD50 / ED50", "Pharmacology", "Technical", "Medium"));
+        q.Add(Q($"{PH}", "Combining warfarin with aspirin increases the risk of:",
+            new(){"Hypertension","Bleeding","Liver toxicity","Seizures"}, "Bleeding", "Drug Interactions", "Technical", "Easy"));
+        q.Add(Q($"{PH}", "Which cytochrome P450 enzyme metabolizes the largest number of drugs?",
+            new(){"CYP1A2","CYP2D6","CYP3A4","CYP2C9"}, "CYP3A4", "Drug Interactions", "Technical", "Medium"));
+        q.Add(Q($"{PH}", "Grapefruit juice is contraindicated with statins because it:",
+            new(){"Increases renal excretion","Inhibits CYP3A4, increasing drug levels","Decreases absorption","Binds to the drug in GI tract"},
+            "Inhibits CYP3A4, increasing drug levels", "Drug Interactions", "Technical", "Hard"));
+        q.Add(Q($"{PH}", "What is the pH of a 0.01 M HCl solution?",
+            new(){"1","2","3","4"}, "2", "Chemistry", "Technical", "Easy"));
+        q.Add(Q($"{PH}", "Which bond holds the two strands of DNA together?",
+            new(){"Covalent bonds","Ionic bonds","Hydrogen bonds","Van der Waals forces"}, "Hydrogen bonds", "Chemistry", "Technical", "Easy"));
+        q.Add(Q($"{PH}", "When counseling a patient on metformin, which side effect should they be warned about?",
+            new(){"Hair loss","Gastrointestinal upset (nausea, diarrhea)","Vision changes","Joint pain"},
+            "Gastrointestinal upset (nausea, diarrhea)", "Patient Counseling", "SoftSkill", "Easy"));
+        q.Add(Q($"{PH}", "Schedule H drugs require:",
+            new(){"No prescription","A valid prescription from a registered medical practitioner","Over-the-counter availability","Patient self-declaration"},
+            "A valid prescription from a registered medical practitioner", "Regulations", "SoftSkill", "Easy"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // CHARTERED ACCOUNTANT
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{CA}", "The fundamental accounting equation is:",
+            new(){"Assets = Liabilities + Revenue","Assets = Liabilities + Owner's Equity","Assets + Liabilities = Equity","Revenue - Expenses = Equity"},
+            "Assets = Liabilities + Owner's Equity", "Accounting", "Technical", "Easy"));
+        q.Add(Q($"{CA}", "Which accounting principle requires revenue to be recorded when earned, not when cash is received?",
+            new(){"Matching Principle","Accrual Principle","Conservatism Principle","Going Concern Principle"}, "Accrual Principle", "Accounting", "Technical", "Easy"));
+        q.Add(Q($"{CA}", "Under double-entry bookkeeping, a purchase of equipment on credit would:",
+            new(){"Debit Equipment, Credit Cash","Debit Equipment, Credit Accounts Payable","Debit Cash, Credit Equipment","Debit Accounts Payable, Credit Equipment"},
+            "Debit Equipment, Credit Accounts Payable", "Accounting", "Technical", "Medium"));
+        q.Add(Q($"{CA}", "Depreciation of a fixed asset is an example of:",
+            new(){"Capital expenditure","Revenue expenditure","Deferred revenue","Contingent liability"}, "Revenue expenditure", "Accounting", "Technical", "Medium"));
+        q.Add(Q($"{CA}", "Under Indian GST, the standard rate for most goods and services is:",
+            new(){"5%","12%","18%","28%"}, "18%", "Taxation", "Technical", "Easy"));
+        q.Add(Q($"{CA}", "Which section of the Indian Income Tax Act deals with TDS?",
+            new(){"Section 80C","Section 194","Section 44AB","Section 10"}, "Section 194", "Taxation", "Technical", "Medium"));
+        q.Add(Q($"{CA}", "The concept of 'transfer pricing' primarily relates to:",
+            new(){"Tax on capital gains","Pricing of transactions between related entities across borders","Sales tax on imports","Depreciation of assets"},
+            "Pricing of transactions between related entities across borders", "Taxation", "Technical", "Hard"));
+        q.Add(Q($"{CA}", "Which audit opinion indicates financial statements are fairly presented in all material respects?",
+            new(){"Adverse Opinion","Disclaimer of Opinion","Unqualified (Clean) Opinion","Qualified Opinion"}, "Unqualified (Clean) Opinion", "Auditing", "Technical", "Easy"));
+        q.Add(Q($"{CA}", "Substantive audit procedures are designed to:",
+            new(){"Test internal controls","Detect material misstatements in financial statements","Verify employee attendance","Assess management competency"},
+            "Detect material misstatements in financial statements", "Auditing", "Technical", "Medium"));
+        q.Add(Q($"{CA}", "Current Ratio is calculated as:",
+            new(){"Total Assets / Total Liabilities","Current Assets / Current Liabilities","Net Income / Total Revenue","EBITDA / Interest Expense"},
+            "Current Assets / Current Liabilities", "Financial Analysis", "Technical", "Easy"));
+        q.Add(Q($"{CA}", "A Debt-to-Equity ratio of 2.5 indicates:",
+            new(){"More equity than debt","The company has 2.5x more debt than equity","Strong liquidity","High profitability"},
+            "The company has 2.5x more debt than equity", "Financial Analysis", "Technical", "Medium"));
+        q.Add(Q($"{CA}", "Which body regulates and oversees chartered accountants in India?",
+            new(){"SEBI","RBI","ICAI","MCA"}, "ICAI", "Business Law", "SoftSkill", "Easy"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // GRAPHIC DESIGNER
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q($"{GD}", "The 'Rule of Thirds' in visual design helps to:",
+            new(){"Choose color palettes","Create balanced, engaging compositions","Determine font sizes","Optimize file sizes"},
+            "Create balanced, engaging compositions", "Visual Design", "Technical", "Easy"));
+        q.Add(Q($"{GD}", "Which design principle ensures elements feel visually connected?",
+            new(){"Contrast","Repetition","Unity","Hierarchy"}, "Unity", "Visual Design", "Technical", "Medium"));
+        q.Add(Q($"{GD}", "White space (negative space) in design is used to:",
+            new(){"Fill empty areas","Improve readability and draw attention to key elements","Reduce page load time","Increase element density"},
+            "Improve readability and draw attention to key elements", "Visual Design", "Technical", "Easy"));
+        q.Add(Q($"{GD}", "In typography, 'kerning' refers to:",
+            new(){"Space between lines of text","Overall weight of a font","Adjusting space between individual letter pairs","Size of uppercase letters"},
+            "Adjusting space between individual letter pairs", "Typography", "Technical", "Easy"));
+        q.Add(Q($"{GD}", "Which font category is generally best for body text in print design?",
+            new(){"Sans-serif","Serif","Display","Script"}, "Serif", "Typography", "Technical", "Medium"));
+        q.Add(Q($"{GD}", "The difference between 'leading' and 'tracking' in typography:",
+            new(){"Leading adjusts letter spacing; tracking adjusts line spacing","Leading adjusts line spacing; tracking adjusts overall letter spacing in a block","They are the same","Leading is for headlines; tracking for body text"},
+            "Leading adjusts line spacing; tracking adjusts overall letter spacing in a block", "Typography", "Technical", "Medium"));
+        q.Add(Q($"{GD}", "Which color model is used for print design?",
+            new(){"RGB","HSL","CMYK","HEX"}, "CMYK", "Color Theory", "Technical", "Easy"));
+        q.Add(Q($"{GD}", "Complementary colors are located:",
+            new(){"Next to each other on the color wheel","Opposite each other on the color wheel","Three colors evenly spaced on the wheel","All warm tones"},
+            "Opposite each other on the color wheel", "Color Theory", "Technical", "Easy"));
+        q.Add(Q($"{GD}", "Which Adobe application is best suited for vector illustrations?",
+            new(){"Photoshop","Premiere Pro","Illustrator","After Effects"}, "Illustrator", "Adobe Suite", "Technical", "Easy"));
+        q.Add(Q($"{GD}", "In Adobe Photoshop, what is the purpose of layer masks?",
+            new(){"To permanently delete parts of an image","To non-destructively hide or reveal parts of a layer","To merge all layers","To adjust image resolution"},
+            "To non-destructively hide or reveal parts of a layer", "Adobe Suite", "Technical", "Medium"));
+        q.Add(Q($"{GD}", "In UI/UX design, a 'wireframe' is:",
+            new(){"A final high-fidelity mockup","A basic structural blueprint of a page layout","A coded prototype","A brand style guide"},
+            "A basic structural blueprint of a page layout", "UI/UX", "Technical", "Easy"));
+        q.Add(Q($"{GD}", "Fitts's Law in UX design states that:",
+            new(){"Users read in an F-pattern","Larger and closer targets are easier to click","Dark mode is always preferred","More options lead to faster decisions"},
+            "Larger and closer targets are easier to click", "UI/UX", "Technical", "Medium"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // ROLE-SPECIFIC APTITUDE
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+        // Tech aptitude â€” project/system reasoning
+        q.Add(Q(TECH, "A software project has 5 modules, each taking 3 days. With 2 developers working in parallel, minimum completion time is:",
+            new(){"15 days","8 days","9 days","7.5 days"}, "9 days", "Aptitude", "Aptitude", "Medium"));
+        q.Add(Q(TECH, "A database grows 15% each month starting at 100 GB. Approximate size after 3 months:",
+            new(){"130 GB","145 GB","152 GB","175 GB"}, "152 GB", "Aptitude", "Aptitude", "Medium"));
+        q.Add(Q(TECH, "A server processes 500 requests/minute. Each request takes 200ms. Minimum threads to avoid a queue:",
+            new(){"1","2","3","4"}, "2", "Aptitude", "Aptitude", "Hard"));
+
+        // Medical aptitude â€” clinical reasoning and statistics
+        q.Add(Q(MED, "A clinical trial shows a drug reduces mortality from 10% to 8%. The Absolute Risk Reduction (ARR) is:",
+            new(){"20%","2%","8%","80%"}, "2%", "Aptitude", "Aptitude", "Medium"));
+        q.Add(Q(MED, "A test with 90% sensitivity and 80% specificity is applied in a population with 10% disease prevalence. A positive result is most likely a:",
+            new(){"True positive","False positive","True negative","False negative"}, "False positive", "Aptitude", "Aptitude", "Hard"));
+        q.Add(Q(MED, "A patient's creatinine clearance is 40 mL/min (normal: 90-120). Which adjustment is most appropriate?",
+            new(){"Double the dose","Reduce dose or extend the dosing interval","No change needed","Switch to IV administration"},
+            "Reduce dose or extend the dosing interval", "Aptitude", "Aptitude", "Medium"));
+
+        // Commerce aptitude â€” financial reasoning
+        q.Add(Q($"{CA}", "An investment of â‚¹1,00,000 earns 10% annual compound interest. Value after 2 years?",
+            new(){"â‚¹1,20,000","â‚¹1,21,000","â‚¹1,10,000","â‚¹1,25,000"}, "â‚¹1,21,000", "Aptitude", "Aptitude", "Easy"));
+        q.Add(Q($"{CA}", "Revenue is â‚¹50 lakhs and cost of goods sold is â‚¹30 lakhs. Gross profit margin is:",
+            new(){"60%","40%","30%","20%"}, "40%", "Aptitude", "Aptitude", "Easy"));
+        q.Add(Q($"{CA}", "If a price is increased 20% then decreased 20%, the net effect is:",
+            new(){"No change","4% decrease","4% increase","20% decrease"}, "4% decrease", "Aptitude", "Aptitude", "Medium"));
+
+        // Design aptitude â€” spatial and visual reasoning
+        q.Add(Q($"{GD}", "A poster needs 300 DPI for a 12Ã—18 inch print. Required pixel dimensions:",
+            new(){"1200Ã—1800","3600Ã—5400","2400Ã—3600","6000Ã—9000"}, "3600Ã—5400", "Aptitude", "Aptitude", "Medium"));
+        q.Add(Q($"{GD}", "A logo must scale from a business card to a billboard without quality loss. Which format should be used?",
+            new(){"JPEG","PNG","SVG (vector)","GIF"}, "SVG (vector)", "Aptitude", "Aptitude", "Easy"));
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // SOFT SKILLS (contextual)
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        q.Add(Q(ALL, "When a colleague disagrees with your approach, the best first action is:",
+            new(){"Implement your approach anyway","Escalate immediately","Listen and discuss trade-offs collaboratively","Ask the team to vote"},
+            "Listen and discuss trade-offs collaboratively", "Soft Skills", "SoftSkill", "Easy"));
+        q.Add(Q(ALL, "You discover a critical issue 1 hour before a deadline. You should:",
+            new(){"Deliver anyway and fix later","Inform your lead/supervisor with an impact assessment","Fix it silently","Blame someone else"},
+            "Inform your lead/supervisor with an impact assessment", "Soft Skills", "SoftSkill", "Medium"));
+        q.Add(Q($"{DR},{PS},{PH}", "A patient asks you to prescribe something you believe is unnecessary. The best approach is:",
+            new(){"Prescribe it to keep the patient happy","Explain your clinical reasoning and discuss alternatives","Refuse without explanation","Ask a colleague to prescribe it"},
+            "Explain your clinical reasoning and discuss alternatives", "Soft Skills", "SoftSkill", "Medium"));
+
+        return q;
     }
 }

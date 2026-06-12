@@ -64,7 +64,9 @@ builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("Mo
 builder.Services.AddSingleton<IMongoClient>(provider =>
 {
     var settings = provider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-    return new MongoClient(settings.ConnectionString);
+    var mongoSettings = MongoClientSettings.FromConnectionString(settings.ConnectionString);
+    mongoSettings.ServerSelectionTimeout = TimeSpan.FromSeconds(1);
+    return new MongoClient(mongoSettings);
 });
 builder.Services.AddSingleton(provider =>
 {
@@ -89,6 +91,9 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IResumeService, ResumeService>();
 builder.Services.AddScoped<ICareerGuidanceService, CareerGuidanceService>();
 builder.Services.AddHttpClient<ITrendService, TrendService>();
+
+// Placement Readiness & Skill Gap Analysis Module
+builder.Services.AddScoped<IPlacementService, PlacementService>();
 
 // Add ChatBot Services - Using Groq as Primary, OpenAI as Fallback
 builder.Services.AddScoped<IChatBotService, ChatBotService>();
@@ -127,6 +132,10 @@ builder.Services.AddPredictionEnginePool<QuizData, QuizPrediction>()
 
 builder.Services.AddPredictionEnginePool<SalaryData, SalaryPrediction>()
     .FromFile(modelName: "SalaryPredictor", filePath: "SalaryPredictor.zip", watchForChanges: true);
+
+// Placement Readiness ML Model
+builder.Services.AddPredictionEnginePool<PlacementData, PlacementPrediction>()
+    .FromFile(modelName: "PlacementReadinessPredictor", filePath: "PlacementReadinessPredictor.zip", watchForChanges: true);
 
 // Add CORS
 builder.Services.AddCors(options =>

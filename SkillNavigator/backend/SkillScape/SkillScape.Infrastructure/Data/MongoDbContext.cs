@@ -21,10 +21,17 @@ public class MongoDbContext
 
     private void EnsureIndexes()
     {
-        var userCollection = Users;
-        var indexKeys = Builders<ApplicationUser>.IndexKeys.Ascending(u => u.Email);
-        var indexOptions = new CreateIndexOptions { Unique = true, Name = "Idx_User_Email" };
-        var indexModel = new CreateIndexModel<ApplicationUser>(indexKeys, indexOptions);
-        userCollection.Indexes.CreateOne(indexModel);
+        try
+        {
+            var userCollection = Users;
+            var indexKeys = Builders<ApplicationUser>.IndexKeys.Ascending(u => u.Email);
+            var indexOptions = new CreateIndexOptions { Unique = true, Name = "Idx_User_Email" };
+            var indexModel = new CreateIndexModel<ApplicationUser>(indexKeys, indexOptions);
+            userCollection.Indexes.CreateOne(indexModel);
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"MongoDB EnsureIndexes failed: {ex.Message}. Continuing without index creation.");
+        }
     }
 }

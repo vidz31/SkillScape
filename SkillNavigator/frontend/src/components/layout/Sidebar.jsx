@@ -41,6 +41,7 @@ const navItems = [
   { path: '/mentor-dashboard/schedule', icon: Clock, label: 'Schedule', roles: ['Mentor'] },
   { path: '/quiz', icon: Compass, label: 'Career Quiz', hiddenRoles: ['Admin', 'Mentor'] },
   { path: '/career-explorer', icon: Map, label: 'Career Map', hiddenRoles: ['Admin', 'Mentor'] },
+  { path: '/placement', icon: Trophy, label: 'Skill Analyzer', hiddenRoles: ['Admin', 'Mentor'] },
   { path: '/salary-forecast', icon: DollarSign, label: 'Salary Forecast', hiddenRoles: ['Admin', 'Mentor'] },
   { path: '/career-analytics', icon: BarChart3, label: 'Career Analytics', hiddenRoles: ['Admin', 'Mentor'] },
   { path: '/roadmap', icon: Map, label: 'Roadmap', hiddenRoles: ['Admin', 'Mentor'] },

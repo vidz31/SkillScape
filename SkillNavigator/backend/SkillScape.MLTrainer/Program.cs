@@ -39,6 +39,25 @@ namespace SkillScape.MLTrainer
         public float PredictedSalary { get; set; }
     }
 
+    // ─── Placement Readiness Models ───────────────────────────────────────────
+    public class PlacementData
+    {
+        [LoadColumn(0)] public float DsaScore { get; set; }
+        [LoadColumn(1)] public float ProgrammingScore { get; set; }
+        [LoadColumn(2)] public float ProblemSolvingScore { get; set; }
+        [LoadColumn(3)] public float AptitudeScore { get; set; }
+        [LoadColumn(4)] public float SoftSkillsScore { get; set; }
+        [LoadColumn(5)] public float SystemDesignScore { get; set; }
+        [LoadColumn(6)] public float DatabasesScore { get; set; }
+        [LoadColumn(7)] public float ReadinessScore { get; set; }
+    }
+
+    public class PlacementPrediction
+    {
+        [ColumnName("Score")]
+        public float ReadinessScore { get; set; }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -51,7 +70,11 @@ namespace SkillScape.MLTrainer
             // 2. Train Salary Predictor
             // TrainSalaryPredictor(mlContext);
 
+            // 3. Train Placement Readiness Predictor (NEW)
+            TrainPlacementReadinessPredictor(mlContext);
+
             TestPredictor(mlContext);
+            TestPlacementPredictor(mlContext);
         }
 
         static void TestPredictor(MLContext mlContext)
@@ -71,6 +94,31 @@ namespace SkillScape.MLTrainer
             Console.WriteLine($"Sample 1 Predicted: {engine.Predict(sample1).PredictedDomain}");
             Console.WriteLine($"Sample 2 Predicted: {engine.Predict(sample2).PredictedDomain}");
             Console.WriteLine($"Sample 3 Predicted: {engine.Predict(sample3).PredictedDomain}");
+        }
+
+        static void TestPlacementPredictor(MLContext mlContext)
+        {
+            Console.WriteLine("-----------------------------------");
+            Console.WriteLine("Testing Placement Readiness Predictor...");
+            string modelPath = Path.Combine(Environment.CurrentDirectory, "PlacementReadinessPredictor.zip");
+            if (!File.Exists(modelPath))
+            {
+                Console.WriteLine("PlacementReadinessPredictor.zip not found. Run training first.");
+                return;
+            }
+            ITransformer model = mlContext.Model.Load(modelPath, out var schema);
+            var engine = mlContext.Model.CreatePredictionEngine<PlacementData, PlacementPrediction>(model);
+
+            // Strong candidate
+            var strong = new PlacementData { DsaScore=90, ProgrammingScore=85, ProblemSolvingScore=88, AptitudeScore=80, SoftSkillsScore=75, SystemDesignScore=70, DatabasesScore=80 };
+            // Average candidate
+            var avg = new PlacementData { DsaScore=60, ProgrammingScore=65, ProblemSolvingScore=55, AptitudeScore=60, SoftSkillsScore=70, SystemDesignScore=50, DatabasesScore=60 };
+            // Weak candidate
+            var weak = new PlacementData { DsaScore=30, ProgrammingScore=35, ProblemSolvingScore=25, AptitudeScore=40, SoftSkillsScore=50, SystemDesignScore=20, DatabasesScore=35 };
+
+            Console.WriteLine($"Strong Candidate Readiness: {engine.Predict(strong).ReadinessScore:F1}%");
+            Console.WriteLine($"Average Candidate Readiness: {engine.Predict(avg).ReadinessScore:F1}%");
+            Console.WriteLine($"Weak Candidate Readiness: {engine.Predict(weak).ReadinessScore:F1}%");
         }
 
         static void TrainCareerPredictor(MLContext mlContext)
@@ -133,6 +181,63 @@ namespace SkillScape.MLTrainer
 
             mlContext.Model.Save(model, dataView.Schema, modelPath);
             Console.WriteLine($"Salary Predictor saved to {modelPath}");
+        }
+
+        /// <summary>
+        /// Trains an SDCA Regression model to predict placement readiness score (0-100)
+        /// from 7 skill category input features.
+        /// </summary>
+        static void TrainPlacementReadinessPredictor(MLContext mlContext)
+        {
+            Console.WriteLine("-----------------------------------");
+            Console.WriteLine("Training Placement Readiness Predictor...");
+
+            string dataPath = Path.Combine(Environment.CurrentDirectory, "..", "DataGeneration", "placement_training_data.csv");
+            string modelPath = Path.Combine(Environment.CurrentDirectory, "PlacementReadinessPredictor.zip");
+
+            if (!File.Exists(dataPath))
+            {
+                Console.WriteLine($"Training data not found at: {dataPath}");
+                return;
+            }
+
+            Console.WriteLine("Loading placement training data...");
+            IDataView dataView = mlContext.Data.LoadFromTextFile<PlacementData>(
+                dataPath, hasHeader: true, separatorChar: ',');
+
+            var splitInfo = mlContext.Data.TrainTestSplit(dataView, testFraction: 0.2);
+
+            Console.WriteLine("Building regression pipeline...");
+            // Concatenate all 7 feature columns, then apply SDCA regression
+            var pipeline = mlContext.Transforms.Concatenate(
+                    "Features",
+                    nameof(PlacementData.DsaScore),
+                    nameof(PlacementData.ProgrammingScore),
+                    nameof(PlacementData.ProblemSolvingScore),
+                    nameof(PlacementData.AptitudeScore),
+                    nameof(PlacementData.SoftSkillsScore),
+                    nameof(PlacementData.SystemDesignScore),
+                    nameof(PlacementData.DatabasesScore))
+                .Append(mlContext.Transforms.CopyColumns(
+                    outputColumnName: "Label",
+                    inputColumnName: nameof(PlacementData.ReadinessScore)))
+                .Append(mlContext.Regression.Trainers.Sdca(
+                    labelColumnName: "Label",
+                    featureColumnName: "Features",
+                    maximumNumberOfIterations: 100));
+
+            Console.WriteLine("Fitting model...");
+            var model = pipeline.Fit(splitInfo.TrainSet);
+
+            var predictions = model.Transform(splitInfo.TestSet);
+            var metrics = mlContext.Regression.Evaluate(predictions, "Label", "Score");
+
+            Console.WriteLine($"Placement Predictor R-Squared:  {metrics.RSquared:F4}");
+            Console.WriteLine($"Placement Predictor RMSE:       {metrics.RootMeanSquaredError:F2}");
+            Console.WriteLine($"Placement Predictor MAE:        {metrics.MeanAbsoluteError:F2}");
+
+            mlContext.Model.Save(model, dataView.Schema, modelPath);
+            Console.WriteLine($"PlacementReadinessPredictor saved to {modelPath}");
         }
     }
 }
